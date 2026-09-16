@@ -1,10 +1,4 @@
 LIBDIR := lib
-
-# Paginate the text output so the local artifact matches what the datatracker
-# renders on submission. Without this, idnits reports missing formfeeds, a
-# missing Expires line, and spurious section-title indentation nits.
-TEXT_PAGINATION := true
-
 -include $(LIBDIR)/main.mk
 
 $(LIBDIR)/main.mk:
