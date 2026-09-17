@@ -8,11 +8,11 @@
 <meta content="Shlomo Heigh" name="author">
 <meta content="Joseph Salowey" name="author">
 <meta content="
-       This document specifies metadata attributes associated with an AI agent's identity that are used for auditing,
-authorization accounting and other purposes. This documents specifies how to carry these attribures within
-WIMSE credentials such as a JWT based workload identity token (WIT) or an X.509 based workload identity
-certificate. Those attributes include groups the agent belongs to, the roles it performs, and the human principal
-it acts on behalf of. 
+       This document specifies metadata attributes associated with an AI agent's identity that are used for
+auditing, authorization, accounting and other purposes. It specifies how to carry these attributes within
+WIMSE credentials such as a JWT-based Workload Identity Token (WIT) or an X.509-based Workload Identity
+Certificate (WIC). Those attributes include groups the agent belongs to, the roles it performs, and the
+human principal it acts on behalf of. 
        This document defines the separation between identifier and metadata, and profiles existing claims for
 expressing agent group, role, and associated human identity. It distinguishes an agent's attributes
 from grants such as scopes, and states the requirements that make the separation sound, including
@@ -1093,11 +1093,11 @@ svg {
 <h1 id="title">Agent Identity Metadata</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This document specifies metadata attributes associated with an AI agent's identity that are used for auditing,
-authorization accounting and other purposes. This documents specifies how to carry these attribures within
-WIMSE credentials such as a JWT based workload identity token (WIT) or an X.509 based workload identity
-certificate. Those attributes include groups the agent belongs to, the roles it performs, and the human principal
-it acts on behalf of.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This document specifies metadata attributes associated with an AI agent's identity that are used for
+auditing, authorization, accounting and other purposes. It specifies how to carry these attributes within
+WIMSE credentials such as a JWT-based Workload Identity Token (WIT) or an X.509-based Workload Identity
+Certificate (WIC). Those attributes include groups the agent belongs to, the roles it performs, and the
+human principal it acts on behalf of.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-abstract-2">This document defines the separation between identifier and metadata, and profiles existing claims for
 expressing agent group, role, and associated human identity. It distinguishes an agent's attributes
 from grants such as scopes, and states the requirements that make the separation sound, including
@@ -1210,7 +1210,7 @@ identifier uniqueness.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
-            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-carrying-metadata-in-identi" class="internal xref">Carrying Metadata in Identity credentials</a></p>
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-carrying-metadata-in-identi" class="internal xref">Carrying Metadata in Identity Credentials</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
                 <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-jwt-based-credentials" class="internal xref">JWT-Based credentials</a></p>
@@ -1236,7 +1236,7 @@ identifier uniqueness.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
                 <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-strength-of-the-issuance-de" class="internal xref">Strength of the Issuance Decision</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
-                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-identity-credentials-as-cap" class="internal xref">Identity credentials as Capabilities</a></p>
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-identity-credentials-as-cap" class="internal xref">Identity Credentials as Capabilities</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
                 <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-attribute-staleness" class="internal xref">Attribute Staleness</a></p>
@@ -1296,7 +1296,7 @@ identifier format does not promise parseable semantics, attributes and identifie
 lifetimes, and the identifier is the most widely exposed field in the system.<a href="#section-1-4" class="pilcrow">¶</a></p>
 <p id="section-1-5">This document specifies the alternative. An identifier denotes exactly one agent and carries no
 semantics a relying party may rely on. Everything a deployment needs to know about the agent travels
-as metadata in the identity document that asserts the identifier: a JWT such as a WIMSE Workload
+as metadata in the Identity Credential that asserts the identifier: a JWT such as a WIMSE Workload
 Identity Token <span>[<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span> or a JWT-SVID, or an X.509 certificate.<a href="#section-1-5" class="pilcrow">¶</a></p>
 <p id="section-1-6">Where suitable claims already exist, this document profiles them rather than defining new ones. Group,
 role, and entitlement claims are already registered <span>[<a href="#RFC9068" class="cite xref">RFC9068</a>]</span> with semantics drawn from SCIM
@@ -1374,7 +1374,7 @@ may have many concurrent Execution Instances.<a href="#section-2-2.4.1" class="p
           <p id="section-2-2.8.1">A signed object asserting an Agent Identifier. In WIMSE deployments this is a Workload Identity Token
 (WIT) or a Workload Identity Certificate (WIC), both defined in <span>[<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span>.
 The term is used here to cover both, and to cover equivalents such as the SPIFFE JWT-SVID
-<span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span> and X.509-SVID <span>[<a href="#SPIFFE-X509-SVID" class="cite xref">SPIFFE-X509-SVID</a>]</span>. Identity credentials are also sometimes
+<span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span> and X.509-SVID <span>[<a href="#SPIFFE-X509-SVID" class="cite xref">SPIFFE-X509-SVID</a>]</span>. Identity Credentials are also sometimes
 referred to as identity documents.<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
@@ -1561,7 +1561,7 @@ expressing an agent's group, role, or entitlements <span class="bcp14">MUST</spa
             <p id="section-4.1-4.2.1"><span><a href="https://rfc-editor.org/rfc/rfc9068#section-2.2.3.1" class="relref">Section 2.2.3.1</a> of [<a href="#RFC9068" class="cite xref">RFC9068</a>]</span> motivates these claims in terms of the resource owner, citing
 "resource owner memberships in roles and groups" and "entitlements assigned to the resource owner",
 and <span>[<a href="#RFC7643" class="cite xref">RFC7643</a>]</span> defines them as attributes of a SCIM <code>User</code>. This document applies them to the subject of
-the Identity credential, which is an agent rather than a person. The registrations themselves are
+the Identity Credential, which is an agent rather than a person. The registrations themselves are
 subject-neutral, so no conflict arises, but a relying party <span class="bcp14">MUST</span> interpret these claims as describing
 the Logical Agent denoted by <code>sub</code> and <span class="bcp14">MUST NOT</span> interpret them as describing the human principal of
 <a href="#human" class="auto internal xref">Section 4.2</a>, where one is asserted.<a href="#section-4.1-4.2.1" class="pilcrow">¶</a></p>
@@ -1573,7 +1573,7 @@ the Logical Agent denoted by <code>sub</code> and <span class="bcp14">MUST NOT</
 to be "a String or label representing a collection of entitlements". It describes <code>groups</code>
 differently: as a multi-valued complex attribute with <code>value</code> and <code>type</code> sub-attributes and canonical
 types "direct" and "indirect", derived from SCIM <code>Group</code> resources that have no counterpart here.
-Neither <span>[<a href="#RFC9068" class="cite xref">RFC9068</a>]</span> nor this document settles whether <code>groups</code> in an Identity credential is an array of
+Neither <span>[<a href="#RFC9068" class="cite xref">RFC9068</a>]</span> nor this document settles whether <code>groups</code> in an Identity Credential is an array of
 strings or an array of objects. Until it is settled, an Issuer <span class="bcp14">SHOULD</span> encode all three claims as
 arrays of strings, and a relying party <span class="bcp14">SHOULD</span> accept an array of objects bearing a <code>value</code>
 sub-attribute as equivalent to the array of those <code>value</code> strings. See <a href="#open-issues" class="auto internal xref">Appendix "Open Issues"</a> item 3.<a href="#section-4.1-4.4.1" class="pilcrow">¶</a></p>
@@ -1592,7 +1592,7 @@ sub-attribute as equivalent to the array of those <code>value</code> strings. Se
 <p id="section-4.2-1">An agent frequently acts on behalf of a human principal, and deployments need that association for
 authorization and for attribution. Existing WIMSE work already determines where most of it belongs.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-4.2-2">
-          <dt id="section-4.2-2.1">The Identity credential's <code>sub</code> is the agent.</dt>
+          <dt id="section-4.2-2.1">The Identity Credential's <code>sub</code> is the agent.</dt>
           <dd style="margin-left: 1.5em" id="section-4.2-2.2">
             <p id="section-4.2-2.2.1"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-4" class="relref">Section 4</a> of [<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span> requires that each credential carry exactly one
 Workload Identifier, and that "for a Workload Identity Token, that identifier is the value of the sub
@@ -1604,22 +1604,22 @@ requirement here; it relies on that one.<a href="#section-4.2-2.2.1" class="pilc
           <dd style="margin-left: 1.5em" id="section-4.2-2.4">
             <p id="section-4.2-2.4.1"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-aims-00#section-10.3" class="relref">Section 10.3</a> of [<a href="#I-D.ietf-wimse-aims" class="cite xref">I-D.ietf-wimse-aims</a>]</span> places the agent's identity in the access token's <code>client_id</code>
 and, "when the Agent is acting on-behalf of another User or System", that party's identifier in the
-access token's <code>sub</code>. The access token, not the Identity credential, therefore carries the
+access token's <code>sub</code>. The access token, not the Identity Credential, therefore carries the
 on-behalf-of relationship, alongside the scopes it authorizes.<a href="#section-4.2-2.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
 <p id="section-4.2-3">This resolves the apparent conflict with <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>, whose <code>act</code> claim identifies "the acting party to
 whom authority has been delegated" and which would otherwise place the human in <code>sub</code>. There is no
-conflict, because there are two credentials: the Identity credential says which agent this is, and the
+conflict, because there are two credentials: the Identity Credential says which agent this is, and the
 access token says on whose behalf and for what it is presently authorized.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
 <p id="section-4.2-4">Applying the distinction of <a href="#permissions" class="auto internal xref">Section 4.3</a>, the per-request "acting on behalf of" relationship is a
-grant and does not belong in an Identity credential. What remains genuinely open is whether a durable
+grant and does not belong in an Identity Credential. What remains genuinely open is whether a durable
 association, meaning that an agent was provisioned for and is permanently attributable to a particular
 person, is an attribute of the agent worth asserting at issuance. It has the stability of an attribute
 and, unlike a scope, does not express authority. This document does not yet take a position; see
 <a href="#open-issues" class="auto internal xref">Appendix "Open Issues"</a> item 1.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
-<p id="section-4.2-5">An Identity credential asserting a human principal makes a claim about a person and is subject to
+<p id="section-4.2-5">An Identity Credential asserting a human principal makes a claim about a person and is subject to
 <a href="#privacy" class="auto internal xref">Section 8</a>.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1628,15 +1628,15 @@ and, unlike a scope, does not express authority. This document does not yet take
         <h3 id="name-permissions-and-scopes">
 <a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-permissions-and-scopes" class="section-name selfRef">Permissions and Scopes</a>
         </h3>
-<p id="section-4.3-1">Deployments frequently want an agent's permissions in its Identity credential. This document
+<p id="section-4.3-1">Deployments frequently want an agent's permissions in its Identity Credential. This document
 distinguishes two cases and treats them differently, because they are not the same kind of statement.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
 <p id="section-4.3-2">Attributes of the subject, such as group, role, and coarse entitlements, describe what the agent is. They are
 relatively stable, they are meaningful independent of any particular relying party, and the Issuer is
-plausibly authoritative for them. These belong in the Identity credential per <a href="#reuse" class="auto internal xref">Section 4.1</a>.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+plausibly authoritative for them. These belong in the Identity Credential per <a href="#reuse" class="auto internal xref">Section 4.1</a>.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
 <p id="section-4.3-3">Grants, such as scopes and fine-grained permissions, describe what the agent may do at a given resource at a
 given moment. They are relationship-specific, they change faster than an identity credential's lifetime,
 and the authority for them is the resource owner or an authorization server, not the identity issuer.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
-<p id="section-4.3-4">Accordingly, an Identity credential <span class="bcp14">MAY</span> carry coarse entitlements per <a href="#reuse" class="auto internal xref">Section 4.1</a>, but <span class="bcp14">SHOULD NOT</span> carry
+<p id="section-4.3-4">Accordingly, an Identity Credential <span class="bcp14">MAY</span> carry coarse entitlements per <a href="#reuse" class="auto internal xref">Section 4.1</a>, but <span class="bcp14">SHOULD NOT</span> carry
 resource-specific scopes or fine-grained permissions. Where a deployment carries them anyway, a relying
 party <span class="bcp14">MUST NOT</span> treat them as authoritative for an authorization decision, and <span class="bcp14">MUST</span> obtain authorization
 from its own policy or from an authorization server. <a href="#capability" class="auto internal xref">Section 7.3</a> gives the reasoning.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
@@ -1667,7 +1667,7 @@ shared by several Logical Agents. Therefore:<a href="#section-4.4-3" class="pilc
 where that credential is, or may become, available to more than one Logical Agent.<a href="#section-4.4-4" class="pilcrow">¶</a></p>
 <p id="section-4.4-5">Where the platform offers only such a credential, an Issuer <span class="bcp14">MUST</span> establish by a means not under the
 control of the agent which Logical Agent a requesting Execution Instance is executing, and <span class="bcp14">MUST</span> issue
-an Identity credential asserting an Agent Identifier denoting that agent rather than passing the
+an Identity Credential asserting an Agent Identifier denoting that agent rather than passing the
 execution credential through. The execution credential <span class="bcp14">MAY</span> be an input to that determination as
 evidence of the execution environment; it <span class="bcp14">MUST NOT</span> be the sole input.<a href="#section-4.4-5" class="pilcrow">¶</a></p>
 </section>
@@ -1677,7 +1677,7 @@ evidence of the execution environment; it <span class="bcp14">MUST NOT</span> be
 <div id="carriage">
 <section id="section-5">
       <h2 id="name-carrying-metadata-in-identi">
-<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-carrying-metadata-in-identi" class="section-name selfRef">Carrying Metadata in Identity credentials</a>
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-carrying-metadata-in-identi" class="section-name selfRef">Carrying Metadata in Identity Credentials</a>
       </h2>
 <div id="jwt">
 <section id="section-5.1">
@@ -1689,9 +1689,9 @@ mechanism is required, and the rules for doing so are already established:
 <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-5.1.2" class="relref">Section 5.1.2</a> of [<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span> permits additional claims in a WIT, requires that a
 recipient ignore claims it does not understand, discourages private claim names, and requires that
 claims used outside closed environments be registered with IANA. Because the claims in <a href="#reuse" class="auto internal xref">Section 4.1</a> are
-already registered, an Identity credential expressing agent group, role, or entitlements satisfies those
+already registered, an Identity Credential expressing agent group, role, or entitlements satisfies those
 rules without further action.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
-<p id="section-5.1-2">The following non-normative examples show Identity credentials for the agent that <a href="#intro" class="auto internal xref">Section 1</a> names with an
+<p id="section-5.1-2">The following non-normative examples show Identity Credentials for the agent that <a href="#intro" class="auto internal xref">Section 1</a> names with an
 attribute-bearing identifier. In each, the identifier is opaque and the attributes appear only as claims.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
 <p id="section-5.1-3">A WIT, whose JOSE header carries <code>"typ": "wit+jwt"</code>:<a href="#section-5.1-3" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-5.1-4">
@@ -1754,7 +1754,7 @@ already closed: <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-
 be carried in a second URI SAN. For an X.509-SVID the constraint is stronger still:
 <span>[<a href="#SPIFFE-X509-SVID" class="cite xref">SPIFFE-X509-SVID</a>]</span> requires a validator to reject any certificate bearing more than one URI SAN,
 whatever its contents. Metadata must go somewhere a relying party will not mistake for an identifier.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
-<p id="section-5.2-3">Absent such a mechanism, a conforming X.509-based Identity credential carries the identifier alone:<a href="#section-5.2-3" class="pilcrow">¶</a></p>
+<p id="section-5.2-3">Absent such a mechanism, a conforming X.509-based Identity Credential carries the identifier alone:<a href="#section-5.2-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.2-4">
 <pre>
 X509v3 Basic Constraints: critical
@@ -1795,7 +1795,7 @@ construction, at the cost of a second object to distribute and validate.<a href=
         <h3 id="name-consistency-across-formats">
 <a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-consistency-across-formats" class="section-name selfRef">Consistency Across Formats</a>
         </h3>
-<p id="section-5.3-1">Where an Issuer issues both JWT-based and X.509-based Identity credentials for the same Logical Agent,
+<p id="section-5.3-1">Where an Issuer issues both JWT-based and X.509-based Identity Credentials for the same Logical Agent,
 the metadata asserted in each <span class="bcp14">MUST</span> be consistent, so that a party able to choose between formats cannot
 obtain a more favorable authorization outcome by choosing one. Where the two formats cannot express
 the same metadata, the Issuer <span class="bcp14">MUST</span> omit the metadata it cannot express consistently rather than assert
@@ -1838,7 +1838,7 @@ Identifier, and sets the rules for adding claims to a WIT that <a href="#jwt" cl
           <p id="section-6-2.8.1">The WIMSE framework for agent identity, and the closest neighbor to this document. It requires
 exactly one identifier per agent (see <a href="#uniqueness" class="auto internal xref">Section 4.4</a>) and locates per-request delegation in the OAuth
 access token (see <a href="#human" class="auto internal xref">Section 4.2</a>). This document is a narrower companion: AIMS establishes that an agent has
-one identifier and is authorized through OAuth, while this document specifies what an Identity credential
+one identifier and is authorized through OAuth, while this document specifies what an Identity Credential
 may assert about that agent and what must not be encoded in the identifier.<a href="#section-6-2.8.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
@@ -1885,7 +1885,7 @@ security-relevant configuration and warrants the same review as policy.<a href="
 <div id="capability">
 <section id="section-7.3">
         <h3 id="name-identity-credentials-as-cap">
-<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-identity-credentials-as-cap" class="section-name selfRef">Identity credentials as Capabilities</a>
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-identity-credentials-as-cap" class="section-name selfRef">Identity Credentials as Capabilities</a>
         </h3>
 <p id="section-7.3-1">Metadata that expresses authority converts an identity credential into a capability. Three consequences
 motivate <a href="#permissions" class="auto internal xref">Section 4.3</a>. They do not depend on the credential being a bearer token: a WIT is bound to the
@@ -1896,13 +1896,13 @@ workload's key and cannot be used as one
           <dt id="section-7.3-2.1">Lifetime mismatch:</dt>
           <dd style="margin-left: 1.5em" id="section-7.3-2.2">
             <p id="section-7.3-2.2.1">A permission revoked at the authorization server remains asserted by every unexpired credential
-carrying it. Identity credential lifetimes are chosen for identity freshness, not for permission
+carrying it. Identity Credential lifetimes are chosen for identity freshness, not for permission
 freshness.<a href="#section-7.3-2.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-7.3-2.3">Two authorities:</dt>
           <dd style="margin-left: 1.5em" id="section-7.3-2.4">
-            <p id="section-7.3-2.4.1">If both the Identity credential and the relying party's policy assert what an agent may do, the
+            <p id="section-7.3-2.4.1">If both the Identity Credential and the relying party's policy assert what an agent may do, the
 effective policy is whichever is consulted, and the deployment has two sources of truth for one
 decision.<a href="#section-7.3-2.4.1" class="pilcrow">¶</a></p>
 </dd>
@@ -2042,7 +2042,7 @@ party, by shortening the credential's lifetime, or by omitting the human princip
 <p id="appendix-A-1">To be resolved with the working group, and removed before publication.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="appendix-A-2">
 <li id="appendix-A-2.1">
-          <p id="appendix-A-2.1.1"><strong>Whether a durable human association belongs in an Identity Document (<a href="#human" class="auto internal xref">Section 4.2</a>).</strong> The per-request
+          <p id="appendix-A-2.1.1"><strong>Whether a durable human association belongs in an Identity Credential (<a href="#human" class="auto internal xref">Section 4.2</a>).</strong> The per-request
 case is settled: it belongs in the access token, per
 <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-aims-00#section-10.3" class="relref">Section 10.3</a> of [<a href="#I-D.ietf-wimse-aims" class="cite xref">I-D.ietf-wimse-aims</a>]</span>. What remains is whether a permanent
 "this agent was provisioned for this person" association is an attribute worth asserting at issuance,
@@ -2065,9 +2065,9 @@ or replacing, and the question may be better raised against <span>[<a href="#RFC
 <a href="#permissions" class="auto internal xref">Section 4.3</a>, or whether the document should exclude authority-bearing metadata entirely.<a href="#appendix-A-2.4.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-2.5">
-          <p id="appendix-A-2.5.1"><strong>Terminology alignment.</strong> "Logical Agent", "Execution Instance", and "Identity Document" are
+          <p id="appendix-A-2.5.1"><strong>Terminology alignment.</strong> "Logical Agent", "Execution Instance", and "Identity Credential" are
 introduced here. If equivalent terms exist in <span>[<a href="#I-D.ietf-wimse-arch" class="cite xref">I-D.ietf-wimse-arch</a>]</span> or
-<span>[<a href="#I-D.ietf-wimse-aims" class="cite xref">I-D.ietf-wimse-aims</a>]</span>, these should defer to them. In particular, "Identity Document" may be
+<span>[<a href="#I-D.ietf-wimse-aims" class="cite xref">I-D.ietf-wimse-aims</a>]</span>, these should defer to them. In particular, "Identity Credential" may be
 unnecessary: WIT and WIC are defined terms, and the abstraction is only needed to also cover SVIDs.<a href="#appendix-A-2.5.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-2.6">
