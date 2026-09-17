@@ -5,7 +5,7 @@
 Workload Identity in Multi System Environments                  S. Heigh
 Internet-Draft                                                J. Salowey
 Intended status: Standards Track                      Palo Alto Networks
-Expires: 19 March 2027                                 15 September 2026
+Expires: 21 March 2027                                 17 September 2026
 
 
                         Agent Identity Metadata
@@ -49,15 +49,6 @@ About This Document
    Source for this draft and an issue tracker can be found at
    https://github.com/szh/draft-agent-identity-metadata.
 
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                 [Page 1]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
 Status of This Memo
 
    This Internet-Draft is submitted in full conformance with the
@@ -73,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 March 2027.
+   This Internet-Draft will expire on 21 March 2027.
 
 Copyright Notice
 
@@ -91,44 +82,36 @@ Copyright Notice
 
 Table of Contents
 
-   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
-     1.1.  Scope . . . . . . . . . . . . . . . . . . . . . . . . . .   4
-   2.  Conventions and Definitions . . . . . . . . . . . . . . . . .   4
-   3.  The Separation Principle  . . . . . . . . . . . . . . . . . .   5
-     3.1.  Why Attributes Are Not Encoded in Identifiers . . . . . .   5
-     3.2.  Content of the Agent Identifier . . . . . . . . . . . . .   6
-     3.3.  Content of the Identity Document  . . . . . . . . . . . .   7
-   4.  Agent Metadata  . . . . . . . . . . . . . . . . . . . . . . .   7
-     4.1.  Reuse of Existing Claims  . . . . . . . . . . . . . . . .   7
-     4.2.  Associated Human Principal  . . . . . . . . . . . . . . .   8
-     4.3.  Permissions and Scopes  . . . . . . . . . . . . . . . . .   9
-     4.4.  Identifier Uniqueness . . . . . . . . . . . . . . . . . .  10
-   5.  Carrying Metadata in Identity Documents . . . . . . . . . . .  10
-     5.1.  JWT-Based Documents . . . . . . . . . . . . . . . . . . .  11
-     5.2.  X.509-Based Documents . . . . . . . . . . . . . . . . . .  12
-
-
-
-Heigh & Salowey           Expires 19 March 2027                 [Page 2]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
-     5.3.  Consistency Across Formats  . . . . . . . . . . . . . . .  13
-   6.  Relationship to Other Work  . . . . . . . . . . . . . . . . .  13
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  14
-     7.1.  Dependence on Identifier Uniqueness . . . . . . . . . . .  14
-     7.2.  Strength of the Issuance Decision . . . . . . . . . . . .  14
-     7.3.  Identity Documents as Capabilities  . . . . . . . . . . .  15
-     7.4.  Attribute Staleness . . . . . . . . . . . . . . . . . . .  15
-   8.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  16
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  16
-   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  16
-     10.1.  Normative References . . . . . . . . . . . . . . . . . .  16
-     10.2.  Informative References . . . . . . . . . . . . . . . . .  17
-   Open Issues . . . . . . . . . . . . . . . . . . . . . . . . . . .  18
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  19
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  19
+   1.  Introduction
+     1.1.  Scope
+   2.  Conventions and Definitions
+   3.  The Separation Principle
+     3.1.  Why Attributes Are Not Encoded in Identifiers
+     3.2.  Content of the Agent Identifier
+     3.3.  Content of the Identity Document
+   4.  Agent Metadata
+     4.1.  Reuse of Existing Claims
+     4.2.  Associated Human Principal
+     4.3.  Permissions and Scopes
+     4.4.  Identifier Uniqueness
+   5.  Carrying Metadata in Identity Documents
+     5.1.  JWT-Based Documents
+     5.2.  X.509-Based Documents
+     5.3.  Consistency Across Formats
+   6.  Relationship to Other Work
+   7.  Security Considerations
+     7.1.  Dependence on Identifier Uniqueness
+     7.2.  Strength of the Issuance Decision
+     7.3.  Identity Documents as Capabilities
+     7.4.  Attribute Staleness
+   8.  Privacy Considerations
+   9.  IANA Considerations
+   10. References
+     10.1.  Normative References
+     10.2.  Informative References
+   Open Issues
+   Acknowledgments
+   Authors' Addresses
 
 1.  Introduction
 
@@ -159,16 +142,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
    such as a WIMSE Workload Identity Token
    [I-D.ietf-wimse-workload-creds] or a JWT-SVID, or an X.509
    certificate.
-
-
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                 [Page 3]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
 
    Where suitable claims already exist, this document profiles them
    rather than defining new ones.  Group, role, and entitlement claims
@@ -218,14 +191,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
       separately attributable in an audit record.
 
    Execution Instance:  A single running process, container, task, or
-
-
-
-Heigh & Salowey           Expires 19 March 2027                 [Page 4]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
       session executing a Logical Agent.  One Logical Agent may have
       many concurrent Execution Instances.
 
@@ -274,14 +239,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
       no longer true.
 
    Cardinality multiplies.  Encoding _n_ attributes produces an
-
-
-
-Heigh & Salowey           Expires 19 March 2027                 [Page 5]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
       identifier space that is their cross product.  Every combination
       of group, role, and owner becomes a distinct identifier requiring
       its own registration, its own grants, and its own policy entries.
@@ -328,15 +285,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
    that agent.  A relying party requiring an agent's group, role, human
    association, or permissions therefore MUST obtain it from Agent
    Metadata.
-
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                 [Page 6]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
 
    An Issuer MAY use structured paths for administrative convenience,
    such as delegation of naming authority within a trust domain or
@@ -386,14 +334,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
       owner memberships in roles and groups" and "entitlements assigned
       to the resource owner", and [RFC7643] defines them as attributes
       of a SCIM User.  This document applies them to the subject of the
-
-
-
-Heigh & Salowey           Expires 19 March 2027                 [Page 7]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
       Identity Document, which is an agent rather than a person.  The
       registrations themselves are subject-neutral, so no conflict
       arises, but a relying party MUST interpret these claims as
@@ -441,15 +381,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
       therefore carries the on-behalf-of relationship, alongside the
       scopes it authorizes.
 
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                 [Page 8]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
    This resolves the apparent conflict with [RFC8693], whose act claim
    identifies "the acting party to whom authority has been delegated"
    and which would otherwise place the human in sub.  There is no
@@ -496,16 +427,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
    policy or from an authorization server.  Section 7.3 gives the
    reasoning.
 
-
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                 [Page 9]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
 4.4.  Identifier Uniqueness
 
    The separation principle depends on the identifier actually denoting
@@ -548,19 +469,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
    execution environment; it MUST NOT be the sole input.
 
 5.  Carrying Metadata in Identity Documents
-
-
-
-
-
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                [Page 10]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
 
 5.1.  JWT-Based Documents
 
@@ -606,18 +514,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
    agent as a JWT-SVID [SPIFFE-JWT-SVID], which is instead audience-
    restricted and carries no confirmation claim:
 
-
-
-
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                [Page 11]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
    {
      "sub": "spiffe://example.com/agent/a7f3c1a24b904d61",
      "aud": ["spiffe://example.com/service/ledger"],
@@ -658,21 +554,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
 
    Absent such a mechanism, a conforming X.509-based Identity Document
    carries the identifier alone:
-
-
-
-
-
-
-
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                [Page 12]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
 
    X509v3 Basic Constraints: critical
        CA:FALSE
@@ -721,15 +602,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
    What follows locates it among the drafts it neighbors.
 
    [I-D.ietf-wimse-identifier]:  Defines the identifier.  This document
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                [Page 13]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
       defines what does not go in it and where those attributes go
       instead.  It introduces no new identifier syntax.
 
@@ -776,16 +648,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
    which is worse, because the audit record then positively names the
    wrong agent.
 
-
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                [Page 14]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
    An Issuer MUST NOT determine an Agent Identifier or Agent Metadata
    solely from properties the requesting agent self-reports.  Beyond
    that, Issuers SHOULD determine both from properties the agent cannot
@@ -826,21 +688,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
    document's lifetime.  Deployments requiring rapid attribute
    revocation SHOULD constrain document lifetimes accordingly rather
    than rely on relying parties to re-resolve attributes out of band.
-
-
-
-
-
-
-
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                [Page 15]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
 
 8.  Privacy Considerations
 
@@ -891,13 +738,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
               <https://datatracker.ietf.org/doc/html/draft-ietf-wimse-
               workload-creds-02>.
 
-
-
-Heigh & Salowey           Expires 19 March 2027                [Page 16]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
@@ -942,17 +782,6 @@ Internet-Draft           Agent Identity Metadata          September 2026
               Attribute Certificate Profile for Authorization",
               RFC 5755, DOI 10.17487/RFC5755, January 2010,
               <https://www.rfc-editor.org/rfc/rfc5755>.
-
-
-
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                [Page 17]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
 
    [RFC8693]  Jones, M., Nadalin, A., Campbell, B., Ed., Bradley, J.,
               and C. Mortimore, "OAuth 2.0 Token Exchange", RFC 8693,
@@ -1002,14 +831,6 @@ Open Issues
        attribute and grant in Section 4.3, or whether the document
        should exclude authority-bearing metadata entirely.
 
-
-
-
-Heigh & Salowey           Expires 19 March 2027                [Page 18]
-
-Internet-Draft           Agent Identity Metadata          September 2026
-
-
    5.  *Terminology alignment.* "Logical Agent", "Execution Instance",
        and "Identity Document" are introduced here.  If equivalent terms
        exist in [I-D.ietf-wimse-arch] or [I-D.ietf-wimse-aims], these
@@ -1039,26 +860,3 @@ Authors' Addresses
    Joseph Salowey
    Palo Alto Networks
    Email: joe@salowey.net
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Heigh & Salowey           Expires 19 March 2027                [Page 19]
