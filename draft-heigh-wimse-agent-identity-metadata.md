@@ -66,8 +66,9 @@ informative:
 
 This document specifies metadata attributes associated with an AI agent's identity that are used for
 auditing, authorization, accounting and other purposes. It specifies how to carry these attributes within
-WIMSE credentials such as a JWT-based Workload Identity Token (WIT) or an X.509-based Workload Identity
-Certificate (WIC). Those attributes include groups the agent belongs to, the roles it performs, and the
+a WIMSE credential, such as a JWT-based Workload Identity Token (WIT) or an X.509-based Workload Identity
+Certificate (WIC), or in a separate agent identity metadata token bound to an authenticated identity or credential.
+Those attributes include groups the agent belongs to, the roles it performs, and the
 human principal it acts on behalf of.
 
 This document defines the separation between identifier and metadata, and profiles existing claims for
@@ -219,12 +220,25 @@ authority within a trust domain or operator legibility. Where it does, the struc
 relying party MUST NOT derive authorization-relevant meaning from any component of an Agent
 Identifier.
 
-## Content of the Identity Credential {#document-role}
+(Joe) MUST NOT is rather strong.  COuld change it to implementations of this specification MUST NOT derive
+authorization relevant meaning... even then, could the identifier be used as a pointer to an ACL? It
+could be bound to an metadata document which is bound to the identifier?
+
+## Content of the Agent Identity Metadata Document {#document-role}
 
 An Identity Credential asserts an Agent Identifier and MAY assert Agent Metadata describing the Logical
 Agent that identifier denotes. Metadata in an Identity Credential is asserted by the Issuer and inherits
 the Credential's signature, its validity period, and its trust path. That is what distinguishes it from
 an attribute the agent asserts about itself at the application layer.
+
+Alternatively the Agent Identity Metadata may be carried in a separate token, the agent identity metadata
+document. This token must be bound either to a WIMSE identifier authenticated by a WIMSE credential
+or it may be bound to the WIMSE credential itself. The issuer of this token MAY be distinct from the
+identity token issuer as the authority for the attributes may be different than the one assigning the identity
+
+While there may be multiple agent identity metadata tokens issued by different authorities it is NOT
+RECOMMENDED.  If such a deployment choice is made then there MUST be policy defined to resolve conflicts
+in attributes between the two documents.
 
 # Agent Metadata {#metadata}
 
@@ -441,10 +455,12 @@ Candidate approaches:
 
 1. A single non-critical certificate extension, identified by an OID assigned for this purpose,
    carrying a structured encoding of the metadata defined in {{reuse}}.
+2. Use existing attributes where they are available, for example the human identifier could be carried in the subject common name.
 2. Separate extensions per attribute.
 3. Attribute certificates {{RFC5755}}, which separate attributes from the identity certificate by
    construction, at the cost of a second object to distribute and validate.
-4. No X.509 carriage in this document, restricting metadata to JWT-based credentials.
+4. No X.509 carriage in this document, metadata is carried in an agent metadata document bound to the identifier
+   in the certificate.
 
 See {{open-issues}} item 2.
 
