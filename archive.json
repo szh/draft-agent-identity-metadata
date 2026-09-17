@@ -1,0 +1,86 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2026-09-17T02:48:56.490636+00:00",
+  "repo": "szh/draft-agent-identity-metadata",
+  "labels": [
+    {
+      "name": "accessibility",
+      "description": "Barrier affecting people with disabilities",
+      "color": "f143ab"
+    },
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOUcQW4c8AAAABD1vczg",
+      "title": "setup1",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/1",
+      "state": "OPEN",
+      "author": "jsalowey",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I think this will help to further set up the repo.  You may have to enable GHpages in the repo. ",
+      "createdAt": "2026-09-16T22:11:18Z",
+      "updatedAt": "2026-09-16T22:11:18Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "af691151e615da20719dfc290a3777b0c97a5403",
+      "headRepository": "szh/draft-agent-identity-metadata",
+      "headRefName": "comments-1",
+      "headRefOid": "724b87801300725e8c2ce3d62de2bfb148418f1d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    }
+  ]
+}
