@@ -18,6 +18,8 @@ human principal it acts on behalf of.
 expressing agent group, role, and associated human identity. It distinguishes an agent's attributes
 from grants such as scopes, and states the requirements that make the separation sound, including
 identifier uniqueness. 
+       The separation and the carriage mechanisms specified here apply to workload identity generally. AI
+agents are the use case driving them and the focus of this document. 
     " name="description">
 <meta content="xml2rfc 3.34.0" name="generator">
 <meta content="agent identity" name="keyword">
@@ -1107,6 +1109,8 @@ human principal it acts on behalf of.<a href="#section-abstract-1" class="pilcro
 expressing agent group, role, and associated human identity. It distinguishes an agent's attributes
 from grants such as scopes, and states the requirements that make the separation sound, including
 identifier uniqueness.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+<p id="section-abstract-3">The separation and the carriage mechanisms specified here apply to workload identity generally. AI
+agents are the use case driving them and the focus of this document.<a href="#section-abstract-3" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1306,6 +1310,11 @@ Identity Token <span>[<a href="#I-D.ietf-wimse-workload-creds" class="cite xref"
 <p id="section-1-6">Where suitable claims already exist, this document profiles them rather than defining new ones. Group,
 role, and entitlement claims are already registered <span>[<a href="#RFC9068" class="cite xref">RFC9068</a>]</span> with semantics drawn from SCIM
 <span>[<a href="#RFC7643" class="cite xref">RFC7643</a>]</span>, and delegation is already expressible <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-7">Nothing in the argument is specific to AI agents. An identifier denotes a workload, metadata describes
+it, and the separation holds for workload identity generally. Agents are what makes it pressing: an
+agent needs a durable identity of its own, and at the same time a group, a role, and an owner that a
+relying party can authorize on. This document is written for that case and uses agent terminology
+throughout; a deployment <span class="bcp14">MAY</span> apply the same rules to workloads that are not agents.<a href="#section-1-7" class="pilcrow">¶</a></p>
 <div id="scope">
 <section id="section-1.1">
         <h3 id="name-scope">
@@ -1332,14 +1341,17 @@ role, and entitlement claims are already registered <span>[<a href="#RFC9068" cl
             <p id="section-1.1-4.1.1">the identifier format itself, which is <span>[<a href="#I-D.ietf-wimse-identifier" class="cite xref">I-D.ietf-wimse-identifier</a>]</span>;<a href="#section-1.1-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.2">
-            <p id="section-1.1-4.2.1">authentication and transport protocols;<a href="#section-1.1-4.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-4.2.1">conveying metadata in an object separate from the identity credential;<a href="#section-1.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.3">
-            <p id="section-1.1-4.3.1">how a relying party reaches an authorization decision from metadata;<a href="#section-1.1-4.3.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-4.3.1">authentication and transport protocols;<a href="#section-1.1-4.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.4">
-            <p id="section-1.1-4.4.1">verification of the identity credentials, for which see
-<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-3" class="relref">Section 3</a> of [<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span>, <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span>, and <span>[<a href="#SPIFFE-X509-SVID" class="cite xref">SPIFFE-X509-SVID</a>]</span>.<a href="#section-1.1-4.4.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-4.4.1">how a relying party reaches an authorization decision from metadata;<a href="#section-1.1-4.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-4.5">
+            <p id="section-1.1-4.5.1">verification of the identity credentials, for which see
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-3" class="relref">Section 3</a> of [<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span>, <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span>, and <span>[<a href="#SPIFFE-X509-SVID" class="cite xref">SPIFFE-X509-SVID</a>]</span>.<a href="#section-1.1-4.5.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -1374,18 +1386,20 @@ may have many concurrent Execution Instances.<a href="#section-2-2.4.1" class="p
           <p id="section-2-2.6.1">A Workload Identifier, as defined in <span>[<a href="#I-D.ietf-wimse-identifier" class="cite xref">I-D.ietf-wimse-identifier</a>]</span>, that denotes a Logical Agent.<a href="#section-2-2.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-2.7">Identity Credential:</dt>
+<dt id="section-2-2.7">Agent Metadata:</dt>
         <dd style="margin-left: 1.5em" id="section-2-2.8">
-          <p id="section-2-2.8.1">A signed object asserting an Agent Identifier. In WIMSE deployments this is a Workload Identity Token
-(WIT) or a Workload Identity Certificate (WIC), both defined in <span>[<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span>.
-The term is used here to cover both, and to cover equivalents such as the SPIFFE JWT-SVID
-<span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span> and X.509-SVID <span>[<a href="#SPIFFE-X509-SVID" class="cite xref">SPIFFE-X509-SVID</a>]</span>. Identity Credentials are also sometimes
-referred to as identity documents.<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.8.1">Attributes of a Logical Agent, distinct from the Agent Identifier, asserted for authorization, audit,
+accounting, and similar purposes.<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-2.9">Agent Metadata:</dt>
+<dt id="section-2-2.9">Identity Credential:</dt>
         <dd style="margin-left: 1.5em" id="section-2-2.10">
-          <p id="section-2-2.10.1">Attributes of a Logical Agent conveyed in an Identity Credential, distinct from the Agent Identifier.<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.10.1">A signed object used to authenticate an Agent Identifier. In WIMSE deployments this is a Workload
+Identity Token (WIT) or a Workload Identity Certificate (WIC), both defined in
+<span>[<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span>. The term is used here to cover both, and to cover equivalents such
+as the SPIFFE JWT-SVID <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span> and X.509-SVID <span>[<a href="#SPIFFE-X509-SVID" class="cite xref">SPIFFE-X509-SVID</a>]</span>. SPIFFE refers to these
+objects as identity documents; this document uses "credential" throughout, consistent with
+<span>[<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span>.<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-2.11">Issuer:</dt>
@@ -2072,13 +2086,23 @@ or replacing, and the question may be better raised against <span>[<a href="#RFC
         <li id="appendix-A-2.5">
           <p id="appendix-A-2.5.1"><strong>Terminology alignment.</strong> "Logical Agent", "Execution Instance", and "Identity Credential" are
 introduced here. If equivalent terms exist in <span>[<a href="#I-D.ietf-wimse-arch" class="cite xref">I-D.ietf-wimse-arch</a>]</span> or
-<span>[<a href="#I-D.ietf-wimse-aims" class="cite xref">I-D.ietf-wimse-aims</a>]</span>, these should defer to them. In particular, "Identity Credential" may be
-unnecessary: WIT and WIC are defined terms, and the abstraction is only needed to also cover SVIDs.<a href="#appendix-A-2.5.1" class="pilcrow">¶</a></p>
+<span>[<a href="#I-D.ietf-wimse-aims" class="cite xref">I-D.ietf-wimse-aims</a>]</span>, these should defer to them. In particular,
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-arch-08#section-2" class="relref">Section 2</a> of [<a href="#I-D.ietf-wimse-arch" class="cite xref">I-D.ietf-wimse-arch</a>]</span> already defines "Workload Identity Credential", and this
+document should probably cite that term rather than define a near-synonym alongside it.<a href="#appendix-A-2.5.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-2.6">
           <p id="appendix-A-2.6.1"><strong>Whether a relying party needs a way to know which metadata an Issuer is authoritative for</strong>, or
 whether that is deployment configuration. This is the <a href="#issuance" class="auto internal xref">Section 7.2</a> question seen from the consuming
 side.<a href="#appendix-A-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-2.7">
+          <p id="appendix-A-2.7.1"><strong>Whether Agent Metadata may be conveyed separately from the Identity Credential.</strong> This document
+deliberately specifies carriage in the Identity Credential only. A separate signed object, bound to
+the Agent Identifier and possibly to a specific Identity Credential, would accommodate an attribute
+authority distinct from the identifier authority and work around the X.509 extension constraints in
+<a href="#x509" class="auto internal xref">Section 5.2</a>. It would also add a second object to retrieve, validate, and reconcile, require a rule for
+conflicting assertions, and mean a relying party may have to establish authority for two Issuers
+rather than one. Whether it belongs here, in a companion document, or nowhere is open.<a href="#appendix-A-2.7.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
 </section>
