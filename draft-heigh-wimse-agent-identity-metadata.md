@@ -36,6 +36,11 @@ author:
     name: Joseph Salowey
     organization: Palo Alto Networks
     email: joe@salowey.net
+ -
+    ins: Y. Rosomakho
+    name: Yaroslav Rosomakho
+    organization: Zscaler
+    email: yrosomakho@zscaler.com
 
 normative:
   I-D.ietf-wimse-identifier:
@@ -75,6 +80,9 @@ expressing agent group, role, and associated human identity. It distinguishes an
 from grants such as scopes, and states the requirements that make the separation sound, including
 identifier uniqueness.
 
+The separation and the carriage mechanisms specified here apply to workload identity generally. AI
+agents are the use case driving them and the focus of this document.
+
 --- middle
 
 # Introduction {#intro}
@@ -106,6 +114,12 @@ Where suitable claims already exist, this document profiles them rather than def
 role, and entitlement claims are already registered {{RFC9068}} with semantics drawn from SCIM
 {{RFC7643}}, and delegation is already expressible {{RFC8693}}.
 
+Nothing in the argument is specific to AI agents. An identifier denotes a workload, metadata describes
+it, and the separation holds for workload identity generally. Agents are what makes it pressing: an
+agent needs a durable identity of its own, and at the same time a group, a role, and an owner that a
+relying party can authorize on. This document is written for that case and uses agent terminology
+throughout; a deployment MAY apply the same rules to workloads that are not agents.
+
 ## Scope
 
 In scope:
@@ -118,6 +132,7 @@ In scope:
 Out of scope:
 
 * the identifier format itself, which is {{I-D.ietf-wimse-identifier}};
+* conveying metadata in an object separate from the identity credential;
 * authentication and transport protocols;
 * how a relying party reaches an authorization decision from metadata;
 * verification of the identity credentials, for which see
@@ -139,15 +154,17 @@ Execution Instance:
 Agent Identifier:
 : A Workload Identifier, as defined in {{I-D.ietf-wimse-identifier}}, that denotes a Logical Agent.
 
-Identity Credential:
-: A signed object asserting an Agent Identifier. In WIMSE deployments this is a Workload Identity Token
-  (WIT) or a Workload Identity Certificate (WIC), both defined in {{I-D.ietf-wimse-workload-creds}}.
-  The term is used here to cover both, and to cover equivalents such as the SPIFFE JWT-SVID
-  {{SPIFFE-JWT-SVID}} and X.509-SVID {{SPIFFE-X509-SVID}}. Identity Credentials are also sometimes
-  referred to as identity documents.
-
 Agent Metadata:
-: Attributes of a Logical Agent conveyed in an Identity Credential, distinct from the Agent Identifier.
+: Attributes of a Logical Agent, distinct from the Agent Identifier, asserted for authorization, audit,
+  accounting, and similar purposes.
+
+Identity Credential:
+: A signed object used to authenticate an Agent Identifier. In WIMSE deployments this is a Workload
+  Identity Token (WIT) or a Workload Identity Certificate (WIC), both defined in
+  {{I-D.ietf-wimse-workload-creds}}. The term is used here to cover both, and to cover equivalents such
+  as the SPIFFE JWT-SVID {{SPIFFE-JWT-SVID}} and X.509-SVID {{SPIFFE-X509-SVID}}. SPIFFE refers to these
+  objects as identity documents; this document uses "credential" throughout, consistent with
+  {{I-D.ietf-wimse-workload-creds}}.
 
 Issuer:
 : The entity that assigns an Agent Identifier, determines Agent Metadata, and issues the Identity
@@ -581,11 +598,19 @@ To be resolved with the working group, and removed before publication.
    {{permissions}}, or whether the document should exclude authority-bearing metadata entirely.
 5. **Terminology alignment.** "Logical Agent", "Execution Instance", and "Identity Credential" are
    introduced here. If equivalent terms exist in {{I-D.ietf-wimse-arch}} or
-   {{I-D.ietf-wimse-aims}}, these should defer to them. In particular, "Identity Credential" may be
-   unnecessary: WIT and WIC are defined terms, and the abstraction is only needed to also cover SVIDs.
+   {{I-D.ietf-wimse-aims}}, these should defer to them. In particular,
+   {{Section 2 of I-D.ietf-wimse-arch}} already defines "Workload Identity Credential", and this
+   document should probably cite that term rather than define a near-synonym alongside it.
 6. **Whether a relying party needs a way to know which metadata an Issuer is authoritative for**, or
    whether that is deployment configuration. This is the {{issuance}} question seen from the consuming
    side.
+7. **Whether Agent Metadata may be conveyed separately from the Identity Credential.** This document
+   deliberately specifies carriage in the Identity Credential only. A separate signed object, bound to
+   the Agent Identifier and possibly to a specific Identity Credential, would accommodate an attribute
+   authority distinct from the identifier authority and work around the X.509 extension constraints in
+   {{x509}}. It would also add a second object to retrieve, validate, and reconcile, require a rule for
+   conflicting assertions, and mean a relying party may have to establish authority for two Issuers
+   rather than one. Whether it belongs here, in a companion document, or nowhere is open.
 
 # Acknowledgments
 {:numbered="false"}
