@@ -64,12 +64,11 @@ informative:
 
 --- abstract
 
-This document specifies metadata attributes associated with an AI agent's identity that are used for auditing,
-authorization accounting and other purposes. This documents specifies how to carry these attribures within
-WIMSE credentials such as a JWT based workload identity token (WIT) or an X.509 based workload identity
-certificate. Those attributes include groups the agent belongs to, the roles it performs, and the human principal
-it acts on behalf of.
-
+This document specifies metadata attributes associated with an AI agent's identity that are used for
+auditing, authorization, accounting and other purposes. It specifies how to carry these attributes within
+WIMSE credentials such as a JWT-based Workload Identity Token (WIT) or an X.509-based Workload Identity
+Certificate (WIC). Those attributes include groups the agent belongs to, the roles it performs, and the
+human principal it acts on behalf of.
 
 This document defines the separation between identifier and metadata, and profiles existing claims for
 expressing agent group, role, and associated human identity. It distinguishes an agent's attributes
@@ -100,7 +99,7 @@ lifetimes, and the identifier is the most widely exposed field in the system.
 
 This document specifies the alternative. An identifier denotes exactly one agent and carries no
 semantics a relying party may rely on. Everything a deployment needs to know about the agent travels
-as metadata in the identity document that asserts the identifier: a JWT such as a WIMSE Workload
+as metadata in the Identity Credential that asserts the identifier: a JWT such as a WIMSE Workload
 Identity Token {{I-D.ietf-wimse-workload-creds}} or a JWT-SVID, or an X.509 certificate.
 
 Where suitable claims already exist, this document profiles them rather than defining new ones. Group,
@@ -144,7 +143,7 @@ Identity Credential:
 : A signed object asserting an Agent Identifier. In WIMSE deployments this is a Workload Identity Token
   (WIT) or a Workload Identity Certificate (WIC), both defined in {{I-D.ietf-wimse-workload-creds}}.
   The term is used here to cover both, and to cover equivalents such as the SPIFFE JWT-SVID
-  {{SPIFFE-JWT-SVID}} and X.509-SVID {{SPIFFE-X509-SVID}}. Identity credentials are also sometimes
+  {{SPIFFE-JWT-SVID}} and X.509-SVID {{SPIFFE-X509-SVID}}. Identity Credentials are also sometimes
   referred to as identity documents.
 
 Agent Metadata:
@@ -249,7 +248,7 @@ The subject is the agent.
 : {{Section 2.2.3.1 of RFC9068}} motivates these claims in terms of the resource owner, citing
   "resource owner memberships in roles and groups" and "entitlements assigned to the resource owner",
   and {{RFC7643}} defines them as attributes of a SCIM `User`. This document applies them to the subject of
-  the Identity credential, which is an agent rather than a person. The registrations themselves are
+  the Identity Credential, which is an agent rather than a person. The registrations themselves are
   subject-neutral, so no conflict arises, but a relying party MUST interpret these claims as describing
   the Logical Agent denoted by `sub` and MUST NOT interpret them as describing the human principal of
   {{human}}, where one is asserted.
@@ -259,7 +258,7 @@ Value encoding is not fully determined.
   to be "a String or label representing a collection of entitlements". It describes `groups`
   differently: as a multi-valued complex attribute with `value` and `type` sub-attributes and canonical
   types "direct" and "indirect", derived from SCIM `Group` resources that have no counterpart here.
-  Neither {{RFC9068}} nor this document settles whether `groups` in an Identity credential is an array of
+  Neither {{RFC9068}} nor this document settles whether `groups` in an Identity Credential is an array of
   strings or an array of objects. Until it is settled, an Issuer SHOULD encode all three claims as
   arrays of strings, and a relying party SHOULD accept an array of objects bearing a `value`
   sub-attribute as equivalent to the array of those `value` strings. See {{open-issues}} item 3.
@@ -272,7 +271,7 @@ MUST treat an unrecognized value as conveying no authority rather than as a wild
 An agent frequently acts on behalf of a human principal, and deployments need that association for
 authorization and for attribution. Existing WIMSE work already determines where most of it belongs.
 
-The Identity credential's `sub` is the agent.
+The Identity Credential's `sub` is the agent.
 : {{Section 4 of I-D.ietf-wimse-workload-creds}} requires that each credential carry exactly one
   Workload Identifier, and that "for a Workload Identity Token, that identifier is the value of the sub
   claim". A human principal therefore cannot occupy `sub`. This document imposes no additional
@@ -281,38 +280,38 @@ The Identity credential's `sub` is the agent.
 Per-request delegation belongs to the access token.
 : {{Section 10.3 of I-D.ietf-wimse-aims}} places the agent's identity in the access token's `client_id`
   and, "when the Agent is acting on-behalf of another User or System", that party's identifier in the
-  access token's `sub`. The access token, not the Identity credential, therefore carries the
+  access token's `sub`. The access token, not the Identity Credential, therefore carries the
   on-behalf-of relationship, alongside the scopes it authorizes.
 
 This resolves the apparent conflict with {{RFC8693}}, whose `act` claim identifies "the acting party to
 whom authority has been delegated" and which would otherwise place the human in `sub`. There is no
-conflict, because there are two credentials: the Identity credential says which agent this is, and the
+conflict, because there are two credentials: the Identity Credential says which agent this is, and the
 access token says on whose behalf and for what it is presently authorized.
 
 Applying the distinction of {{permissions}}, the per-request "acting on behalf of" relationship is a
-grant and does not belong in an Identity credential. What remains genuinely open is whether a durable
+grant and does not belong in an Identity Credential. What remains genuinely open is whether a durable
 association, meaning that an agent was provisioned for and is permanently attributable to a particular
 person, is an attribute of the agent worth asserting at issuance. It has the stability of an attribute
 and, unlike a scope, does not express authority. This document does not yet take a position; see
 {{open-issues}} item 1.
 
-An Identity credential asserting a human principal makes a claim about a person and is subject to
+An Identity Credential asserting a human principal makes a claim about a person and is subject to
 {{privacy}}.
 
 ## Permissions and Scopes {#permissions}
 
-Deployments frequently want an agent's permissions in its Identity credential. This document
+Deployments frequently want an agent's permissions in its Identity Credential. This document
 distinguishes two cases and treats them differently, because they are not the same kind of statement.
 
 Attributes of the subject, such as group, role, and coarse entitlements, describe what the agent is. They are
 relatively stable, they are meaningful independent of any particular relying party, and the Issuer is
-plausibly authoritative for them. These belong in the Identity credential per {{reuse}}.
+plausibly authoritative for them. These belong in the Identity Credential per {{reuse}}.
 
 Grants, such as scopes and fine-grained permissions, describe what the agent may do at a given resource at a
 given moment. They are relationship-specific, they change faster than an identity credential's lifetime,
 and the authority for them is the resource owner or an authorization server, not the identity issuer.
 
-Accordingly, an Identity credential MAY carry coarse entitlements per {{reuse}}, but SHOULD NOT carry
+Accordingly, an Identity Credential MAY carry coarse entitlements per {{reuse}}, but SHOULD NOT carry
 resource-specific scopes or fine-grained permissions. Where a deployment carries them anyway, a relying
 party MUST NOT treat them as authoritative for an authorization decision, and MUST obtain authorization
 from its own policy or from an authorization server. {{capability}} gives the reasoning.
@@ -343,11 +342,11 @@ where that credential is, or may become, available to more than one Logical Agen
 
 Where the platform offers only such a credential, an Issuer MUST establish by a means not under the
 control of the agent which Logical Agent a requesting Execution Instance is executing, and MUST issue
-an Identity credential asserting an Agent Identifier denoting that agent rather than passing the
+an Identity Credential asserting an Agent Identifier denoting that agent rather than passing the
 execution credential through. The execution credential MAY be an input to that determination as
 evidence of the execution environment; it MUST NOT be the sole input.
 
-# Carrying Metadata in Identity credentials {#carriage}
+# Carrying Metadata in Identity Credentials {#carriage}
 
 ## JWT-Based credentials {#jwt}
 
@@ -356,10 +355,10 @@ mechanism is required, and the rules for doing so are already established:
 {{Section 5.1.2 of I-D.ietf-wimse-workload-creds}} permits additional claims in a WIT, requires that a
 recipient ignore claims it does not understand, discourages private claim names, and requires that
 claims used outside closed environments be registered with IANA. Because the claims in {{reuse}} are
-already registered, an Identity credential expressing agent group, role, or entitlements satisfies those
+already registered, an Identity Credential expressing agent group, role, or entitlements satisfies those
 rules without further action.
 
-The following non-normative examples show Identity credentials for the agent that {{intro}} names with an
+The following non-normative examples show Identity Credentials for the agent that {{intro}} names with an
 attribute-bearing identifier. In each, the identifier is opaque and the attributes appear only as claims.
 
 A WIT, whose JOSE header carries `"typ": "wit+jwt"`:
@@ -421,7 +420,7 @@ be carried in a second URI SAN. For an X.509-SVID the constraint is stronger sti
 {{SPIFFE-X509-SVID}} requires a validator to reject any certificate bearing more than one URI SAN,
 whatever its contents. Metadata must go somewhere a relying party will not mistake for an identifier.
 
-Absent such a mechanism, a conforming X.509-based Identity credential carries the identifier alone:
+Absent such a mechanism, a conforming X.509-based Identity Credential carries the identifier alone:
 
 ~~~
 X509v3 Basic Constraints: critical
@@ -451,7 +450,7 @@ See {{open-issues}} item 2.
 
 ## Consistency Across Formats {#consistency}
 
-Where an Issuer issues both JWT-based and X.509-based Identity credentials for the same Logical Agent,
+Where an Issuer issues both JWT-based and X.509-based Identity Credentials for the same Logical Agent,
 the metadata asserted in each MUST be consistent, so that a party able to choose between formats cannot
 obtain a more favorable authorization outcome by choosing one. Where the two formats cannot express
 the same metadata, the Issuer MUST omit the metadata it cannot express consistently rather than assert
@@ -477,7 +476,7 @@ drafts it neighbors.
 : The WIMSE framework for agent identity, and the closest neighbor to this document. It requires
   exactly one identifier per agent (see {{uniqueness}}) and locates per-request delegation in the OAuth
   access token (see {{human}}). This document is a narrower companion: AIMS establishes that an agent has
-  one identifier and is authorized through OAuth, while this document specifies what an Identity credential
+  one identifier and is authorized through OAuth, while this document specifies what an Identity Credential
   may assert about that agent and what must not be encoded in the identifier.
 
 # Security Considerations {#security}
@@ -507,7 +506,7 @@ available properties depend on the platform and range from hardware-rooted attes
 kernel-observed process properties to orchestrator-asserted labels. Whichever an Issuer relies on is
 security-relevant configuration and warrants the same review as policy.
 
-## Identity credentials as Capabilities {#capability}
+## Identity Credentials as Capabilities {#capability}
 
 Metadata that expresses authority converts an identity credential into a capability. Three consequences
 motivate {{permissions}}. They do not depend on the credential being a bearer token: a WIT is bound to the
@@ -517,11 +516,11 @@ workload's key and cannot be used as one
 
 Lifetime mismatch:
 : A permission revoked at the authorization server remains asserted by every unexpired credential
-  carrying it. Identity credential lifetimes are chosen for identity freshness, not for permission
+  carrying it. Identity Credential lifetimes are chosen for identity freshness, not for permission
   freshness.
 
 Two authorities:
-: If both the Identity credential and the relying party's policy assert what an agent may do, the
+: If both the Identity Credential and the relying party's policy assert what an agent may do, the
   effective policy is whichever is consulted, and the deployment has two sources of truth for one
   decision.
 
@@ -565,7 +564,7 @@ This document has no IANA actions. The claims profiled in {{reuse}} are already 
 
 To be resolved with the working group, and removed before publication.
 
-1. **Whether a durable human association belongs in an Identity Document ({{human}}).** The per-request
+1. **Whether a durable human association belongs in an Identity Credential ({{human}}).** The per-request
    case is settled: it belongs in the access token, per
    {{Section 10.3 of I-D.ietf-wimse-aims}}. What remains is whether a permanent
    "this agent was provisioned for this person" association is an attribute worth asserting at issuance,
@@ -580,9 +579,9 @@ To be resolved with the working group, and removed before publication.
    or replacing, and the question may be better raised against {{RFC9068}} than answered here.
 4. **Whether `entitlements` is the right line to draw** between attribute and grant in
    {{permissions}}, or whether the document should exclude authority-bearing metadata entirely.
-5. **Terminology alignment.** "Logical Agent", "Execution Instance", and "Identity Document" are
+5. **Terminology alignment.** "Logical Agent", "Execution Instance", and "Identity Credential" are
    introduced here. If equivalent terms exist in {{I-D.ietf-wimse-arch}} or
-   {{I-D.ietf-wimse-aims}}, these should defer to them. In particular, "Identity Document" may be
+   {{I-D.ietf-wimse-aims}}, these should defer to them. In particular, "Identity Credential" may be
    unnecessary: WIT and WIC are defined terms, and the abstraction is only needed to also cover SVIDs.
 6. **Whether a relying party needs a way to know which metadata an Issuer is authoritative for**, or
    whether that is deployment configuration. This is the {{issuance}} question seen from the consuming
