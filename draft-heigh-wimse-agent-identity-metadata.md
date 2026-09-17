@@ -36,6 +36,11 @@ author:
     name: Joseph Salowey
     organization: Palo Alto Networks
     email: joe@salowey.net
+ -
+    ins: Y. Rosomakho
+    name: Yaroslav Rosomakho
+    organization: Zscaler
+    email: yrosomakho@zscaler.com
 
 normative:
   I-D.ietf-wimse-identifier:
