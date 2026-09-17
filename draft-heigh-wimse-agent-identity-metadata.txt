@@ -13,16 +13,13 @@ Expires: 21 March 2027                                 17 September 2026
 
 Abstract
 
-   This document specifies that an AI agent's attributes are carried as
-   metadata in the identity document that asserts its identifier, such
-   as a JWT or an X.509 certificate, and are not encoded in the
-   identifier itself.  Those attributes include the group the agent
-   belongs to, the role it performs, and the human principal it acts
-   for.
-
-   Encoding them in the identifier is common practice, but it produces
-   identifiers with structured paths that relying parties are then
-   expected to parse and authorize on.
+   This document specifies metadata attributes associated with an AI
+   agent's identity that are used for auditing, authorization accounting
+   and other purposes.  This documents specifies how to carry these
+   attribures within WIMSE credentials such as a JWT based workload
+   identity token (WIT) or an X.509 based workload identity certificate.
+   Those attributes include groups the agent belongs to, the roles it
+   performs, and the human principal it acts on behalf of.
 
    This document defines the separation between identifier and metadata,
    and profiles existing claims for expressing agent group, role, and
@@ -88,21 +85,21 @@ Table of Contents
    3.  The Separation Principle
      3.1.  Why Attributes Are Not Encoded in Identifiers
      3.2.  Content of the Agent Identifier
-     3.3.  Content of the Identity Document
+     3.3.  Content of the Identity Credential
    4.  Agent Metadata
      4.1.  Reuse of Existing Claims
      4.2.  Associated Human Principal
      4.3.  Permissions and Scopes
      4.4.  Identifier Uniqueness
-   5.  Carrying Metadata in Identity Documents
-     5.1.  JWT-Based Documents
-     5.2.  X.509-Based Documents
+   5.  Carrying Metadata in Identity credentials
+     5.1.  JWT-Based credentials
+     5.2.  X.509-Based credentials
      5.3.  Consistency Across Formats
    6.  Relationship to Other Work
    7.  Security Considerations
      7.1.  Dependence on Identifier Uniqueness
      7.2.  Strength of the Issuance Decision
-     7.3.  Identity Documents as Capabilities
+     7.3.  Identity credentials as Capabilities
      7.4.  Attribute Staleness
    8.  Privacy Considerations
    9.  IANA Considerations
@@ -119,7 +116,9 @@ Table of Contents
    different things with different lifetimes, different authorities, and
    different exposure, and conflating them causes concrete harm.
 
-   The conflation is common in practice.  Deployments that need to
+   Encoding them in the identifier is common practice, but it produces
+   identifiers with structured paths that relying parties are then
+   expected to parse and authorize on.  Deployments that need to
    authorize on an agent's group, role, or human owner frequently encode
    those attributes into the identifier, producing identifiers of the
    form:
@@ -158,7 +157,7 @@ Table of Contents
    *  metadata for agent group, role, and associated human principal;
 
    *  how metadata is carried in JWT-based and X.509-based identity
-      documents;
+      credentials;
 
    *  the identifier uniqueness requirements that the separation depends
       on.
@@ -173,8 +172,8 @@ Table of Contents
    *  how a relying party reaches an authorization decision from
       metadata;
 
-   *  verification of the identity document, for which see Section 3 of
-      [I-D.ietf-wimse-workload-creds], [SPIFFE-JWT-SVID], and
+   *  verification of the identity credentials, for which see Section 3
+      of [I-D.ietf-wimse-workload-creds], [SPIFFE-JWT-SVID], and
       [SPIFFE-X509-SVID].
 
 2.  Conventions and Definitions
@@ -197,18 +196,19 @@ Table of Contents
    Agent Identifier:  A Workload Identifier, as defined in
       [I-D.ietf-wimse-identifier], that denotes a Logical Agent.
 
-   Identity Document:  A signed object asserting an Agent Identifier.
+   Identity Credential:  A signed object asserting an Agent Identifier.
       In WIMSE deployments this is a Workload Identity Token (WIT) or a
       Workload Identity Certificate (WIC), both defined in
       [I-D.ietf-wimse-workload-creds].  The term is used here to cover
       both, and to cover equivalents such as the SPIFFE JWT-SVID
-      [SPIFFE-JWT-SVID] and X.509-SVID [SPIFFE-X509-SVID].
+      [SPIFFE-JWT-SVID] and X.509-SVID [SPIFFE-X509-SVID].  Identity
+      credentials are also sometimes referred to as identity documents.
 
    Agent Metadata:  Attributes of a Logical Agent conveyed in an
-      Identity Document, distinct from the Agent Identifier.
+      Identity Credential, distinct from the Agent Identifier.
 
    Issuer:  The entity that assigns an Agent Identifier, determines
-      Agent Metadata, and issues the Identity Document asserting them.
+      Agent Metadata, and issues the Identity Credential asserting them.
 
 3.  The Separation Principle
 
@@ -292,14 +292,14 @@ Table of Contents
    a relying party MUST NOT derive authorization-relevant meaning from
    any component of an Agent Identifier.
 
-3.3.  Content of the Identity Document
+3.3.  Content of the Identity Credential
 
-   An Identity Document asserts an Agent Identifier and MAY assert Agent
-   Metadata describing the Logical Agent that identifier denotes.
-   Metadata in an Identity Document is asserted by the Issuer and
-   inherits the document's signature, its validity period, and its trust
-   path.  That is what distinguishes it from an attribute the agent
-   asserts about itself at the application layer.
+   An Identity Credential asserts an Agent Identifier and MAY assert
+   Agent Metadata describing the Logical Agent that identifier denotes.
+   Metadata in an Identity Credential is asserted by the Issuer and
+   inherits the Credential's signature, its validity period, and its
+   trust path.  That is what distinguishes it from an attribute the
+   agent asserts about itself at the application layer.
 
 4.  Agent Metadata
 
@@ -309,7 +309,7 @@ Table of Contents
    permission where registered claims exist.  Section 7.2.1 of [RFC9068]
    registers groups, roles, and entitlements in the JSON Web Token
    Claims registry, referring for their definitions to Section 4.1.2 of
-   [RFC7643].  An Identity Document expressing an agent's group, role,
+   [RFC7643].  An Identity Credential expressing an agent's group, role,
    or entitlements MUST use those claims.
 
    +============================+==============+======================+
@@ -334,7 +334,7 @@ Table of Contents
       owner memberships in roles and groups" and "entitlements assigned
       to the resource owner", and [RFC7643] defines them as attributes
       of a SCIM User.  This document applies them to the subject of the
-      Identity Document, which is an agent rather than a person.  The
+      Identity credential, which is an agent rather than a person.  The
       registrations themselves are subject-neutral, so no conflict
       arises, but a relying party MUST interpret these claims as
       describing the Logical Agent denoted by sub and MUST NOT interpret
@@ -348,7 +348,7 @@ Table of Contents
       complex attribute with value and type sub-attributes and canonical
       types "direct" and "indirect", derived from SCIM Group resources
       that have no counterpart here.  Neither [RFC9068] nor this
-      document settles whether groups in an Identity Document is an
+      document settles whether groups in an Identity credential is an
       array of strings or an array of objects.  Until it is settled, an
       Issuer SHOULD encode all three claims as arrays of strings, and a
       relying party SHOULD accept an array of objects bearing a value
@@ -366,7 +366,7 @@ Table of Contents
    attribution.  Existing WIMSE work already determines where most of it
    belongs.
 
-   The Identity Document's sub is the agent.  Section 4 of
+   The Identity credential's sub is the agent.  Section 4 of
       [I-D.ietf-wimse-workload-creds] requires that each credential
       carry exactly one Workload Identifier, and that "for a Workload
       Identity Token, that identifier is the value of the sub claim".  A
@@ -377,20 +377,20 @@ Table of Contents
       [I-D.ietf-wimse-aims] places the agent's identity in the access
       token's client_id and, "when the Agent is acting on-behalf of
       another User or System", that party's identifier in the access
-      token's sub.  The access token, not the Identity Document,
+      token's sub.  The access token, not the Identity credential,
       therefore carries the on-behalf-of relationship, alongside the
       scopes it authorizes.
 
    This resolves the apparent conflict with [RFC8693], whose act claim
    identifies "the acting party to whom authority has been delegated"
    and which would otherwise place the human in sub.  There is no
-   conflict, because there are two documents: the Identity Document says
-   which agent this is, and the access token says on whose behalf and
-   for what it is presently authorized.
+   conflict, because there are two credentials: the Identity credential
+   says which agent this is, and the access token says on whose behalf
+   and for what it is presently authorized.
 
    Applying the distinction of Section 4.3, the per-request "acting on
    behalf of" relationship is a grant and does not belong in an Identity
-   Document.  What remains genuinely open is whether a durable
+   credential.  What remains genuinely open is whether a durable
    association, meaning that an agent was provisioned for and is
    permanently attributable to a particular person, is an attribute of
    the agent worth asserting at issuance.  It has the stability of an
@@ -398,28 +398,28 @@ Table of Contents
    document does not yet take a position; see Appendix "Open Issues"
    item 1.
 
-   An Identity Document asserting a human principal makes a claim about
-   a person and is subject to Section 8.
+   An Identity credential asserting a human principal makes a claim
+   about a person and is subject to Section 8.
 
 4.3.  Permissions and Scopes
 
    Deployments frequently want an agent's permissions in its Identity
-   Document.  This document distinguishes two cases and treats them
+   credential.  This document distinguishes two cases and treats them
    differently, because they are not the same kind of statement.
 
    Attributes of the subject, such as group, role, and coarse
    entitlements, describe what the agent is.  They are relatively
    stable, they are meaningful independent of any particular relying
    party, and the Issuer is plausibly authoritative for them.  These
-   belong in the Identity Document per Section 4.1.
+   belong in the Identity credential per Section 4.1.
 
    Grants, such as scopes and fine-grained permissions, describe what
    the agent may do at a given resource at a given moment.  They are
-   relationship-specific, they change faster than an identity document's
-   lifetime, and the authority for them is the resource owner or an
-   authorization server, not the identity issuer.
+   relationship-specific, they change faster than an identity
+   credential's lifetime, and the authority for them is the resource
+   owner or an authorization server, not the identity issuer.
 
-   Accordingly, an Identity Document MAY carry coarse entitlements per
+   Accordingly, an Identity credential MAY carry coarse entitlements per
    Section 4.1, but SHOULD NOT carry resource-specific scopes or fine-
    grained permissions.  Where a deployment carries them anyway, a
    relying party MUST NOT treat them as authoritative for an
@@ -463,14 +463,14 @@ Table of Contents
    Where the platform offers only such a credential, an Issuer MUST
    establish by a means not under the control of the agent which Logical
    Agent a requesting Execution Instance is executing, and MUST issue an
-   Identity Document asserting an Agent Identifier denoting that agent
+   Identity credential asserting an Agent Identifier denoting that agent
    rather than passing the execution credential through.  The execution
    credential MAY be an input to that determination as evidence of the
    execution environment; it MUST NOT be the sole input.
 
-5.  Carrying Metadata in Identity Documents
+5.  Carrying Metadata in Identity credentials
 
-5.1.  JWT-Based Documents
+5.1.  JWT-Based credentials
 
    Metadata is carried as claims in the JWT [RFC7519] claims set, using
    the claims in Section 4.1.  No new mechanism is required, and the
@@ -479,13 +479,13 @@ Table of Contents
    requires that a recipient ignore claims it does not understand,
    discourages private claim names, and requires that claims used
    outside closed environments be registered with IANA.  Because the
-   claims in Section 4.1 are already registered, an Identity Document
+   claims in Section 4.1 are already registered, an Identity credential
    expressing agent group, role, or entitlements satisfies those rules
    without further action.
 
-   The following non-normative examples show Identity Documents for the
-   agent that Section 1 names with an attribute-bearing identifier.  In
-   each, the identifier is opaque and the attributes appear only as
+   The following non-normative examples show Identity credentials for
+   the agent that Section 1 names with an attribute-bearing identifier.
+   In each, the identifier is opaque and the attributes appear only as
    claims.
 
    A WIT, whose JOSE header carries "typ": "wit+jwt":
@@ -508,7 +508,7 @@ Table of Contents
      "entitlements": ["ledger-read"]
    }
 
-   The cnf claim is mandatory in a WIT and binds the document to the
+   The cnf claim is mandatory in a WIT and binds the credential to the
    workload's key; a WIT has no aud claim and cannot be used as a bearer
    token (Section 5.1 of [I-D.ietf-wimse-workload-creds]).  The same
    agent as a JWT-SVID [SPIFFE-JWT-SVID], which is instead audience-
@@ -530,11 +530,11 @@ Table of Contents
    groups and leaves sub untouched, so every existing grant and every
    historical audit record that named the agent remains valid and
    remains accurate.  And a relying party that is not authorized to
-   learn the agent's role can be issued a document omitting roles,
+   learn the agent's role can be issued a credential omitting roles,
    without changing the agent's identity, because the identifier no
    longer carries it.
 
-5.2.  X.509-Based Documents
+5.2.  X.509-Based credentials
 
    X.509 certificates have no equivalent of a claims set, so carrying
    metadata in one requires a mechanism this document does not yet
@@ -552,7 +552,7 @@ Table of Contents
    Metadata must go somewhere a relying party will not mistake for an
    identifier.
 
-   Absent such a mechanism, a conforming X.509-based Identity Document
+   Absent such a mechanism, a conforming X.509-based Identity credential
    carries the identifier alone:
 
    X509v3 Basic Constraints: critical
@@ -582,14 +582,14 @@ Table of Contents
        object to distribute and validate.
 
    4.  No X.509 carriage in this document, restricting metadata to JWT-
-       based documents.
+       based credentials.
 
    See Appendix "Open Issues" item 2.
 
 5.3.  Consistency Across Formats
 
    Where an Issuer issues both JWT-based and X.509-based Identity
-   Documents for the same Logical Agent, the metadata asserted in each
+   credentials for the same Logical Agent, the metadata asserted in each
    MUST be consistent, so that a party able to choose between formats
    cannot obtain a more favorable authorization outcome by choosing one.
    Where the two formats cannot express the same metadata, the Issuer
@@ -606,7 +606,7 @@ Table of Contents
       instead.  It introduces no new identifier syntax.
 
    [I-D.ietf-wimse-arch]:  Provides the architectural frame within which
-      identity documents are issued and consumed.
+      identity credentials are issued and consumed.
 
    [I-D.ietf-wimse-workload-creds]:  Normative.  Defines the WIT and WIC
       that carry the metadata specified here, fixes sub as the Workload
@@ -619,15 +619,15 @@ Table of Contents
       delegation in the OAuth access token (see Section 4.2).  This
       document is a narrower companion: AIMS establishes that an agent
       has one identifier and is authorized through OAuth, while this
-      document specifies what an Identity Document may assert about that
-      agent and what must not be encoded in the identifier.
+      document specifies what an Identity credential may assert about
+      that agent and what must not be encoded in the identifier.
 
 7.  Security Considerations
 
 7.1.  Dependence on Identifier Uniqueness
 
    Metadata is bound to the agent only through the identifier that the
-   same document asserts, so all the reasoning here rests on
+   same credential asserts, so all the reasoning here rests on
    Section 4.4.  Sharing an identifier does two kinds of damage.
    Metadata asserted over a shared identifier is worse than no metadata,
    because it positively describes an agent that may not be the caller.
@@ -658,60 +658,60 @@ Table of Contents
    Issuer relies on is security-relevant configuration and warrants the
    same review as policy.
 
-7.3.  Identity Documents as Capabilities
+7.3.  Identity credentials as Capabilities
 
-   Metadata that expresses authority converts an identity document into
-   a capability.  Three consequences motivate Section 4.3.  They do not
-   depend on the document being a bearer token: a WIT is bound to the
-   workload's key and cannot be used as one (Section 5.1 of
+   Metadata that expresses authority converts an identity credential
+   into a capability.  Three consequences motivate Section 4.3.  They do
+   not depend on the credential being a bearer token: a WIT is bound to
+   the workload's key and cannot be used as one (Section 5.1 of
    [I-D.ietf-wimse-workload-creds]), where a JWT-SVID is presented as
    one [SPIFFE-JWT-SVID], and the consequences below hold in both cases.
 
    Lifetime mismatch:  A permission revoked at the authorization server
-      remains asserted by every unexpired document carrying it.
-      Identity document lifetimes are chosen for identity freshness, not
-      for permission freshness.
+      remains asserted by every unexpired credential carrying it.
+      Identity credential lifetimes are chosen for identity freshness,
+      not for permission freshness.
 
-   Two authorities:  If both the Identity Document and the relying
+   Two authorities:  If both the Identity credential and the relying
       party's policy assert what an agent may do, the effective policy
       is whichever is consulted, and the deployment has two sources of
       truth for one decision.
 
-   Blast radius:  An identity document is presented to every relying
-      party the agent contacts.  A document enumerating permissions
+   Blast radius:  An identity credential is presented to every relying
+      party the agent contacts.  A credential enumerating permissions
       discloses the agent's full authority to each of them, including
       those with no need to know it.
 
 7.4.  Attribute Staleness
 
    Because metadata is asserted at issuance, it is as fresh as the
-   document's lifetime.  Deployments requiring rapid attribute
-   revocation SHOULD constrain document lifetimes accordingly rather
+   credential's lifetime.  Deployments requiring rapid attribute
+   revocation SHOULD constrain credential lifetimes accordingly rather
    than rely on relying parties to re-resolve attributes out of band.
 
 8.  Privacy Considerations
 
    Asserting an associated human principal per Section 4.2 places an
-   identifier for a person into a document presented to every relying
+   identifier for a person into a credential presented to every relying
    party the agent contacts, and typically into the audit records of
-   each.  Where the document is an X.509 certificate, it may
+   each.  Where the credential is an X.509 certificate, it may
    additionally be transmitted during TLS handshakes and retained by
    intermediaries.
 
    Issuers SHOULD assert a human principal only where relying parties
    require it, SHOULD prefer an opaque pseudonymous identifier to a
    directly identifying one such as an email address, and SHOULD scope
-   documents carrying a human principal to the relying parties that need
-   it.
+   credentials carrying a human principal to the relying parties that
+   need it.
 
    How that scoping is achieved depends on the format, and the obvious
    mechanism is not always available.  A JWT-SVID can be narrowed by
    audience restriction, and [SPIFFE-JWT-SVID] already recommends a
    single narrowly scoped aud value.  A WIT has no aud claim at all,
    being bound to the workload's key rather than to a recipient, so an
-   Issuer can limit exposure only by issuing a distinct document per
-   relying party, by shortening the document's lifetime, or by omitting
-   the human principal.
+   Issuer can limit exposure only by issuing a distinct credential per
+   relying party, by shortening the credential's lifetime, or by
+   omitting the human principal.
 
 9.  IANA Considerations
 
