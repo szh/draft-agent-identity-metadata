@@ -243,6 +243,17 @@ Agent that identifier denotes. Metadata in an Identity Credential is asserted by
 the Credential's signature, its validity period, and its trust path. That is what distinguishes it from
 an attribute the agent asserts about itself at the application layer.
 
+## Why Metadata Travels With the Credential {#in-band}
+
+A relying party needing an attribute has three places to obtain it: the Agent Identifier, a lookup
+service, or the Identity Credential. {{pollution}} rules out the first. A lookup service is
+deployable but requires a record per Logical Agent, written before the agent's first authenticated
+request; an agent whose record has not been written is indistinguishable from an unknown one.
+
+In-credential carriage requires no such record. The Issuer's configuration is per-category rather
+than per-agent: a new agent in a known category costs no new entry; only a genuinely new category
+requires Issuer configuration.
+
 # Agent Metadata {#metadata}
 
 ## Reuse of Existing Claims {#reuse}
@@ -520,8 +531,23 @@ An Issuer MUST NOT determine an Agent Identifier or Agent Metadata solely from p
 requesting agent self-reports. Beyond that, Issuers SHOULD determine both from properties the agent
 cannot alter within its own privilege level. This document does not define what qualifies, since the
 available properties depend on the platform and range from hardware-rooted attestation through
-kernel-observed process properties to orchestrator-asserted labels. Whichever an Issuer relies on is
+kernel-observed process properties to orchestrator-asserted labels not under the deployer's control.
+Whichever an Issuer relies on is
 security-relevant configuration and warrants the same review as policy.
+
+That requirement constrains the agent, not its deployer. Where an Issuer maps a deployment-time
+record (such as an orchestrator label or workload annotation) to an authorization-relevant
+attribute, permission to write that record is permission to grant that attribute. Deployments SHOULD
+restrict such write access as tightly as the corresponding authorization grant, or determine
+attributes from properties the deployer cannot write.
+
+Platform-assigned execution environment credentials (such as IAM execution roles, managed
+identities, or service accounts) satisfy this when their assignment requires privileges the workload
+operator does not hold. An Issuer MAY use such a credential as a selector from which to derive
+metadata, subject to two constraints: it MUST NOT become the Agent Identifier, and where it may be
+shared across Logical Agents it MUST NOT be the sole input to identifier determination
+({{uniqueness}}). Deployments SHOULD confirm that assigning the execution credential requires greater
+privilege than deploying the workload.
 
 ## Identity Credentials as Capabilities {#capability}
 
