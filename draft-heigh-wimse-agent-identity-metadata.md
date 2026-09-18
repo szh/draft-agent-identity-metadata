@@ -70,7 +70,7 @@ informative:
 --- abstract
 
 This document specifies metadata attributes associated with an AI agent's identity that are used for
-auditing, authorization, accounting and other purposes. It specifies how to carry these attributes within
+auditing, authorization, accounting, and other purposes. It specifies how to carry these attributes within
 WIMSE credentials such as a JWT-based Workload Identity Token (WIT) or an X.509-based Workload Identity
 Certificate (WIC). Those attributes include groups the agent belongs to, the roles it performs, and the
 human principal it acts on behalf of.
@@ -376,7 +376,7 @@ evidence of the execution environment; it MUST NOT be the sole input.
 
 # Carrying Metadata in Identity Credentials {#carriage}
 
-## JWT-Based credentials {#jwt}
+## JWT-Based Credentials {#jwt}
 
 Metadata is carried as claims in the JWT {{RFC7519}} claims set, using the claims in {{reuse}}. No new
 mechanism is required, and the rules for doing so are already established:
@@ -435,7 +435,7 @@ that named the agent remains valid and remains accurate. And a relying party tha
 learn the agent's role can be issued a credential omitting `roles`, without changing the agent's
 identity, because the identifier no longer carries it.
 
-## X.509-Based credentials {#x509}
+## X.509-Based Credentials {#x509}
 
 X.509 certificates have no equivalent of a claims set, so carrying metadata in one requires a mechanism
 this document does not yet specify.
@@ -532,8 +532,8 @@ requesting agent self-reports. Beyond that, Issuers SHOULD determine both from p
 cannot alter within its own privilege level. This document does not define what qualifies, since the
 available properties depend on the platform and range from hardware-rooted attestation through
 kernel-observed process properties to orchestrator-asserted labels not under the deployer's control.
-Whichever an Issuer relies on is
-security-relevant configuration and warrants the same review as policy.
+Whichever an Issuer relies on is security-relevant configuration and warrants the same review as
+policy.
 
 That requirement constrains the agent, not its deployer. Where an Issuer maps a deployment-time
 record (such as an orchestrator label or workload annotation) to an authorization-relevant
@@ -554,7 +554,7 @@ privilege than deploying the workload.
 Metadata that expresses authority converts an identity credential into a capability. Three consequences
 motivate {{permissions}}. They do not depend on the credential being a bearer token: a WIT is bound to the
 workload's key and cannot be used as one
-({{Section 5.1 of I-D.ietf-wimse-workload-creds}}), where a JWT-SVID is presented as one
+({{Section 5.1 of I-D.ietf-wimse-workload-creds}}), whereas a JWT-SVID is presented as one
 {{SPIFFE-JWT-SVID}}, and the consequences below hold in both cases.
 
 Lifetime mismatch:
