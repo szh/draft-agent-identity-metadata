@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-17T02:48:56.490636+00:00",
+  "timestamp": "2026-09-20T02:46:37.740623+00:00",
   "repo": "szh/draft-agent-identity-metadata",
   "labels": [
     {
@@ -61,25 +61,145 @@
       "id": "PR_kwDOUcQW4c8AAAABD1vczg",
       "title": "setup1",
       "url": "https://github.com/szh/draft-agent-identity-metadata/pull/1",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "jsalowey",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "I think this will help to further set up the repo.  You may have to enable GHpages in the repo. ",
       "createdAt": "2026-09-16T22:11:18Z",
-      "updatedAt": "2026-09-16T22:11:18Z",
+      "updatedAt": "2026-09-17T12:56:19Z",
       "baseRepository": "szh/draft-agent-identity-metadata",
       "baseRefName": "main",
       "baseRefOid": "af691151e615da20719dfc290a3777b0c97a5403",
       "headRepository": "szh/draft-agent-identity-metadata",
       "headRefName": "comments-1",
       "headRefOid": "724b87801300725e8c2ce3d62de2bfb148418f1d",
+      "closedAt": "2026-09-17T12:56:16Z",
+      "mergedAt": "2026-09-17T12:56:16Z",
+      "mergedBy": "szh",
+      "mergeCommit": {
+        "oid": "d5f8c349cff22b10f098d13034d69891835b7217"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABOBWQJw",
+          "commit": {
+            "abbreviatedOid": "724b878"
+          },
+          "author": "szh",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "Thanks, LGTM!",
+          "createdAt": "2026-09-17T12:56:07Z",
+          "updatedAt": "2026-09-17T12:56:07Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "id": "PR_kwDOUcQW4c8AAAABD3tSbw",
+      "title": "Comments 2",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/2",
+      "state": "MERGED",
+      "author": "jsalowey",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "adjusted some terminology.  WIMSE mostly deals with credentials and does not talk about identity documents. So I tried to adjust that text.  Could probably make the definition say that a Wimse credentials is a type of identity document and the attibutes defined in this document could be used in other identity documents. ",
+      "createdAt": "2026-09-17T04:39:13Z",
+      "updatedAt": "2026-09-17T12:58:11Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "af691151e615da20719dfc290a3777b0c97a5403",
+      "headRepository": "szh/draft-agent-identity-metadata",
+      "headRefName": "comments-2",
+      "headRefOid": "7f343d80654db01550aeaeead2f096548ea3d63c",
+      "closedAt": "2026-09-17T12:57:55Z",
+      "mergedAt": "2026-09-17T12:57:55Z",
+      "mergedBy": "szh",
+      "mergeCommit": {
+        "oid": "fad94265c638719ab12a3013bac8dd16ba05de94"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABOBXYNA",
+          "commit": {
+            "abbreviatedOid": "7f343d8"
+          },
+          "author": "szh",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-09-17T12:57:49Z",
+          "updatedAt": "2026-09-17T12:57:49Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "id": "PR_kwDOUcQW4c8AAAABD9Iiww",
+      "title": "some comments around a separate metadata document",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/3",
+      "state": "OPEN",
+      "author": "jsalowey",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-09-17T15:49:43Z",
+      "updatedAt": "2026-09-17T15:49:43Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "1db15d210d5f12cf1e23ad61f559e44c303a476e",
+      "headRepository": "szh/draft-agent-identity-metadata",
+      "headRefName": "comment-3",
+      "headRefOid": "b81cd7581aafc902b9a1cd55b7972ea197879616",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 4,
+      "id": "PR_kwDOUcQW4c8AAAABD-cYgA",
+      "title": "Add @yaroslavros as co-author; generalize scope to workload identity",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/4",
+      "state": "OPEN",
+      "author": "szh",
+      "authorAssociation": "OWNER",
+      "assignees": [
+        "szh"
+      ],
+      "labels": [],
+      "body": "@yaroslavros",
+      "createdAt": "2026-09-17T18:36:00Z",
+      "updatedAt": "2026-09-18T13:24:07Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "1db15d210d5f12cf1e23ad61f559e44c303a476e",
+      "headRepository": "szh/draft-agent-identity-metadata",
+      "headRefName": "yaroslav",
+      "headRefOid": "c6903f919e7802bc5dd7fb238145b0e4fcb872f6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "szh",
+          "authorAssociation": "OWNER",
+          "body": "@yaroslavros Please let me know if this looks good to you.",
+          "createdAt": "2026-09-18T13:24:07Z",
+          "updatedAt": "2026-09-18T13:24:07Z"
+        }
+      ],
       "reviews": []
     }
   ]
