@@ -10,7 +10,7 @@
 <meta content="Yaroslav Rosomakho" name="author">
 <meta content="
        This document specifies metadata attributes associated with an AI agent's identity that are used for
-auditing, authorization, accounting and other purposes. It specifies how to carry these attributes within
+auditing, authorization, accounting, and other purposes. It specifies how to carry these attributes within
 WIMSE credentials such as a JWT-based Workload Identity Token (WIT) or an X.509-based Workload Identity
 Certificate (WIC). Those attributes include groups the agent belongs to, the roles it performs, and the
 human principal it acts on behalf of. 
@@ -1101,7 +1101,7 @@ svg {
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
 <p id="section-abstract-1">This document specifies metadata attributes associated with an AI agent's identity that are used for
-auditing, authorization, accounting and other purposes. It specifies how to carry these attributes within
+auditing, authorization, accounting, and other purposes. It specifies how to carry these attributes within
 WIMSE credentials such as a JWT-based Workload Identity Token (WIT) or an X.509-based Workload Identity
 Certificate (WIC). Those attributes include groups the agent belongs to, the roles it performs, and the
 human principal it acts on behalf of.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
@@ -1199,6 +1199,9 @@ agents are the use case driving them and the focus of this document.<a href="#se
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
                 <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-content-of-the-identity-cre" class="internal xref">Content of the Identity Credential</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
+                <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="auto internal xref">3.4</a>.  <a href="#name-why-metadata-travels-with-t" class="internal xref">Why Metadata Travels With the Credential</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
@@ -1222,10 +1225,10 @@ agents are the use case driving them and the focus of this document.<a href="#se
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-carrying-metadata-in-identi" class="internal xref">Carrying Metadata in Identity Credentials</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
-                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-jwt-based-credentials" class="internal xref">JWT-Based credentials</a></p>
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-jwt-based-credentials" class="internal xref">JWT-Based Credentials</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
-                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-x509-based-credentials" class="internal xref">X.509-Based credentials</a></p>
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-x509-based-credentials" class="internal xref">X.509-Based Credentials</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
                 <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-consistency-across-formats" class="internal xref">Consistency Across Formats</a></p>
@@ -1510,6 +1513,20 @@ the Credential's signature, its validity period, and its trust path. That is wha
 an attribute the agent asserts about itself at the application layer.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="in-band">
+<section id="section-3.4">
+        <h3 id="name-why-metadata-travels-with-t">
+<a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-why-metadata-travels-with-t" class="section-name selfRef">Why Metadata Travels With the Credential</a>
+        </h3>
+<p id="section-3.4-1">A relying party needing an attribute has three places to obtain it: the Agent Identifier, a lookup
+service, or the Identity Credential. <a href="#pollution" class="auto internal xref">Section 3.1</a> rules out the first. A lookup service is
+deployable but requires a record per Logical Agent, written before the agent's first authenticated
+request; an agent whose record has not been written is indistinguishable from an unknown one.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.4-2">In-credential carriage requires no such record. The Issuer's configuration is per-category rather
+than per-agent: a new agent in a known category costs no new entry; only a genuinely new category
+requires Issuer configuration.<a href="#section-3.4-2" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="metadata">
@@ -1701,7 +1718,7 @@ evidence of the execution environment; it <span class="bcp14">MUST NOT</span> be
 <div id="jwt">
 <section id="section-5.1">
         <h3 id="name-jwt-based-credentials">
-<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-jwt-based-credentials" class="section-name selfRef">JWT-Based credentials</a>
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-jwt-based-credentials" class="section-name selfRef">JWT-Based Credentials</a>
         </h3>
 <p id="section-5.1-1">Metadata is carried as claims in the JWT <span>[<a href="#RFC7519" class="cite xref">RFC7519</a>]</span> claims set, using the claims in <a href="#reuse" class="auto internal xref">Section 4.1</a>. No new
 mechanism is required, and the rules for doing so are already established:
@@ -1762,7 +1779,7 @@ identity, because the identifier no longer carries it.<a href="#section-5.1-7" c
 <div id="x509">
 <section id="section-5.2">
         <h3 id="name-x509-based-credentials">
-<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-x509-based-credentials" class="section-name selfRef">X.509-Based credentials</a>
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-x509-based-credentials" class="section-name selfRef">X.509-Based Credentials</a>
         </h3>
 <p id="section-5.2-1">X.509 certificates have no equivalent of a claims set, so carrying metadata in one requires a mechanism
 this document does not yet specify.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
@@ -1897,8 +1914,27 @@ positively names the wrong agent.<a href="#section-7.2-1" class="pilcrow">¶</a>
 requesting agent self-reports. Beyond that, Issuers <span class="bcp14">SHOULD</span> determine both from properties the agent
 cannot alter within its own privilege level. This document does not define what qualifies, since the
 available properties depend on the platform and range from hardware-rooted attestation through
-kernel-observed process properties to orchestrator-asserted labels. Whichever an Issuer relies on is
-security-relevant configuration and warrants the same review as policy.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+kernel-observed process properties to orchestrator-asserted labels not under the deployer's control.
+Whichever an Issuer relies on is security-relevant configuration and warrants the same review as
+policy.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+<p id="section-7.2-3">That requirement constrains the agent, not its deployer. Where an Issuer maps a deployment-time
+record (such as an orchestrator label or workload annotation) to an authorization-relevant
+attribute, permission to write that record is permission to grant that attribute. Deployments <span class="bcp14">SHOULD</span>
+restrict such write access as tightly as the corresponding authorization grant, or determine
+attributes from properties the deployer cannot write.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
+<p id="section-7.2-4">A deployer can place a workload only in execution environments the platform authorizes them
+to access. The namespace a pod runs in, the project a cloud workload is deployed to, and the
+identity pool from which it obtains a credential are all properties the platform assigns and
+the workload cannot self-report. An Issuer <span class="bcp14">MAY</span> use such properties as selectors from which to
+derive Agent Metadata. Where a property is shared across Logical Agents, it <span class="bcp14">MUST NOT</span> be the
+sole input to identifier determination (<a href="#uniqueness" class="auto internal xref">Section 4.4</a>); it <span class="bcp14">MAY</span> inform which metadata the
+Issuer asserts for agents that share the environment.<a href="#section-7.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.2-5">For finer granularity within a shared environment, platform-assigned execution environment
+credentials (such as IAM execution roles, managed identities, or service accounts) can
+distinguish individual Logical Agents. An Issuer <span class="bcp14">MAY</span> use such a credential as a selector for
+metadata derivation; it <span class="bcp14">MUST NOT</span> become the Agent Identifier. Deployments <span class="bcp14">SHOULD</span> confirm that
+the privilege required to assign such a credential exceeds the privilege required to deploy
+the workload.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="capability">
@@ -1909,7 +1945,7 @@ security-relevant configuration and warrants the same review as policy.<a href="
 <p id="section-7.3-1">Metadata that expresses authority converts an identity credential into a capability. Three consequences
 motivate <a href="#permissions" class="auto internal xref">Section 4.3</a>. They do not depend on the credential being a bearer token: a WIT is bound to the
 workload's key and cannot be used as one
-(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-5.1" class="relref">Section 5.1</a> of [<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span>), where a JWT-SVID is presented as one
+(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-5.1" class="relref">Section 5.1</a> of [<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span>), whereas a JWT-SVID is presented as one
 <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span>, and the consequences below hold in both cases.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-7.3-2">
           <dt id="section-7.3-2.1">Lifetime mismatch:</dt>
