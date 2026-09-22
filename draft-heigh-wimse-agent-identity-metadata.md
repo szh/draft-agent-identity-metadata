@@ -541,13 +541,20 @@ attribute, permission to write that record is permission to grant that attribute
 restrict such write access as tightly as the corresponding authorization grant, or determine
 attributes from properties the deployer cannot write.
 
-Platform-assigned execution environment credentials (such as IAM execution roles, managed
-identities, or service accounts) satisfy this when their assignment requires privileges the workload
-operator does not hold. An Issuer MAY use such a credential as a selector from which to derive
-metadata, subject to two constraints: it MUST NOT become the Agent Identifier, and where it may be
-shared across Logical Agents it MUST NOT be the sole input to identifier determination
-({{uniqueness}}). Deployments SHOULD confirm that assigning the execution credential requires greater
-privilege than deploying the workload.
+A deployer can place a workload only in execution environments the platform authorizes them
+to access. The namespace a pod runs in, the project a cloud workload is deployed to, and the
+identity pool from which it obtains a credential are all properties the platform assigns and
+the workload cannot self-report. An Issuer MAY use such properties as selectors from which to
+derive Agent Metadata. Where a property is shared across Logical Agents, it MUST NOT be the
+sole input to identifier determination ({{uniqueness}}); it MAY inform which metadata the
+Issuer asserts for agents that share the environment.
+
+For finer granularity within a shared environment, platform-assigned execution environment
+credentials (such as IAM execution roles, managed identities, or service accounts) can
+distinguish individual Logical Agents. An Issuer MAY use such a credential as a selector for
+metadata derivation; it MUST NOT become the Agent Identifier. Deployments SHOULD confirm that
+the privilege required to assign such a credential exceeds the privilege required to deploy
+the workload.
 
 ## Identity Credentials as Capabilities {#capability}
 
