@@ -70,7 +70,7 @@ informative:
 --- abstract
 
 This document specifies metadata attributes associated with an AI agent's identity that are used for
-auditing, authorization, accounting and other purposes. It specifies how to carry these attributes within
+auditing, authorization, accounting, and other purposes. It specifies how to carry these attributes within
 WIMSE credentials such as a JWT-based Workload Identity Token (WIT) or an X.509-based Workload Identity
 Certificate (WIC). Those attributes include groups the agent belongs to, the roles it performs, and the
 human principal it acts on behalf of.
@@ -243,6 +243,17 @@ Agent that identifier denotes. Metadata in an Identity Credential is asserted by
 the Credential's signature, its validity period, and its trust path. That is what distinguishes it from
 an attribute the agent asserts about itself at the application layer.
 
+## Why Metadata Travels With the Credential {#in-band}
+
+A relying party needing an attribute has three places to obtain it: the Agent Identifier, a lookup
+service, or the Identity Credential. {{pollution}} rules out the first. A lookup service is
+deployable but requires a record per Logical Agent, written before the agent's first authenticated
+request; an agent whose record has not been written is indistinguishable from an unknown one.
+
+In-credential carriage requires no such record. The Issuer's configuration is per-category rather
+than per-agent: a new agent in a known category costs no new entry; only a genuinely new category
+requires Issuer configuration.
+
 # Agent Metadata {#metadata}
 
 ## Reuse of Existing Claims {#reuse}
@@ -365,7 +376,7 @@ evidence of the execution environment; it MUST NOT be the sole input.
 
 # Carrying Metadata in Identity Credentials {#carriage}
 
-## JWT-Based credentials {#jwt}
+## JWT-Based Credentials {#jwt}
 
 Metadata is carried as claims in the JWT {{RFC7519}} claims set, using the claims in {{reuse}}. No new
 mechanism is required, and the rules for doing so are already established:
@@ -424,7 +435,7 @@ that named the agent remains valid and remains accurate. And a relying party tha
 learn the agent's role can be issued a credential omitting `roles`, without changing the agent's
 identity, because the identifier no longer carries it.
 
-## X.509-Based credentials {#x509}
+## X.509-Based Credentials {#x509}
 
 X.509 certificates have no equivalent of a claims set, so carrying metadata in one requires a mechanism
 this document does not yet specify.
@@ -520,15 +531,37 @@ An Issuer MUST NOT determine an Agent Identifier or Agent Metadata solely from p
 requesting agent self-reports. Beyond that, Issuers SHOULD determine both from properties the agent
 cannot alter within its own privilege level. This document does not define what qualifies, since the
 available properties depend on the platform and range from hardware-rooted attestation through
-kernel-observed process properties to orchestrator-asserted labels. Whichever an Issuer relies on is
-security-relevant configuration and warrants the same review as policy.
+kernel-observed process properties to orchestrator-asserted labels not under the deployer's control.
+Whichever an Issuer relies on is security-relevant configuration and warrants the same review as
+policy.
+
+That requirement constrains the agent, not its deployer. Where an Issuer maps a deployment-time
+record (such as an orchestrator label or workload annotation) to an authorization-relevant
+attribute, permission to write that record is permission to grant that attribute. Deployments SHOULD
+restrict such write access as tightly as the corresponding authorization grant, or determine
+attributes from properties the deployer cannot write.
+
+A deployer can place a workload only in execution environments the platform authorizes them
+to access. The namespace a pod runs in, the project a cloud workload is deployed to, and the
+identity pool from which it obtains a credential are all properties the platform assigns and
+the workload cannot self-report. An Issuer MAY use such properties as selectors from which to
+derive Agent Metadata. Where a property is shared across Logical Agents, it MUST NOT be the
+sole input to identifier determination ({{uniqueness}}); it MAY inform which metadata the
+Issuer asserts for agents that share the environment.
+
+For finer granularity within a shared environment, platform-assigned execution environment
+credentials (such as IAM execution roles, managed identities, or service accounts) can
+distinguish individual Logical Agents. An Issuer MAY use such a credential as a selector for
+metadata derivation; it MUST NOT become the Agent Identifier. Deployments SHOULD confirm that
+the privilege required to assign such a credential exceeds the privilege required to deploy
+the workload.
 
 ## Identity Credentials as Capabilities {#capability}
 
 Metadata that expresses authority converts an identity credential into a capability. Three consequences
 motivate {{permissions}}. They do not depend on the credential being a bearer token: a WIT is bound to the
 workload's key and cannot be used as one
-({{Section 5.1 of I-D.ietf-wimse-workload-creds}}), where a JWT-SVID is presented as one
+({{Section 5.1 of I-D.ietf-wimse-workload-creds}}), whereas a JWT-SVID is presented as one
 {{SPIFFE-JWT-SVID}}, and the consequences below hold in both cases.
 
 Lifetime mismatch:
