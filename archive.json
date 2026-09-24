@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-22T02:44:46.470304+00:00",
+  "timestamp": "2026-09-24T02:34:50.897766+00:00",
   "repo": "szh/draft-agent-identity-metadata",
   "labels": [
     {
@@ -171,7 +171,7 @@
       "id": "PR_kwDOUcQW4c8AAAABD-cYgA",
       "title": "Add @yaroslavros as co-author; generalize scope to workload identity",
       "url": "https://github.com/szh/draft-agent-identity-metadata/pull/4",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "szh",
       "authorAssociation": "OWNER",
       "assignees": [
@@ -180,17 +180,19 @@
       "labels": [],
       "body": "@yaroslavros",
       "createdAt": "2026-09-17T18:36:00Z",
-      "updatedAt": "2026-09-18T13:24:07Z",
+      "updatedAt": "2026-09-22T15:49:18Z",
       "baseRepository": "szh/draft-agent-identity-metadata",
       "baseRefName": "main",
       "baseRefOid": "1db15d210d5f12cf1e23ad61f559e44c303a476e",
       "headRepository": "szh/draft-agent-identity-metadata",
       "headRefName": "yaroslav",
       "headRefOid": "c6903f919e7802bc5dd7fb238145b0e4fcb872f6",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-09-22T15:49:14Z",
+      "mergedAt": "2026-09-22T15:49:14Z",
+      "mergedBy": "szh",
+      "mergeCommit": {
+        "oid": "f83b542485e133eeb8ce3ddc3a9d17c6b6d1a399"
+      },
       "comments": [
         {
           "author": "szh",
@@ -200,7 +202,65 @@
           "updatedAt": "2026-09-18T13:24:07Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABOrxp-g",
+          "commit": {
+            "abbreviatedOid": "c6903f9"
+          },
+          "author": "yaroslavros",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-09-22T15:47:33Z",
+          "updatedAt": "2026-09-22T15:47:33Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOUcQW4c8AAAABEmye-g",
+      "title": "Address feedback",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/5",
+      "state": "MERGED",
+      "author": "szh",
+      "authorAssociation": "OWNER",
+      "assignees": [
+        "szh"
+      ],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-09-22T15:49:38Z",
+      "updatedAt": "2026-09-22T15:52:33Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "f83b542485e133eeb8ce3ddc3a9d17c6b6d1a399",
+      "headRepository": "szh/draft-agent-identity-metadata",
+      "headRefName": "james-feedback",
+      "headRefOid": "831178b4d31963946c17837c681ee03854a74a77",
+      "closedAt": "2026-09-22T15:52:29Z",
+      "mergedAt": "2026-09-22T15:52:29Z",
+      "mergedBy": "szh",
+      "mergeCommit": {
+        "oid": "094a8eb0c1c92dcaed534be8f8adaa682aee4498"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABOrzeeA",
+          "commit": {
+            "abbreviatedOid": "831178b"
+          },
+          "author": "yaroslavros",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-09-22T15:50:14Z",
+          "updatedAt": "2026-09-22T15:50:14Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
