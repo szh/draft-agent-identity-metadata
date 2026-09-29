@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-27T02:57:56.469238+00:00",
+  "timestamp": "2026-09-29T03:37:25.893486+00:00",
   "repo": "szh/draft-agent-identity-metadata",
   "labels": [
     {
@@ -261,6 +261,58 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 6,
+      "id": "PR_kwDOUcQW4c8AAAABFX9j6Q",
+      "title": "Generalised to workloads",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/6",
+      "state": "OPEN",
+      "author": "yaroslavros",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "As discussed.\r\n\r\nI've also used this opportunity to modernise reference format.",
+      "createdAt": "2026-09-27T17:45:30Z",
+      "updatedAt": "2026-09-27T17:45:31Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "094a8eb0c1c92dcaed534be8f8adaa682aee4498",
+      "headRepository": "yaroslavros/draft-agent-identity-metadata",
+      "headRefName": "workloads",
+      "headRefOid": "10afca3bef65968f94983a043ab4f8c031e4f717",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 7,
+      "id": "PR_kwDOUcQW4c8AAAABFYQaDg",
+      "title": "Metadata api",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/7",
+      "state": "OPEN",
+      "author": "yaroslavros",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Initial text on metadata API",
+      "createdAt": "2026-09-27T18:44:09Z",
+      "updatedAt": "2026-09-27T19:11:17Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "094a8eb0c1c92dcaed534be8f8adaa682aee4498",
+      "headRepository": "yaroslavros/draft-agent-identity-metadata",
+      "headRefName": "metadata-api",
+      "headRefOid": "18645825a2d6824fb8faf223a641c65f89549c76",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
