@@ -1,4 +1,8 @@
 LIBDIR := lib
+
+# Keep the pre-rename editor's copy URL working.
+GHPAGES_EXTRA := draft-heigh-wimse-agent-identity-metadata.html
+
 -include $(LIBDIR)/main.mk
 
 $(LIBDIR)/main.mk:
