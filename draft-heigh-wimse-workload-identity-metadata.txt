@@ -5,9 +5,9 @@
 Workload Identity in Multi System Environments                  S. Heigh
 Internet-Draft                                                J. Salowey
 Intended status: Standards Track                      Palo Alto Networks
-Expires: 2 April 2027                                       Y. Rosomakho
+Expires: 3 April 2027                                       Y. Rosomakho
                                                                  Zscaler
-                                                       29 September 2026
+                                                       30 September 2026
 
 
                        Workload Identity Metadata
@@ -67,7 +67,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 April 2027.
+   This Internet-Draft will expire on 3 April 2027.
 
 Copyright Notice
 
