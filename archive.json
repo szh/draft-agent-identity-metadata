@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-29T03:37:25.893486+00:00",
+  "timestamp": "2026-10-01T03:29:53.408319+00:00",
   "repo": "szh/draft-agent-identity-metadata",
   "labels": [
     {
@@ -152,7 +152,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2026-09-17T15:49:43Z",
-      "updatedAt": "2026-09-17T15:49:43Z",
+      "updatedAt": "2026-09-29T15:49:01Z",
       "baseRepository": "szh/draft-agent-identity-metadata",
       "baseRefName": "main",
       "baseRefOid": "1db15d210d5f12cf1e23ad61f559e44c303a476e",
@@ -163,7 +163,15 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "szh",
+          "authorAssociation": "OWNER",
+          "body": "@jsalowey should we close this or is there still a chance we'd pursue this?",
+          "createdAt": "2026-09-29T15:49:01Z",
+          "updatedAt": "2026-09-29T15:49:01Z"
+        }
+      ],
       "reviews": []
     },
     {
@@ -267,26 +275,42 @@
       "id": "PR_kwDOUcQW4c8AAAABFX9j6Q",
       "title": "Generalised to workloads",
       "url": "https://github.com/szh/draft-agent-identity-metadata/pull/6",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "yaroslavros",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "As discussed.\r\n\r\nI've also used this opportunity to modernise reference format.",
       "createdAt": "2026-09-27T17:45:30Z",
-      "updatedAt": "2026-09-27T17:45:31Z",
+      "updatedAt": "2026-09-29T14:15:01Z",
       "baseRepository": "szh/draft-agent-identity-metadata",
       "baseRefName": "main",
       "baseRefOid": "094a8eb0c1c92dcaed534be8f8adaa682aee4498",
       "headRepository": "yaroslavros/draft-agent-identity-metadata",
       "headRefName": "workloads",
       "headRefOid": "10afca3bef65968f94983a043ab4f8c031e4f717",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-09-29T14:15:00Z",
+      "mergedAt": "2026-09-29T14:15:00Z",
+      "mergedBy": "szh",
+      "mergeCommit": {
+        "oid": "a379db1dac6c402fc586e294f0336ae1c6514a48"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABPx1nTw",
+          "commit": {
+            "abbreviatedOid": "10afca3"
+          },
+          "author": "szh",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "LGTM, thank you so much!",
+          "createdAt": "2026-09-29T14:14:49Z",
+          "updatedAt": "2026-09-29T14:14:49Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 7,
@@ -296,11 +320,13 @@
       "state": "OPEN",
       "author": "yaroslavros",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "szh"
+      ],
       "labels": [],
       "body": "Initial text on metadata API",
       "createdAt": "2026-09-27T18:44:09Z",
-      "updatedAt": "2026-09-27T19:11:17Z",
+      "updatedAt": "2026-09-30T13:44:11Z",
       "baseRepository": "szh/draft-agent-identity-metadata",
       "baseRefName": "main",
       "baseRefOid": "094a8eb0c1c92dcaed534be8f8adaa682aee4498",
@@ -312,7 +338,180 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABPx_7Sg",
+          "commit": {
+            "abbreviatedOid": "1864582"
+          },
+          "author": "szh",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-29T14:28:25Z",
+          "updatedAt": "2026-09-29T14:43:02Z",
+          "comments": [
+            {
+              "originalPosition": 349,
+              "body": "Does this PR propose we don't pursue the other options for trying to include metadata in X.509 credentials, and instead require that issuers using X.509 implement the metadata endpoint instead?",
+              "createdAt": "2026-09-29T14:28:25Z",
+              "updatedAt": "2026-09-29T14:43:02Z"
+            },
+            {
+              "originalPosition": 353,
+              "body": "I worry about the added complexity of this additional policy.",
+              "createdAt": "2026-09-29T14:28:52Z",
+              "updatedAt": "2026-09-29T14:43:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABP4Fp1A",
+          "commit": {
+            "abbreviatedOid": "1864582"
+          },
+          "author": "yaroslavros",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-30T01:25:48Z",
+          "updatedAt": "2026-09-30T01:25:48Z",
+          "comments": [
+            {
+              "originalPosition": 349,
+              "body": "Yes - at least for now.\r\nEmbedding arbitrary metadata in X.509 is very difficult. Also rotating certificates just because some metadata changed tends to be much more complex compared to minting a new JWT...",
+              "createdAt": "2026-09-30T01:25:48Z",
+              "updatedAt": "2026-09-30T01:25:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABP4GmTw",
+          "commit": {
+            "abbreviatedOid": "1864582"
+          },
+          "author": "yaroslavros",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-30T01:28:31Z",
+          "updatedAt": "2026-09-30T01:28:31Z",
+          "comments": [
+            {
+              "originalPosition": 353,
+              "body": "I don't think this adds complexity, but rather flexibility. Without a metadata API you have to enforce credential rotation every time any metadata changes. Also, it's up to the goodwill of the workload to replace old credentials with the new one given there are no real mechanisms for revocation of JWTs.\r\nFinally, there could be some metadata that should not be exposed to its subject. I think this particularly applies to AI agents - they might be intentionally left blind to certain properties that they have.",
+              "createdAt": "2026-09-30T01:28:31Z",
+              "updatedAt": "2026-09-30T01:28:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABP-Zmbg",
+          "commit": {
+            "abbreviatedOid": "1864582"
+          },
+          "author": "szh",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-30T13:44:11Z",
+          "updatedAt": "2026-09-30T13:44:11Z",
+          "comments": [
+            {
+              "originalPosition": 353,
+              "body": "That makes sense. What about federation? One use case is where a GCP workload implements this standard and provides workloads with an X.509 cert and exposes a metadata url for related metadata. PANW's SWA stands outside of GCP as a central authn service that allows workloads to communicate between different cloud providers. It exchanges the GCP X.509 for its own. Does it now also have to function as a proxy for the metadata endpoint? Or perhaps it should fetch the metadata during the token exchange and include it in the credential it mints (if it uses JWT for example), or store it and expose it via its own metadata endpoint?",
+              "createdAt": "2026-09-30T13:44:11Z",
+              "updatedAt": "2026-09-30T13:44:11Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "id": "PR_kwDOUcQW4c8AAAABFuiqkw",
+      "title": "redirect old agent-identity-metadata editor's copy URL",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/8",
+      "state": "MERGED",
+      "author": "szh",
+      "authorAssociation": "OWNER",
+      "assignees": [
+        "szh"
+      ],
+      "labels": [],
+      "body": "## Problem\n\nhttps://szh.github.io/draft-agent-identity-metadata/draft-heigh-wimse-agent-identity-metadata.html is a 404 since PR #6 renamed the draft file. The i-d-template publish step deletes all `draft-*.html` files before copying in the current build, so the old page is gone and cannot be restored by committing to `gh-pages` directly.\n\n## Fix\n\n- Add `draft-heigh-wimse-agent-identity-metadata.html`: a static meta-refresh + JS redirect to `draft-heigh-wimse-workload-identity-metadata.html`. The JS line preserves URL fragments so anchored links (e.g. `#pollution`) still land in the right section.\n- Add `GHPAGES_EXTRA := draft-heigh-wimse-agent-identity-metadata.html` to `Makefile`. Files listed in `GHPAGES_EXTRA` are copied into the Pages branch on every build and are not removed by the cleanup step.\n\nThe redirect uses a relative target so it also works inside per-branch preview subdirectories.\n\n## Scope\n\nDoes not affect the `.txt` URL (plain text cannot redirect). No other files changed.\n\nMade with [Cursor](https://cursor.com)",
+      "createdAt": "2026-09-29T15:40:57Z",
+      "updatedAt": "2026-09-30T03:09:34Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "a379db1dac6c402fc586e294f0336ae1c6514a48",
+      "headRepository": "szh/draft-agent-identity-metadata",
+      "headRefName": "redirect-old-url",
+      "headRefOid": "c186c9c9ce212e5d9e50dc7858393f191e161d73",
+      "closedAt": "2026-09-30T03:09:28Z",
+      "mergedAt": "2026-09-30T03:09:28Z",
+      "mergedBy": "szh",
+      "mergeCommit": {
+        "oid": "62e2e9ec2b77340caf4c409eeb307f7860bba7bb"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABP4Hfbg",
+          "commit": {
+            "abbreviatedOid": "c186c9c"
+          },
+          "author": "yaroslavros",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-09-30T01:31:15Z",
+          "updatedAt": "2026-09-30T01:31:15Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "id": "PR_kwDOUcQW4c8AAAABFunH1Q",
+      "title": "update CODEOWNERS: all three authors, @usernames, current filename",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/9",
+      "state": "MERGED",
+      "author": "szh",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The auto-generated CODEOWNERS was stale in three ways:\n\n- It referenced the pre-rename filename `draft-heigh-wimse-agent-identity-metadata.md` instead of the current one.\n- It listed only two authors by email (omitting @yaroslavros).\n- Email-based ownership is less reliable than GitHub usernames.\n\nThis replaces it with a single wildcard rule covering the whole repo:\n\n```\n* @szh @jsalowey @yaroslavros\n```\n\nThe generated header is removed so `make update-codeowners` does not silently overwrite the explicit author list on the next run.\n\nMade with [Cursor](https://cursor.com)",
+      "createdAt": "2026-09-29T15:47:12Z",
+      "updatedAt": "2026-09-30T03:09:56Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "a379db1dac6c402fc586e294f0336ae1c6514a48",
+      "headRepository": "szh/draft-agent-identity-metadata",
+      "headRefName": "update-codeowners",
+      "headRefOid": "264d1578bd9721f0089680bf489f3c03d3d84aab",
+      "closedAt": "2026-09-30T03:09:51Z",
+      "mergedAt": "2026-09-30T03:09:51Z",
+      "mergedBy": "szh",
+      "mergeCommit": {
+        "oid": "cdc8a48f6dc8d90b321c3ecca07f9da8a812a543"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABP4H8OQ",
+          "commit": {
+            "abbreviatedOid": "264d157"
+          },
+          "author": "yaroslavros",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-09-30T01:32:02Z",
+          "updatedAt": "2026-09-30T01:32:02Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
