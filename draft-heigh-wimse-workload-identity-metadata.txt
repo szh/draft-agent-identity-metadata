@@ -5,9 +5,9 @@
 Workload Identity in Multi System Environments                  S. Heigh
 Internet-Draft                                                J. Salowey
 Intended status: Standards Track                      Palo Alto Networks
-Expires: 3 April 2027                                       Y. Rosomakho
+Expires: 9 April 2027                                       Y. Rosomakho
                                                                  Zscaler
-                                                       30 September 2026
+                                                          6 October 2026
 
 
                        Workload Identity Metadata
@@ -18,9 +18,11 @@ Abstract
    This document specifies metadata attributes associated with a
    workload's identity that are used for auditing, authorization,
    accounting, and other purposes.  It profiles existing claims for
-   group membership, roles, and entitlements in JWT-based Workload
-   Identity Credentials, including WIMSE Workload Identity Tokens
-   (WITs), and discusses carriage in X.509-based credentials.
+   group membership, roles, and entitlements, with delivery either in
+   JWT-based Workload Identity Credentials or through an authenticated
+   workload metadata endpoint.  The endpoint supports metadata retrieval
+   for workloads using JWT-based or X.509-based credentials and
+   disclosure according to the caller's authorization.
 
    This document defines the separation between identifier and metadata,
    and profiles existing claims for expressing workload attributes.  It
@@ -67,7 +69,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 April 2027.
+   This Internet-Draft will expire on 9 April 2027.
 
 Copyright Notice
 
@@ -92,7 +94,7 @@ Table of Contents
      3.1.  Why Attributes Are Not Encoded in Identifiers
      3.2.  Content of the Workload Identifier
      3.3.  Content of the Workload Identity Credential
-     3.4.  Why Metadata Travels With the Credential
+     3.4.  In-Band Metadata and API Retrieval
    4.  Workload Metadata
      4.1.  Reuse of Existing Claims
      4.2.  Associated Principal
@@ -102,18 +104,25 @@ Table of Contents
    6.  Carrying Metadata in Workload Identity Credentials
      6.1.  JWT-Based Credentials
      6.2.  X.509-Based Credentials
-     6.3.  Consistency Across Formats
-   7.  Relationship to Other Work
-   8.  Security Considerations
-     8.1.  Dependence on Identifier Uniqueness
-     8.2.  Strength of the Issuance Decision
-     8.3.  Workload Identity Credentials as Capabilities
-     8.4.  Attribute Staleness
-   9.  Privacy Considerations
-   10. IANA Considerations
-   11. References
-     11.1.  Normative References
-     11.2.  Informative References
+   7.  Workload Metadata Endpoint
+     7.1.  Endpoint Location and Trust
+     7.2.  Authentication and Authorization
+     7.3.  Metadata Request
+     7.4.  Metadata Response
+     7.5.  Errors and Caching
+   8.  Consistency Across Delivery Methods
+   9.  Relationship to Other Work
+   10. Security Considerations
+     10.1.  Dependence on Identifier Uniqueness
+     10.2.  Strength of the Issuance Decision
+     10.3.  Metadata Service Authority and Request Protection
+     10.4.  Workload Identity Credentials as Capabilities
+     10.5.  Attribute Staleness
+   11. Privacy Considerations
+   12. IANA Considerations
+   13. References
+     13.1.  Normative References
+     13.2.  Informative References
    Open Issues
    Acknowledgments
    Authors' Addresses
@@ -145,10 +154,14 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
    This document specifies the alternative.  An identifier denotes the
    workload or workload instance selected by the deployment's identity
    model; a relying party does not derive attributes from its structure.
-   This document profiles metadata carried in the Workload Identity
-   Credential that asserts the identifier: a JWT such as a WIMSE
-   Workload Identity Token [WIMSE-CREDS] or a JWT-SVID.  Carriage in
-   X.509 certificates remains an open issue.
+   This document profiles metadata carried in a JWT-based Workload
+   Identity Credential, such as a WIMSE Workload Identity Token
+   [WIMSE-CREDS] or a JWT-SVID, or retrieved from an authenticated
+   metadata endpoint.  Both delivery methods use the same metadata model
+   and bind attributes to the complete Workload Identifier.  The
+   endpoint also supports workloads authenticated using X.509
+   credentials, for which this document defines no in-band metadata
+   encoding.
 
    Where suitable claims already exist, this document profiles them
    rather than defining new ones.  Group, role, and entitlement claims
@@ -177,8 +190,11 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
    *  metadata for workload group, role, and entitlements, and
       consideration of durable principal associations;
 
-   *  how metadata is carried in JWT-based and X.509-based identity
-      credentials;
+   *  how metadata is carried in JWT-based identity credentials or
+      retrieved through an authenticated API;
+
+   *  endpoint location, request and response formats, and
+      authorization-dependent disclosure;
 
    *  the identifier uniqueness requirements that the separation depends
       on.
@@ -187,10 +203,13 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
 
    *  the identifier format itself, which is [WIMSE-IDENTIFIER];
 
-   *  conveying metadata in an object separate from the identity
-      credential;
+   *  defining new workload authentication mechanisms or selecting a
+      mandatory API authentication binding;
 
-   *  authentication and transport protocols;
+   *  defining an in-band metadata encoding for X.509 credentials;
+
+   *  independently signed metadata responses and their forwarding to
+      other parties;
 
    *  how a relying party reaches an authorization decision from
       metadata;
@@ -281,7 +300,7 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
       Attributes embedded there are disclosed wherever the identifier
       travels, which is everywhere.  Section 7.5 of [WIMSE-IDENTIFIER]
       raises the same concern for descriptive paths generally.  It is
-      most acute for human identity; see Section 9.
+      most acute for human identity; see Section 11.
 
    Authority differs.  The authority competent to assign an identifier
       is not necessarily the authority competent to assert a role or a
@@ -328,19 +347,32 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
    distinguishes it from an attribute the workload asserts about itself
    at the application layer.
 
-3.4.  Why Metadata Travels With the Credential
+3.4.  In-Band Metadata and API Retrieval
 
-   A relying party needing an attribute has three places to obtain it:
-   the Workload Identifier, a lookup service, or the Workload Identity
-   Credential.  Section 3.1 rules out the first.  A lookup service is
-   deployable but requires a record per workload, written before the
-   workload's first authenticated request; a workload whose record has
-   not been written is indistinguishable from an unknown one.
+   Metadata in a JWT-based Workload Identity Credential reaches a
+   relying party with the credential, avoiding a separate API call and a
+   dependency on an available metadata service at decision time.
+   However, additional claims increase token size (token bloat), are
+   transmitted whenever that token is presented, and reflect the
+   attributes asserted at credential issuance.  This document defines no
+   encoding for carrying these metadata claims in X.509 credentials
+   (Section 6.2).
 
-   In-credential carriage requires no such record.  The credential
-   issuer's configuration is per-category rather than per-workload: a
-   new workload in a known category costs no new entry; only a genuinely
-   new category requires credential issuer configuration.
+   Retrieval through the API in Section 7 keeps metadata out of the
+   credential, supports X.509-based deployments, and lets the service
+   disclose different claims to different authorized callers.
+   Attributes can be updated without reissuing credentials.  Retrieval
+   adds a network request, latency, and an availability dependency, and
+   its freshness depends on the service's data sources (Section 10.5).
+   The service can obtain metadata from stored records or derive it from
+   authoritative information; this document does not require a separate
+   pre-provisioned record for every workload.
+
+   A deployment MAY use either method or both, for example carrying
+   frequently used attributes in a JWT and retrieving additional
+   attributes when needed.  Claim semantics are independent of delivery;
+   Section 8 addresses differences between the assertions a relying
+   party receives.
 
 4.  Workload Metadata
 
@@ -350,9 +382,10 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
    permission where registered claims exist.  Section 7.2.1 of
    [OAUTH-JWT] registers groups, roles, and entitlements in the JSON Web
    Token Claims registry, referring for their definitions to
-   Section 4.1.2 of [SCIM-CORE].  A Workload Identity Credential
-   expressing a workload's group, role, or entitlements MUST use those
-   claims.
+   Section 4.1.2 of [SCIM-CORE].  A Workload Identity Credential or
+   metadata endpoint response expressing a workload's group, role, or
+   entitlements MUST use those claims with the same meanings and value
+   encodings.
 
      +=====================+==============+==========================+
      | Attribute           | Claim        | Source                   |
@@ -373,12 +406,12 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
       "resource owner memberships in roles and groups" and "entitlements
       assigned to the resource owner", and [SCIM-CORE] defines them as
       attributes of a SCIM User.  This document applies them to the
-      subject of the Workload Identity Credential, which is a workload
-      or workload instance rather than a person.  The registrations
-      themselves are subject-neutral, so no conflict arises, but a
-      relying party MUST interpret these claims as describing the
-      workload or workload instance denoted by sub and MUST NOT
-      interpret them as describing an associated principal
+      subject of the Workload Identity Credential or metadata response,
+      which is a workload or workload instance rather than a person.
+      The registrations themselves are subject-neutral, so no conflict
+      arises, but a relying party MUST interpret these claims as
+      describing the workload or workload instance denoted by sub and
+      MUST NOT interpret them as describing an associated principal
       (Section 4.2), where one is asserted.
 
    Value encoding is not fully determined.  [SCIM-CORE] specifies no
@@ -388,12 +421,12 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
       complex attribute with value and type sub-attributes and canonical
       types "direct" and "indirect", derived from SCIM Group resources
       that have no counterpart here.  Neither [OAUTH-JWT] nor this
-      document settles whether groups in a Workload Identity Credential
-      is an array of strings or an array of objects.  Until it is
-      settled, a credential issuer SHOULD encode all three claims as
-      arrays of strings, and a relying party SHOULD accept an array of
-      objects bearing a value sub-attribute as equivalent to the array
-      of those value strings.  See Appendix "Open Issues" item 3.
+      document settles whether groups is an array of strings or an array
+      of objects.  Until it is settled, credential issuers and metadata
+      services SHOULD encode all three claims as arrays of strings, and
+      a relying party SHOULD accept an array of objects bearing a value
+      sub-attribute as equivalent to the array of those value strings.
+      See Appendix "Open Issues" item 3.
 
    Values are otherwise trust-domain specific, and this document defines
    no vocabulary.  A relying party MUST treat an unrecognized value as
@@ -423,10 +456,10 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
    the AI agent profile is discussed in Section 5.
 
    Whether a durable principal association is an attribute worth
-   asserting in a Workload Identity Credential, and how it should be
-   represented, remains open.  This document defines no claim for that
-   association; see Appendix "Open Issues" item 1.  Where the associated
-   principal is a person, asserting it is subject to Section 9.
+   asserting as Workload Metadata, and how it should be represented,
+   remains open.  This document defines no claim for that association;
+   see Appendix "Open Issues" item 1.  Where the associated principal is
+   a person, asserting it is subject to Section 11.
 
 4.3.  Permissions and Scopes
 
@@ -439,7 +472,8 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
    entitlements, describe what the workload is.  They are relatively
    stable, they are meaningful independent of any particular relying
    party, and the credential issuer is plausibly authoritative for them.
-   These belong in the Workload Identity Credential per Section 4.1.
+   These belong in the Workload Identity Credential or a metadata
+   endpoint response per Section 4.1.
 
    Grants, such as scopes and fine-grained permissions, describe what
    the workload may do at a given resource at a given moment.  They are
@@ -452,8 +486,13 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
    scopes or fine-grained permissions.  Where a deployment carries them
    anyway, a relying party MUST NOT treat them as authoritative for an
    authorization decision, and MUST obtain authorization from its own
-   policy or from an authorization server.  Section 8.3 gives the
+   policy or from an authorization server.  Section 10.4 gives the
    reasoning.
+
+   The same distinction applies to API responses.  Retrieving metadata
+   does not itself grant the target workload permission to access a
+   resource, and the caller's permission to retrieve metadata does not
+   confer authority to act as the target workload.
 
 4.4.  Identifier Uniqueness
 
@@ -595,21 +634,23 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
      "entitlements": ["ledger-read"]
    }
 
-   The metadata is identical across the two formats, as Section 6.3
-   requires.  Two properties of these examples illustrate what the
-   separation buys.  Reassigning the workload to another team changes
-   groups and leaves sub untouched, so every existing grant and every
-   historical audit record that named the workload remains valid and
-   remains accurate.  And a relying party that is not authorized to
-   learn the workload's role can be issued a credential omitting roles,
-   without changing the workload's identifier, because the identifier no
-   longer carries it.
+   The metadata is identical across these two examples.  Two properties
+   illustrate what the separation buys.  Reassigning the workload to
+   another team changes groups and leaves sub untouched, so every
+   existing grant and every historical audit record that named the
+   workload remains valid and remains accurate.  And a relying party
+   that is not authorized to learn the workload's role can be issued a
+   credential omitting roles, without changing the workload's
+   identifier, because the identifier no longer carries it.
 
 6.2.  X.509-Based Credentials
 
-   X.509 certificates have no equivalent of a claims set, so carrying
-   metadata in one requires a mechanism this document does not yet
-   specify.
+   X.509 certificates have no JWT claims set.  This document defines no
+   certificate extension or other encoding for carrying Workload
+   Metadata in X.509 credentials, so in-band metadata carriage is not
+   available for those credentials under this specification.  X.509 is
+   extensible, but defining such an extension is outside this document's
+   scope.
 
    Section 6.1 of [WIMSE-CREDS] defines the Workload Identity
    Certificate, which carries the Workload Identifier in a single URI
@@ -634,40 +675,220 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
    X509v3 Subject Alternative Name: critical
        URI:spiffe://example.com/workload/a7f3c1a24b904d61
 
-   The identifier is opaque, satisfying Section 3.2, but none of the
-   metadata of Section 4.1 can be expressed.  This is approach 4 below
-   in practice, and it is what deployments using X.509 credentials get
-   until one of the following is chosen.
+   After authenticating the workload using this certificate, a relying
+   party can request metadata for the complete URI SAN value from the
+   endpoint in Section 7.  It authenticates the metadata request using
+   its own workload credentials.  No certificate extension is needed for
+   this retrieval.
 
-   Candidate approaches:
+7.  Workload Metadata Endpoint
 
-   1.  A single non-critical certificate extension, identified by an OID
-       assigned for this purpose, carrying a structured encoding of the
-       metadata defined in Section 4.1.
+   The workload metadata endpoint is an HTTPS API that returns claims
+   about a workload or workload instance.  The caller and the subject of
+   the query are distinct roles: for example, workload B can
+   authenticate to the endpoint to retrieve metadata about workload A.
+   The service authenticates B and authorizes B's access to A's
+   metadata.  A caller MAY also request its own metadata, subject to the
+   same authorization checks.
 
-   2.  Separate extensions per attribute.
+   The metadata service can be operated by a credential issuer or by a
+   separate authority trusted to provide metadata for the relevant
+   workloads and claims.  Knowledge of a Workload Identifier, or
+   possession of another workload's public credential, does not grant
+   access to its metadata.
 
-   3.  Attribute certificates [INET-CERT], which separate attributes
-       from the identity certificate by construction, at the cost of a
-       second object to distribute and validate.
+7.1.  Endpoint Location and Trust
 
-   4.  No X.509 carriage in this document, restricting metadata to JWT-
-       based credentials.
+   A deployment or trust domain MAY configure its workload metadata
+   endpoint URI out of band.  This configuration MUST be obtained
+   through a trusted mechanism and MUST associate the endpoint with the
+   Workload Identifier namespaces and claims for which it is
+   authoritative.  The endpoint can use a different host from the trust
+   domain, for example https://metadata.example.net/workload-info.  An
+   explicitly configured URI takes precedence over the default URI
+   described below.
 
-   See Appendix "Open Issues" item 2.
+   In the absence of an explicitly configured URI, a client MAY use the
+   following default URI when the trust domain is a valid fully
+   qualified DNS name and deployment policy trusts that domain's HTTPS
+   service to provide the requested workload metadata:
 
-6.3.  Consistency Across Formats
+   https://<trust-domain>/.well-known/workload-metadata
 
-   Where a credential issuer issues both JWT-based and X.509-based
-   Workload Identity Credentials for the same workload or workload
-   instance, the metadata asserted in each MUST be consistent, so that a
-   party able to choose between formats cannot obtain a more favorable
-   authorization outcome by choosing one.  Where the two formats cannot
-   express the same metadata, the credential issuer MUST omit the
-   metadata it cannot express consistently rather than assert divergent
-   values.
+   The well-known URI uses HTTPS on its default port and follows
+   [WELL-KNOWN].  The client's trust configuration MUST authorize this
+   mapping before the client contacts the endpoint or presents
+   credentials.  DNS resolution or a valid TLS certificate alone does
+   not establish authority to assert workload metadata.  Where a trust
+   domain is not a valid fully qualified DNS name, or this default
+   mapping is not trusted, the client MUST use trusted out-of-band
+   configuration or treat the endpoint as unavailable.  It MUST NOT
+   derive an endpoint from the workload path or an untrusted claim.
 
-7.  Relationship to Other Work
+   Configured endpoint URIs MUST be absolute HTTPS URIs without user
+   information or a fragment.  They MAY contain fixed query parameters,
+   but MUST NOT contain a sub parameter; the client adds that parameter
+   for each request as described in Section 7.3.  Clients MUST
+   authenticate the server using the configured trust anchors and
+   expected server identity for the endpoint.  Clients MUST NOT
+   automatically follow redirects; an alternative endpoint requires a
+   trusted configuration update.  Failure of a configured endpoint MUST
+   NOT trigger fallback to an unconfigured default.
+
+   The association with a namespace includes the Workload Identifier
+   scheme.  Identifiers using different schemes MUST NOT be treated as
+   interchangeable merely because their trust domains or paths match.  A
+   service at the default URI can serve multiple authorized namespaces
+   and distinguishes them using the complete identifier in the request.
+
+7.2.  Authentication and Authorization
+
+   The endpoint MUST authenticate the caller using WIMSE workload
+   authentication before returning metadata.  This document does not
+   select a mandatory authentication binding.  Deployments can use
+   mutual TLS [WIMSE-MTLS], HTTP Message Signatures [WIMSE-HTTPSIG], or
+   a WIT with a Workload Proof Token [WIMSE-WPT], according to
+   deployment configuration.
+
+   The service MUST authorize disclosure for the authenticated caller,
+   the requested subject, and each claim it returns.  The same request
+   from different callers MAY return different subsets of claims.  The
+   authorization policy and any grouping of claims into access levels
+   are deployment-specific.
+
+7.3.  Metadata Request
+
+   A client retrieves metadata using HTTP GET as defined in
+   Section 9.3.1 of [HTTP].  The request MUST contain exactly one query
+   parameter named sub, whose value is the complete Workload Identifier
+   of the subject.  The client MUST percent-encode the value as a URI
+   query parameter using [URI].  Only unreserved characters can remain
+   unencoded in the value; percent signs already present in the
+   identifier are encoded as %25.  If the endpoint has fixed query
+   parameters, the client appends sub to them using &; otherwise it
+   starts the query with ?sub=. The service decodes the parameter value
+   once to recover the identifier and MUST NOT interpret its path as a
+   set of claims.  The client MUST NOT send request content with this
+   GET request.
+
+   For example, a request for wimse://example.com/workload/
+   a7f3c1a24b904d61 uses the following request target.  The caller is
+   authenticated using the configured WIMSE binding; authentication-
+   specific headers, if any, are omitted from this example.
+
+   GET /.well-known/workload-metadata?sub=wimse%3A%2F%2Fexample.com%2Fworkload%2Fa7f3c1a24b904d61 HTTP/1.1
+   Host: example.com
+   Accept: application/json
+
+7.4.  Metadata Response
+
+   A successful response MUST use status code 200 and media type
+   application/json.  The response body MUST be a UTF-8 JSON object
+   [JSON], with claims directly at the top level and no wrapping
+   metadata object.  Claim values retain their defined types, including
+   arrays and objects where applicable.  Member names MUST be unique.
+   The response MUST contain a string-valued sub exactly equal to the
+   complete identifier recovered from the request, using case-sensitive
+   string comparison.  The client MUST verify this equality and MUST NOT
+   use a response with a missing, invalid, or mismatched sub.
+
+   The remaining members are claims the caller is authorized to receive,
+   using Section 4.1.  Clients MUST ignore claims they do not
+   understand.  A claim that is unavailable or withheld MUST be omitted;
+   omission MUST NOT be interpreted as a negative assertion, an empty
+   value, or deletion of a previously received claim.  For example, an
+   omitted groups member does not assert that the workload has no
+   groups, whereas "groups": [] asserts an empty group membership list.
+   A response containing only sub is permitted when the caller is
+   authorized to learn that the subject exists but no other claims are
+   available for disclosure.  Missing claims required by an
+   authorization policy MUST NOT be treated as satisfying that policy.
+
+   For a caller authorized to receive group membership and roles, a
+   response might be:
+
+   HTTP/1.1 200 OK
+   Content-Type: application/json
+   Cache-Control: no-store
+
+   {
+     "sub": "wimse://example.com/workload/a7f3c1a24b904d61",
+     "groups": ["team-payments"],
+     "roles": ["reconciler"]
+   }
+
+   A different caller authorized to receive only group membership might
+   receive:
+
+   HTTP/1.1 200 OK
+   Content-Type: application/json
+   Cache-Control: no-store
+
+   {
+     "sub": "wimse://example.com/workload/a7f3c1a24b904d61",
+     "groups": ["team-payments"]
+   }
+
+   The missing roles member in the second response says nothing about
+   the workload's roles.  The response is protected by the authenticated
+   HTTPS exchange; it is not a signed assertion for forwarding to
+   another party and is not evidence that the subject participated in
+   this exchange.  The relying party authenticates the subject
+   separately when its application requires that proof.
+
+7.5.  Errors and Caching
+
+   Authentication failures are handled according to the selected WIMSE
+   authentication binding.  For authenticated requests, the endpoint
+   uses HTTP status codes as follows:
+
+   *  400 (Bad Request) for a missing, repeated, or invalid sub
+      parameter;
+
+   *  403 (Forbidden) when the caller is not authorized to use the
+      metadata endpoint at all;
+
+   *  404 (Not Found) when the subject is unknown or the caller is not
+      authorized to learn whether it exists.  These cases MUST NOT be
+      distinguished in the response status or body;
+
+   *  503 (Service Unavailable) when a temporary failure prevents the
+      service from obtaining the metadata needed to process the request.
+
+   Errors MUST NOT disclose withheld claims.  Implementations SHOULD
+   also avoid revealing subject existence through differences in
+   response timing.  Other HTTP errors retain their meanings in [HTTP].
+
+   All HTTP responses from this endpoint, including errors, MUST include
+   Cache-Control: no-store (Section 5.2.2.5 of [HTTP-CACHING]).  In
+   addition to HTTP cache handling, clients MUST NOT reuse retrieved
+   metadata for subsequent authorization decisions beyond the request
+   for which it was obtained.  This does not preclude retaining records
+   for audit purposes, subject to Section 11.
+
+8.  Consistency Across Delivery Methods
+
+   Claims have the same semantics whether carried in a JWT or returned
+   by the metadata endpoint.  The same subject can have different
+   disclosed claim subsets in different credentials and API responses.
+   An X.509 credential's lack of metadata does not require omitting
+   those claims from JWTs or API responses.  Different values can also
+   reflect changes since a credential was issued.
+
+   A relying party using more than one source MUST apply an explicit
+   policy identifying the trusted authority and freshness requirements
+   for each claim used in authorization.  It MUST NOT assume that an API
+   response overrides a credential solely because it was received later,
+   or combine claim values from different assertions to obtain a more
+   permissive result.  Where conflicting assertions cannot be resolved
+   by that policy, the relying party MUST NOT use the conflicting claim
+   to grant access.  Omission does not resolve a conflict or revoke a
+   previously asserted value; nor does it make an older value
+   sufficiently fresh for the current decision.  If required metadata
+   cannot be obtained from an acceptable source, access depending on
+   that metadata MUST NOT be granted.
+
+9.  Relationship to Other Work
 
    The RFCs this document profiles are described where they are used.
    What follows locates it among the drafts it neighbors.
@@ -680,10 +901,16 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
       of Workload, Workload Instance, and Workload Identity Credential
       used in this document.
 
-   [WIMSE-CREDS]:  Normative.  Defines the WIT and WIC that carry the
-      metadata specified here, fixes sub as the Workload Identifier, and
-      sets the rules for adding claims to a WIT that Section 6.1
-      profiles.
+   [WIMSE-CREDS]:  Normative.  Defines the WIT and WIC used to
+      authenticate workloads, fixes sub in a WIT as the Workload
+      Identifier, and sets the rules for adding claims to a WIT that
+      Section 6.1 profiles.  Workloads authenticated using either
+      credential format can be subjects of metadata retrieval.
+
+   [WIMSE-MTLS], [WIMSE-HTTPSIG], and [WIMSE-WPT]:  Describe WIMSE
+      authentication bindings that deployments can use for the metadata
+      endpoint.  Section 7.2 leaves the selection of a binding to
+      deployment configuration.
 
    [WIMSE-AIMS]:  The WIMSE framework for AI agent identity.  It
       establishes identifier and OAuth authorization requirements for
@@ -692,21 +919,21 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
       Section 5 describes the relationship without imposing the agent
       framework on other workloads.
 
-8.  Security Considerations
+10.  Security Considerations
 
-8.1.  Dependence on Identifier Uniqueness
+10.1.  Dependence on Identifier Uniqueness
 
-   Metadata is bound to its subject through the identifier that the same
-   credential asserts, so the reasoning here rests on Section 4.4.
-   Sharing an identifier among workloads or instances that require
-   distinct identities does two kinds of damage.  Metadata can describe
-   a different subject from the caller, and grants made to the shared
-   identifier can accrue to all its holders.  Instances intentionally
-   sharing a workload identity are treated as the same subject; metadata
-   bound only to that identifier cannot distinguish them for
-   authorization or attribution.
+   Metadata is bound to its subject through the identifier asserted in
+   the credential or API response, so the reasoning here rests on
+   Section 4.4.  Sharing an identifier among workloads or instances that
+   require distinct identities does two kinds of damage.  Metadata can
+   describe a different subject from the caller, and grants made to the
+   shared identifier can accrue to all its holders.  Instances
+   intentionally sharing a workload identity are treated as the same
+   subject; metadata bound only to that identifier cannot distinguish
+   them for authorization or attribution.
 
-8.2.  Strength of the Issuance Decision
+10.2.  Strength of the Issuance Decision
 
    A credential issuer asserting metadata is making a claim it must be
    competent to make.  If it distinguishes workloads, or determines
@@ -757,7 +984,39 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
    confirm that the privilege required to assign such a credential
    exceeds the privilege required to deploy the workload.
 
-8.3.  Workload Identity Credentials as Capabilities
+10.3.  Metadata Service Authority and Request Protection
+
+   A metadata service MUST obtain authorization-relevant attributes from
+   sources it is trusted to use for the subject and claims concerned.
+   It MUST NOT accept claims solely on the basis that a caller or the
+   subject workload self-reports them.  The considerations about
+   writable deployment records and metadata derivation in Section 10.2
+   apply equally to metadata services.  An authenticated response
+   establishes which service supplied the claims; it does not by itself
+   establish that the service is authoritative for them.  Clients MUST
+   verify the authority association in Section 7.1 and the response
+   subject in Section 7.4 before using returned claims.
+
+   The target identifier in a request is a lookup key, not a URI to
+   fetch.  A service MUST NOT dereference that identifier to obtain
+   metadata without a separately trusted configuration for the source.
+   Clients and services SHOULD apply network access restrictions
+   appropriate to their deployment to prevent metadata lookups from
+   becoming a means of making requests to unintended destinations.  The
+   configured endpoint precedence and redirect restrictions in
+   Section 7.1 also prevent disclosure of credentials or query subjects
+   to untrusted endpoints.
+
+   The WIMSE authentication binding and HTTPS transport MUST together
+   protect the association between the authenticated caller and the
+   actual metadata request, including its method and target with the sub
+   query parameter.  When an intermediary terminates authentication, the
+   service MUST rely only on a trusted binding of the original caller to
+   that request.  Forwarding an unauthenticated caller-identity header
+   is not such a binding.  Rate limits and request-size limits SHOULD be
+   applied to reduce enumeration and denial-of-service risks.
+
+10.4.  Workload Identity Credentials as Capabilities
 
    Metadata that expresses authority converts an identity credential
    into a capability.  Three consequences motivate Section 4.3.  They do
@@ -781,47 +1040,83 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
       discloses the workload's full authority to each of them, including
       those with no need to know it.
 
-8.4.  Attribute Staleness
+10.5.  Attribute Staleness
 
-   Because metadata is asserted at issuance, it is as fresh as the
-   credential's lifetime.  Deployments requiring rapid attribute
-   revocation SHOULD constrain credential lifetimes accordingly rather
-   than rely on relying parties to re-resolve attributes out of band.
+   In-band metadata reflects the assertions made at credential issuance.
+   A still-valid credential can therefore carry an attribute that has
+   since changed.  Deployments requiring fresher attributes can use
+   shorter credential lifetimes or require retrieval from the metadata
+   endpoint for the relevant claims.  Retrieval avoids waiting for
+   credential renewal, but a metadata service can itself depend on
+   delayed or replicated data sources; no-store does not guarantee real-
+   time updates at those sources.
 
-9.  Privacy Considerations
+   Deployments MUST establish acceptable freshness for claims used in
+   authorization and MUST NOT use data known to exceed those limits.  If
+   policy requires an API lookup and that lookup fails, the relying
+   party MUST NOT silently fall back to older in-band metadata.  The
+   source-selection and conflict rules in Section 8 apply even when both
+   the credential and endpoint response are authentic.  Retrieval does
+   not renew, revoke, or establish the validity of a Workload Identity
+   Credential.
 
-   Asserting an associated human principal per Section 4.2 places an
-   identifier for a person into a credential presented to every relying
-   party the workload contacts, and typically into the audit records of
-   each.  Where the credential is an X.509 certificate, it may
-   additionally be transmitted during TLS handshakes and retained by
-   intermediaries.
+11.  Privacy Considerations
 
-   Credential issuers SHOULD assert a human principal only where relying
-   parties require it, SHOULD prefer an opaque pseudonymous identifier
-   to a directly identifying one such as an email address, and SHOULD
-   scope credentials carrying a human principal to the relying parties
-   that need it.
+   Asserting an associated human principal per Section 4.2 can disclose
+   a person's identifier to relying parties and their audit systems.
+   Credential issuers and metadata services SHOULD disclose such
+   associations only to parties that require them and SHOULD prefer
+   opaque pseudonymous identifiers to directly identifying values such
+   as email addresses.
 
-   How that scoping is achieved depends on the format, and the obvious
-   mechanism is not always available.  A JWT-SVID can be narrowed by
-   audience restriction, and [SPIFFE-JWT-SVID] already recommends a
-   single narrowly scoped aud value.  A WIT has no aud claim at all,
-   being bound to the workload's key rather than to a recipient, so a
-   credential issuer can limit exposure only by issuing a distinct
-   credential per relying party, by shortening the credential's
-   lifetime, or by omitting the human principal.
+   In-band attributes are exposed to each relying party to which the
+   credential is presented.  A JWT-SVID can be narrowed by audience
+   restriction, and [SPIFFE-JWT-SVID] recommends a single narrowly
+   scoped aud value.  A WIT has no aud claim, so issuing different WITs
+   does not itself enforce recipient-specific disclosure.  Deployments
+   SHOULD omit sensitive attributes from credentials shared across
+   relying parties and use the metadata endpoint's authorization-
+   dependent disclosure where appropriate.  This consideration also
+   applies to organizational information such as group membership and
+   roles.
 
-10.  IANA Considerations
+   API retrieval reveals the queried workload identifier to the metadata
+   service, allowing it to observe which callers are interested in which
+   workloads.  With GET, identifiers also appear in request URIs and can
+   be retained in access logs by clients, servers, and intermediaries.
+   Deployments SHOULD minimize and protect such logs, including audit
+   records of returned claims.  HTTPS protects the exchange in transit
+   but does not conceal its contents from its endpoints or TLS-
+   terminating intermediaries.  The subject-existence protections and
+   no-store requirement in Section 7.5 limit additional disclosure
+   through errors and caches.
 
-   This document has no IANA actions.  The claims profiled in
-   Section 4.1 are already registered by [OAUTH-JWT] in the JSON Web
-   Token Claims registry, and this document defines no new values for
-   them.
+12.  IANA Considerations
 
-11.  References
+   This document requests registration of the following entry in the
+   "Well-Known URIs" registry established by [WELL-KNOWN]:
 
-11.1.  Normative References
+   URI suffix:  workload-metadata
+
+   Reference:  this document
+
+   Status:  permanent
+
+   Change controller:  IETF
+
+13.  References
+
+13.1.  Normative References
+
+   [HTTP]     Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke,
+              Ed., "HTTP Semantics", STD 97, RFC 9110,
+              DOI 10.17487/RFC9110, June 2022,
+              <https://www.rfc-editor.org/rfc/rfc9110>.
+
+   [JSON]     Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
+              Interchange Format", STD 90, RFC 8259,
+              DOI 10.17487/RFC8259, December 2017,
+              <https://www.rfc-editor.org/rfc/rfc8259>.
 
    [JWT]      Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
@@ -847,6 +1142,16 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
               Core Schema", RFC 7643, DOI 10.17487/RFC7643, September
               2015, <https://www.rfc-editor.org/rfc/rfc7643>.
 
+   [URI]      Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifier (URI): Generic Syntax", STD 66,
+              RFC 3986, DOI 10.17487/RFC3986, January 2005,
+              <https://www.rfc-editor.org/rfc/rfc3986>.
+
+   [WELL-KNOWN]
+              Nottingham, M., "Well-Known Uniform Resource Identifiers
+              (URIs)", RFC 8615, DOI 10.17487/RFC8615, May 2019,
+              <https://www.rfc-editor.org/rfc/rfc8615>.
+
    [WIMSE-ARCH]
               Salowey, J. A., Rosomakho, Y., and H. Tschofenig,
               "Workload Identity in a Multi System Environment (WIMSE)
@@ -870,7 +1175,13 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
               <https://datatracker.ietf.org/doc/html/draft-ietf-wimse-
               identifier-03>.
 
-11.2.  Informative References
+13.2.  Informative References
+
+   [HTTP-CACHING]
+              Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke,
+              Ed., "HTTP Caching", STD 98, RFC 9111,
+              DOI 10.17487/RFC9111, June 2022,
+              <https://www.rfc-editor.org/rfc/rfc9111>.
 
    [INET-CERT]
               Farrell, S., Housley, R., and S. Turner, "An Internet
@@ -902,24 +1213,46 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
               <https://datatracker.ietf.org/doc/html/draft-ietf-wimse-
               aims-00>.
 
+   [WIMSE-HTTPSIG]
+              Salowey, J. A. and Y. Sheffer, "WIMSE Workload-to-Workload
+              Authentication with HTTP Signatures", Work in Progress,
+              Internet-Draft, draft-ietf-wimse-http-signature-07, 20
+              September 2026, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-wimse-http-signature-07>.
+
+   [WIMSE-MTLS]
+              Salowey, J. A. and Y. Rosomakho, "Workload Authentication
+              Using Mutual TLS", Work in Progress, Internet-Draft,
+              draft-ietf-wimse-mutual-tls-02, 6 July 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-wimse-
+              mutual-tls-02>.
+
+   [WIMSE-WPT]
+              Campbell, B. and A. Schwenkschuster, "WIMSE Workload Proof
+              Token", Work in Progress, Internet-Draft, draft-ietf-
+              wimse-wpt-02, 27 August 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-wimse-
+              wpt-02>.
+
 Open Issues
 
    To be resolved with the working group, and removed before
    publication.
 
-   1.  *Whether a durable principal association belongs in a Workload
-       Identity Credential (Section 4.2).* Per-request delegation is
-       separate from workload metadata.  What remains is whether
-       ownership or operational associations with a person,
-       organization, or another workload are attributes worth asserting
-       at issuance, how to distinguish those relationships, and whether
-       they justify new registered claims.  Associations with people
-       also require the privacy analysis in Section 9.
+   1.  *Whether a durable principal association belongs in Workload
+       Metadata (Section 4.2).* Per-request delegation is separate from
+       workload metadata.  What remains is whether ownership or
+       operational associations with a person, organization, or another
+       workload are attributes worth asserting, how to distinguish those
+       relationships, and whether they justify new registered claims.
+       Associations with people also require the privacy analysis in
+       Section 11.
 
-   2.  *X.509 carriage (Section 6.2).* Which of the four candidate
-       approaches to take, and prior to that whether this document
-       should cover X.509 at all rather than leaving it to a companion
-       document.
+   2.  *A common authentication binding for the metadata endpoint
+       (Section 7.2).* Whether to select a mandatory-to-implement WIMSE
+       binding or specify interoperable profiles for multiple bindings.
+       HTTP Message Signatures are one candidate; this version leaves
+       the choice to deployments.
 
    3.  *Value encoding for groups (Section 4.1).* [SCIM-CORE] defines
        groups as a complex multi-valued attribute derived from SCIM
@@ -934,23 +1267,27 @@ Open Issues
        attribute and grant in Section 4.3, or whether the document
        should exclude authority-bearing metadata entirely.
 
-   5.  *Whether a relying party needs a way to know which metadata a
-       credential issuer is authoritative for*, or whether that is
-       deployment configuration.  This is the Section 8.2 question seen
-       from the consuming side.
+   5.  *Distribution of metadata authority information.* This version
+       relies on deployment trust configuration for claim-specific
+       authority and source precedence (Section 7.1 and Section 8).
+       Whether an interoperable mechanism for distributing that
+       information is needed remains open.
 
-   6.  *Whether Workload Metadata may be conveyed separately from the
-       Workload Identity Credential.* This document deliberately
-       specifies carriage in the Workload Identity Credential only.  A
-       separate signed object, bound to the Workload Identifier and
-       possibly to a specific Workload Identity Credential, would
-       accommodate an attribute authority distinct from the identifier
-       authority and work around the X.509 extension constraints in
-       Section 6.2.  It would also add a second object to retrieve,
-       validate, and reconcile, require a rule for conflicting
-       assertions, and mean a relying party may have to establish
-       authority for two issuers rather than one.  Whether it belongs
-       here, in a companion document, or nowhere is open.
+   6.  *Independently signed metadata responses.* The API response is
+       currently protected by the authenticated HTTPS exchange.  A
+       separately signed object would need rules for issuer trust,
+       subject binding, audience, lifetime, replay, and use by parties
+       other than the original caller.
+
+   7.  *Caching retrieved metadata.* Whether to allow bounded reuse, and
+       how cache lifetimes, caller authorization changes, and different
+       disclosed subsets would interact.  This version uses no-store and
+       does not allow reuse for later authorization decisions
+       (Section 7.5).
+
+   8.  *Additional retrieval methods.* Whether a future version should
+       support HTTP QUERY for more complex requests.  This version
+       specifies GET with a single subject and no request body.
 
 Acknowledgments
 
