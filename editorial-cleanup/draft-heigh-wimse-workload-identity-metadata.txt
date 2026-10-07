@@ -199,7 +199,7 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
    *  the identifier format itself, which is [WIMSE-IDENTIFIER];
 
    *  defining new workload authentication mechanisms or selecting a
-      mandatory API authentication binding;
+      mandatory-to-implement authentication binding;
 
    *  defining an in-band metadata encoding for X.509 credentials;
 
@@ -426,7 +426,7 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
       services SHOULD encode all three claims as arrays of strings, and
       a relying party SHOULD accept an array of objects bearing a value
       sub-attribute as equivalent to the array of those value strings.
-      See Appendix "Open Issues" item 3.
+      See Appendix "Open Issues" item 2.
 
    Values are otherwise trust-domain specific, and this document defines
    no vocabulary.  A relying party MUST treat an unrecognized value as
@@ -1249,13 +1249,7 @@ Open Issues
        Associations with people also require the privacy analysis in
        Section 11.
 
-   2.  *A common authentication binding for the metadata endpoint
-       (Section 7.2).* Whether to select a mandatory-to-implement WIMSE
-       binding or specify interoperable profiles for multiple bindings.
-       HTTP Message Signatures are one candidate; this version leaves
-       the choice to deployments.
-
-   3.  *Value encoding for groups, roles, and entitlements
+   2.  *Value encoding for groups, roles, and entitlements
        (Section 4.1).* [SCIM-CORE] defines all three as multi-valued
        complex attributes whose elements carry a value sub-attribute,
        and [OAUTH-JWT] defers to that encoding without saying whether an
@@ -1267,29 +1261,29 @@ Open Issues
        the question may be better raised against [OAUTH-JWT] than
        answered here.
 
-   4.  *Whether entitlements is the right line to draw* between
+   3.  *Whether entitlements is the right line to draw* between
        attribute and grant in Section 4.3, or whether the document
        should exclude authority-bearing metadata entirely.
 
-   5.  *Distribution of metadata authority information.* This version
+   4.  *Distribution of metadata authority information.* This version
        relies on deployment trust configuration for claim-specific
        authority and source precedence (Section 7.1 and Section 8).
        Whether an interoperable mechanism for distributing that
        information is needed remains open.
 
-   6.  *Independently signed metadata responses.* The API response is
+   5.  *Independently signed metadata responses.* The API response is
        currently protected by the authenticated HTTPS exchange.  A
        separately signed object would need rules for issuer trust,
        subject binding, audience, lifetime, replay, and use by parties
        other than the original caller.
 
-   7.  *Caching retrieved metadata.* Whether to allow bounded reuse, and
+   6.  *Caching retrieved metadata.* Whether to allow bounded reuse, and
        how cache lifetimes, caller authorization changes, and different
        disclosed subsets would interact.  This version uses no-store and
        does not allow reuse for later authorization decisions
        (Section 7.5).
 
-   8.  *Additional retrieval methods.* Whether a future version should
+   7.  *Additional retrieval methods.* Whether a future version should
        support the HTTP QUERY method [HTTP-QUERY] for more complex
        requests.  This version specifies GET with a single subject and
        no request body.

@@ -1376,7 +1376,8 @@ associations;<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
             <p id="section-1.1-4.1.1">the identifier format itself, which is <span>[<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span>;<a href="#section-1.1-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.2">
-            <p id="section-1.1-4.2.1">defining new workload authentication mechanisms or selecting a mandatory API authentication binding;<a href="#section-1.1-4.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-4.2.1">defining new workload authentication mechanisms or selecting a mandatory-to-implement
+authentication binding;<a href="#section-1.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.3">
             <p id="section-1.1-4.3.1">defining an in-band metadata encoding for X.509 credentials;<a href="#section-1.1-4.3.1" class="pilcrow">¶</a></p>
@@ -1639,7 +1640,7 @@ defined in" <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> 
 does not say whether an array of strings conforms. Until this is settled, credential issuers and metadata
 services <span class="bcp14">SHOULD</span> encode all three claims as arrays of strings, and a relying party <span class="bcp14">SHOULD</span> accept an
 array of objects bearing a <code>value</code> sub-attribute as equivalent to the array of those <code>value</code>
-strings. See <a href="#open-issues" class="auto internal xref">Appendix "Open Issues"</a> item 3.<a href="#section-4.1-4.4.1" class="pilcrow">¶</a></p>
+strings. See <a href="#open-issues" class="auto internal xref">Appendix "Open Issues"</a> item 2.<a href="#section-4.1-4.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
@@ -2442,43 +2443,38 @@ they justify new registered claims. Associations with people also require the pr
 <a href="#privacy" class="auto internal xref">Section 11</a>.<a href="#appendix-A-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-2.2">
-          <p id="appendix-A-2.2.1"><strong>A common authentication binding for the metadata endpoint (<a href="#metadata-auth" class="auto internal xref">Section 7.2</a>).</strong> Whether to
-select a mandatory-to-implement WIMSE binding or specify interoperable profiles for multiple
-bindings. HTTP Message Signatures are one candidate; this version leaves the choice to deployments.<a href="#appendix-A-2.2.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="appendix-A-2.3">
-          <p id="appendix-A-2.3.1"><strong>Value encoding for <code>groups</code>, <code>roles</code>, and <code>entitlements</code> (<a href="#reuse" class="auto internal xref">Section 4.1</a>).</strong> <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> defines
+          <p id="appendix-A-2.2.1"><strong>Value encoding for <code>groups</code>, <code>roles</code>, and <code>entitlements</code> (<a href="#reuse" class="auto internal xref">Section 4.1</a>).</strong> <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> defines
 all three as multi-valued complex attributes whose elements carry a <code>value</code> sub-attribute, and
 <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> defers to that encoding without saying whether an array of strings conforms. The
 interim rule in <a href="#reuse" class="auto internal xref">Section 4.1</a> (emit strings, accept objects with a <code>value</code> sub-attribute) departs from
 the object form <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> points to, and is in tension with the requirement in <a href="#reuse" class="auto internal xref">Section 4.1</a> to
 use the same value encodings as the registered claims. It needs either confirming or replacing,
-and the question may be better raised against <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> than answered here.<a href="#appendix-A-2.3.1" class="pilcrow">¶</a></p>
+and the question may be better raised against <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> than answered here.<a href="#appendix-A-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-2.3">
+          <p id="appendix-A-2.3.1"><strong>Whether <code>entitlements</code> is the right line to draw</strong> between attribute and grant in
+<a href="#permissions" class="auto internal xref">Section 4.3</a>, or whether the document should exclude authority-bearing metadata entirely.<a href="#appendix-A-2.3.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-2.4">
-          <p id="appendix-A-2.4.1"><strong>Whether <code>entitlements</code> is the right line to draw</strong> between attribute and grant in
-<a href="#permissions" class="auto internal xref">Section 4.3</a>, or whether the document should exclude authority-bearing metadata entirely.<a href="#appendix-A-2.4.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="appendix-A-2.5">
-          <p id="appendix-A-2.5.1"><strong>Distribution of metadata authority information.</strong> This version relies on deployment trust
+          <p id="appendix-A-2.4.1"><strong>Distribution of metadata authority information.</strong> This version relies on deployment trust
 configuration for claim-specific authority and source precedence (<a href="#endpoint-location" class="auto internal xref">Section 7.1</a> and
 <a href="#consistency" class="auto internal xref">Section 8</a>). Whether an interoperable mechanism for distributing that information is needed
-remains open.<a href="#appendix-A-2.5.1" class="pilcrow">¶</a></p>
+remains open.<a href="#appendix-A-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-2.5">
+          <p id="appendix-A-2.5.1"><strong>Independently signed metadata responses.</strong> The API response is currently protected by the
+authenticated HTTPS exchange. A separately signed object would need rules for issuer trust,
+subject binding, audience, lifetime, replay, and use by parties other than the original caller.<a href="#appendix-A-2.5.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-2.6">
-          <p id="appendix-A-2.6.1"><strong>Independently signed metadata responses.</strong> The API response is currently protected by the
-authenticated HTTPS exchange. A separately signed object would need rules for issuer trust,
-subject binding, audience, lifetime, replay, and use by parties other than the original caller.<a href="#appendix-A-2.6.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-2.6.1"><strong>Caching retrieved metadata.</strong> Whether to allow bounded reuse, and how cache lifetimes, caller
+authorization changes, and different disclosed subsets would interact. This version uses
+<code>no-store</code> and does not allow reuse for later authorization decisions (<a href="#metadata-errors" class="auto internal xref">Section 7.5</a>).<a href="#appendix-A-2.6.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-2.7">
-          <p id="appendix-A-2.7.1"><strong>Caching retrieved metadata.</strong> Whether to allow bounded reuse, and how cache lifetimes, caller
-authorization changes, and different disclosed subsets would interact. This version uses
-<code>no-store</code> and does not allow reuse for later authorization decisions (<a href="#metadata-errors" class="auto internal xref">Section 7.5</a>).<a href="#appendix-A-2.7.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="appendix-A-2.8">
-          <p id="appendix-A-2.8.1"><strong>Additional retrieval methods.</strong> Whether a future version should support the HTTP QUERY method
+          <p id="appendix-A-2.7.1"><strong>Additional retrieval methods.</strong> Whether a future version should support the HTTP QUERY method
 <span>[<a href="#HTTP-QUERY" class="cite xref">HTTP-QUERY</a>]</span> for more complex requests. This version specifies GET with a single
-subject and no request body.<a href="#appendix-A-2.8.1" class="pilcrow">¶</a></p>
+subject and no request body.<a href="#appendix-A-2.7.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
 </section>
