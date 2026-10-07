@@ -123,6 +123,7 @@ In scope:
   associations;
 * how metadata is carried in JWT-based identity credentials or retrieved through an authenticated API;
 * endpoint location, request and response formats, and authorization-dependent disclosure;
+* metadata asserted by a credential issuer that exchanges credentials across trust domains;
 * the identifier uniqueness requirements that the separation depends on.
 
 Out of scope:
@@ -676,6 +677,26 @@ cannot be resolved by that policy, the relying party MUST NOT use the conflictin
 access. Omission does not resolve a conflict or revoke a previously asserted value; nor does it make
 an older value sufficiently fresh for the current decision. If required metadata cannot be obtained
 from an acceptable source, access depending on that metadata MUST NOT be granted.
+
+# Metadata Across Credential Exchange {#exchange}
+
+A credential issuer can accept a Workload Identity Credential issued in another trust domain and
+issue its own in exchange, for example a cross-platform authentication service that exchanges a
+platform-provided X.509 credential for a credential in its own trust domain. For JWT-based
+credentials, {{OAUTH-TOKEN-EXCHANGE}} defines one protocol for such an exchange.
+
+The exchanging credential issuer MAY obtain metadata from the other trust domain, either from the
+presented credential or from that trust domain's metadata endpoint. According to its own policy,
+it MAY assert all, some, or none of that metadata, add claims, or modify values. It MAY make the
+result available in a JWT-based credential it issues ({{jwt}}), through its own metadata endpoint,
+or both.
+
+Whatever its origin, metadata the exchanging credential issuer asserts is its own assertion and
+carries its authority, not the other trust domain's ({{document-role}}). A relying party evaluates
+it according to the trust it places in the exchanging credential issuer, under the source-selection
+rules in {{consistency}}; it cannot infer what the other trust domain asserted. The exchanging
+credential issuer accordingly takes on the obligations of a credential issuer in {{issuance}} and,
+where it operates a metadata endpoint, those of a metadata service in {{metadata-security}}.
 
 # Relationship to Other Work {#relationship}
 
