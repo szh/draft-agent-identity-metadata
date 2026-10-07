@@ -1089,11 +1089,11 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
 
    URI suffix:  workload-metadata
 
-   Reference:  this document
+   Change controller:  IETF
+
+   Specification document(s):  Section 7 of this document
 
    Status:  permanent
-
-   Change controller:  IETF
 
 13.  References
 
@@ -1103,6 +1103,12 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
               Ed., "HTTP Semantics", STD 97, RFC 9110,
               DOI 10.17487/RFC9110, June 2022,
               <https://www.rfc-editor.org/rfc/rfc9110>.
+
+   [HTTP-CACHING]
+              Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke,
+              Ed., "HTTP Caching", STD 98, RFC 9111,
+              DOI 10.17487/RFC9111, June 2022,
+              <https://www.rfc-editor.org/rfc/rfc9111>.
 
    [JSON]     Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
               Interchange Format", STD 90, RFC 8259,
@@ -1143,14 +1149,6 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
               (URIs)", RFC 8615, DOI 10.17487/RFC8615, May 2019,
               <https://www.rfc-editor.org/rfc/rfc8615>.
 
-   [WIMSE-ARCH]
-              Salowey, J. A., Rosomakho, Y., and H. Tschofenig,
-              "Workload Identity in a Multi System Environment (WIMSE)
-              Architecture", Work in Progress, Internet-Draft, draft-
-              ietf-wimse-arch-08, 6 July 2026,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-wimse-
-              arch-08>.
-
    [WIMSE-CREDS]
               Campbell, B., Salowey, J. A., Schwenkschuster, A.,
               Sheffer, Y., and Y. Rosomakho, "WIMSE Workload
@@ -1168,11 +1166,10 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
 
 13.2.  Informative References
 
-   [HTTP-CACHING]
-              Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke,
-              Ed., "HTTP Caching", STD 98, RFC 9111,
-              DOI 10.17487/RFC9111, June 2022,
-              <https://www.rfc-editor.org/rfc/rfc9111>.
+   [HTTP-QUERY]
+              Reschke, J., Snell, J.M., and M. Bishop, "The HTTP QUERY
+              Method", RFC 10008, DOI 10.17487/RFC10008, June 2026,
+              <https://www.rfc-editor.org/rfc/rfc10008>.
 
    [INET-CERT]
               Farrell, S., Housley, R., and S. Turner, "An Internet
@@ -1203,6 +1200,14 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
               wimse-aims-00, 15 September 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-wimse-
               aims-00>.
+
+   [WIMSE-ARCH]
+              Salowey, J. A., Rosomakho, Y., and H. Tschofenig,
+              "Workload Identity in a Multi System Environment (WIMSE)
+              Architecture", Work in Progress, Internet-Draft, draft-
+              ietf-wimse-arch-08, 6 July 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-wimse-
+              arch-08>.
 
    [WIMSE-HTTPSIG]
               Salowey, J. A. and Y. Sheffer, "WIMSE Workload-to-Workload
@@ -1277,8 +1282,9 @@ Open Issues
        (Section 7.5).
 
    8.  *Additional retrieval methods.* Whether a future version should
-       support HTTP QUERY for more complex requests.  This version
-       specifies GET with a single subject and no request body.
+       support the HTTP QUERY method [HTTP-QUERY] for more complex
+       requests.  This version specifies GET with a single subject and
+       no request body.
 
 Acknowledgments
 
