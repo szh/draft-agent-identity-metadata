@@ -1,0 +1,2526 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Workload Identity Metadata</title>
+<meta content="Shlomo Heigh" name="author">
+<meta content="Joseph Salowey" name="author">
+<meta content="Yaroslav Rosomakho" name="author">
+<meta content="
+       This document specifies metadata attributes associated with a workload's identity that are used for
+auditing, authorization, accounting, and other purposes. It profiles existing claims for group
+membership, roles, and entitlements, with delivery either in JWT-based Workload Identity Credentials
+or through an authenticated workload metadata endpoint. The endpoint supports metadata retrieval for
+workloads using JWT-based or X.509-based credentials and disclosure according to the caller's
+authorization. 
+       This document also defines the separation between identifier and metadata. It distinguishes workload
+attributes and durable principal associations from per-request delegation and grants such as scopes,
+and states the requirements that make the separation sound, including identifier uniqueness. 
+       The document applies to workloads generally, including services, batch and continuous integration
+jobs, serverless functions, and AI agents. Agentic use cases are discussed separately. 
+    " name="description">
+<meta content="xml2rfc 3.34.1" name="generator">
+<meta content="workload identity" name="keyword">
+<meta content="agent identity" name="keyword">
+<meta content="identifier" name="keyword">
+<meta content="metadata" name="keyword">
+<meta content="delegation" name="keyword">
+<meta content="draft-heigh-wimse-workload-identity-metadata-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.34.1
+    Python 3.14.8
+    ConfigArgParse 1.8.0
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.12.2
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.9.1
+-->
+<link href="draft-heigh-wimse-workload-identity-metadata.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
+}
+svg {
+  display: block;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
+}
+.alignCenter {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+      float: none;
+    }
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a {
+  text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
+}
+.iref + a[href].internal {
+  color: var(--text-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
+  }
+  @media print {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+  & .prepared {
+    float: right;
+  }
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
+  }
+}
+
+/* Comments */
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
+      }
+    }
+    & a.toplink {
+      float: right;
+    }
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
+    }
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc {
+    page-break-before: always;
+    border-top: none;
+    padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Workload Identity Metadata</td>
+<td class="right">October 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Heigh, et al.</td>
+<td class="center">Expires 10 April 2027</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Workload Identity in Multi System Environments</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-heigh-wimse-workload-identity-metadata-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-10-07" class="published">7 October 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2027-04-10">10 April 2027</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">S. Heigh</div>
+<div class="org">Palo Alto Networks</div>
+</div>
+<div class="author">
+      <div class="author-name">J. Salowey</div>
+<div class="org">Palo Alto Networks</div>
+</div>
+<div class="author">
+      <div class="author-name">Y. Rosomakho</div>
+<div class="org">Zscaler</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Workload Identity Metadata</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document specifies metadata attributes associated with a workload's identity that are used for
+auditing, authorization, accounting, and other purposes. It profiles existing claims for group
+membership, roles, and entitlements, with delivery either in JWT-based Workload Identity Credentials
+or through an authenticated workload metadata endpoint. The endpoint supports metadata retrieval for
+workloads using JWT-based or X.509-based credentials and disclosure according to the caller's
+authorization.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">This document also defines the separation between identifier and metadata. It distinguishes workload
+attributes and durable principal associations from per-request delegation and grants such as scopes,
+and states the requirements that make the separation sound, including identifier uniqueness.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+<p id="section-abstract-3">The document applies to workloads generally, including services, batch and continuous integration
+jobs, serverless functions, and AI agents. Agentic use cases are discussed separately.<a href="#section-abstract-3" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://szh.github.io/draft-agent-identity-metadata/draft-heigh-wimse-workload-identity-metadata.html">https://szh.github.io/draft-agent-identity-metadata/draft-heigh-wimse-workload-identity-metadata.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-heigh-wimse-workload-identity-metadata/">https://datatracker.ietf.org/doc/draft-heigh-wimse-workload-identity-metadata/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        Workload Identity in Multi System Environments Working Group mailing list (<span><a href="mailto:wimse@ietf.org">mailto:wimse@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/wimse/">https://mailarchive.ietf.org/arch/browse/wimse/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/wimse/">https://www.ietf.org/mailman/listinfo/wimse/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/szh/draft-agent-identity-metadata">https://github.com/szh/draft-agent-identity-metadata</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 10 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-scope" class="internal xref">Scope</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-the-separation-principle" class="internal xref">The Separation Principle</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-why-attributes-are-not-enco" class="internal xref">Why Attributes Are Not Encoded in Identifiers</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-content-of-the-workload-ide" class="internal xref">Content of the Workload Identifier</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-content-of-the-workload-iden" class="internal xref">Content of the Workload Identity Credential</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
+                <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="auto internal xref">3.4</a>.  <a href="#name-in-band-metadata-and-api-re" class="internal xref">In-Band Metadata and API Retrieval</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-workload-metadata" class="internal xref">Workload Metadata</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-reuse-of-existing-claims" class="internal xref">Reuse of Existing Claims</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-associated-principal" class="internal xref">Associated Principal</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-permissions-and-scopes" class="internal xref">Permissions and Scopes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-identifier-uniqueness" class="internal xref">Identifier Uniqueness</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-agentic-use-cases" class="internal xref">Agentic Use Cases</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-carrying-metadata-in-worklo" class="internal xref">Carrying Metadata in Workload Identity Credentials</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-jwt-based-credentials" class="internal xref">JWT-Based Credentials</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-x509-based-credentials" class="internal xref">X.509-Based Credentials</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-workload-metadata-endpoint" class="internal xref">Workload Metadata Endpoint</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-endpoint-location-and-trust" class="internal xref">Endpoint Location and Trust</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-authentication-and-authoriz" class="internal xref">Authentication and Authorization</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-metadata-request" class="internal xref">Metadata Request</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-metadata-response" class="internal xref">Metadata Response</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.5">
+                <p id="section-toc.1-1.7.2.5.1"><a href="#section-7.5" class="auto internal xref">7.5</a>.  <a href="#name-errors-and-caching" class="internal xref">Errors and Caching</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-consistency-across-delivery" class="internal xref">Consistency Across Delivery Methods</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-relationship-to-other-work" class="internal xref">Relationship to Other Work</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-dependence-on-identifier-un" class="internal xref">Dependence on Identifier Uniqueness</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-strength-of-the-issuance-de" class="internal xref">Strength of the Issuance Decision</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3">
+                <p id="section-toc.1-1.10.2.3.1"><a href="#section-10.3" class="auto internal xref">10.3</a>.  <a href="#name-metadata-service-authority-" class="internal xref">Metadata Service Authority and Request Protection</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.4">
+                <p id="section-toc.1-1.10.2.4.1"><a href="#section-10.4" class="auto internal xref">10.4</a>.  <a href="#name-workload-identity-credentia" class="internal xref">Workload Identity Credentials as Capabilities</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.5">
+                <p id="section-toc.1-1.10.2.5.1"><a href="#section-10.5" class="auto internal xref">10.5</a>.  <a href="#name-attribute-staleness" class="internal xref">Attribute Staleness</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-privacy-considerations" class="internal xref">Privacy Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#section-13" class="auto internal xref">13</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
+                <p id="section-toc.1-1.13.2.1.1"><a href="#section-13.1" class="auto internal xref">13.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
+                <p id="section-toc.1-1.13.2.2.1"><a href="#section-13.2" class="auto internal xref">13.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-open-issues" class="internal xref">Open Issues</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16">
+            <p id="section-toc.1-1.16.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="intro">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">An identifier denotes a workload. Metadata describes it. These are different things with different
+lifetimes, different authorities, and different exposure, and conflating them causes concrete harm.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Deployments that need to authorize on a workload's group, role, or owner commonly encode those
+attributes in the identifier, producing identifiers of the form:<a href="#section-1-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-1-3">
+<pre>
+spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliation
+</pre><a href="#section-1-3" class="pilcrow">¶</a>
+</div>
+<p id="section-1-4">Relying parties then parse the path and authorize on its components. This appears to work, and it
+is the path of least resistance because the identifier is the one field guaranteed to reach the
+relying party. It is nonetheless unsound, for reasons developed in <a href="#pollution" class="auto internal xref">Section 3.1</a>: the identifier
+format does not promise parseable semantics, attributes and identifiers have different lifetimes,
+and the identifier is the most widely exposed field in the system.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">This document specifies the alternative. An identifier denotes the workload or workload instance
+selected by the deployment's identity model; a relying party does not derive attributes from its
+structure. This document profiles metadata carried in a JWT-based Workload Identity Credential,
+such as a WIMSE Workload Identity Token <span>[<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span> or a JWT-SVID,
+or retrieved from an authenticated metadata endpoint. Both delivery methods use the same metadata
+model and bind attributes to the complete Workload Identifier. The endpoint also supports workloads
+authenticated using X.509 credentials, for which this document defines no in-band metadata encoding.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">Where suitable claims already exist, this document profiles them rather than defining new ones. Group,
+role, and entitlement claims are already registered <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> with semantics drawn from SCIM
+<span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span>, and delegation is already expressible <span>[<a href="#OAUTH-TOKEN-EXCHANGE" class="cite xref">OAUTH-TOKEN-EXCHANGE</a>]</span>.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-7">The separation between identifiers and workload attributes applies across workload types. A replicated
+service can change team membership without changing its identifier. A continuous integration (CI) job
+or a batch job can have a role independent of the worker on which it runs. A serverless function can
+retain its workload identifier across invocations, while a deployment requiring separate attribution
+can assign identifiers to individual instances.<a href="#section-1-7" class="pilcrow">¶</a></p>
+<p id="section-1-8">AI agents have the same needs, with additional considerations discussed in <a href="#agentic" class="auto internal xref">Section 5</a>.<a href="#section-1-8" class="pilcrow">¶</a></p>
+<div id="scope">
+<section id="section-1.1">
+        <h3 id="name-scope">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-scope" class="section-name selfRef">Scope</a>
+        </h3>
+<p id="section-1.1-1">In scope:<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-2.1">
+            <p id="section-1.1-2.1.1">the separation between identifier and metadata, and requirements enforcing it;<a href="#section-1.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.2">
+            <p id="section-1.1-2.2.1">metadata for workload group, role, and entitlements, and consideration of durable principal
+associations;<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.3">
+            <p id="section-1.1-2.3.1">how metadata is carried in JWT-based identity credentials or retrieved through an authenticated API;<a href="#section-1.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.4">
+            <p id="section-1.1-2.4.1">endpoint location, request and response formats, and authorization-dependent disclosure;<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.5">
+            <p id="section-1.1-2.5.1">the identifier uniqueness requirements that the separation depends on.<a href="#section-1.1-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.1-3">Out of scope:<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-4.1">
+            <p id="section-1.1-4.1.1">the identifier format itself, which is <span>[<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span>;<a href="#section-1.1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-4.2">
+            <p id="section-1.1-4.2.1">defining new workload authentication mechanisms or selecting a mandatory API authentication binding;<a href="#section-1.1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-4.3">
+            <p id="section-1.1-4.3.1">defining an in-band metadata encoding for X.509 credentials;<a href="#section-1.1-4.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-4.4">
+            <p id="section-1.1-4.4.1">independently signed metadata responses and their forwarding to other parties;<a href="#section-1.1-4.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-4.5">
+            <p id="section-1.1-4.5.1">how a relying party reaches an authorization decision from metadata;<a href="#section-1.1-4.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-4.6">
+            <p id="section-1.1-4.6.1">verification of the identity credentials, for which see
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-3" class="relref">Section 3</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span>, <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span>, and <span>[<a href="#SPIFFE-X509-SVID" class="cite xref">SPIFFE-X509-SVID</a>]</span>.<a href="#section-1.1-4.6.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-2">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">The terms Workload, Workload Instance, and Workload Identity Credential are used as defined in
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-arch-08#section-2" class="relref">Section 2</a> of [<a href="#WIMSE-ARCH" class="cite xref">WIMSE-ARCH</a>]</span>. Workload Identifier and Issuer are used as defined in
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03#section-3" class="relref">Section 3</a> of [<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span>.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-3">A workload can have multiple concurrent instances. A Workload Identifier can identify a logical
+workload or a particular instance, according to deployment policy; this document does not require a
+separate identifier for each process, replica, job, or invocation.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-2-4">
+        <dt id="section-2-4.1">Workload Metadata:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-4.2">
+          <p id="section-2-4.2.1">Attributes of the workload or workload instance denoted by a Workload Identifier, distinct from
+that identifier, asserted for authorization, audit, accounting, and similar purposes.<a href="#section-2-4.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-4.3">Credential issuer:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-4.4">
+          <p id="section-2-4.4.1">The entity that issues a Workload Identity Credential, such as the Identity Server that issues a
+WIT (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-5.1" class="relref">Section 5.1</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span>). It need not be the Issuer that assigns the Workload
+Identifier, nor the entity that determines Workload Metadata.<a href="#section-2-4.4.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="section-2-5">The Workload Identity Credentials discussed here include WIMSE Workload Identity Tokens (WITs) and
+Workload Identity Certificates (WICs), defined in <span>[<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span>, and SPIFFE
+JWT-SVIDs <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span> and X.509-SVIDs <span>[<a href="#SPIFFE-X509-SVID" class="cite xref">SPIFFE-X509-SVID</a>]</span>. SPIFFE refers to these objects as
+identity documents; this document uses "credential" throughout, consistent with WIMSE terminology.<a href="#section-2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="separation">
+<section id="section-3">
+      <h2 id="name-the-separation-principle">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-the-separation-principle" class="section-name selfRef">The Separation Principle</a>
+      </h2>
+<div id="pollution">
+<section id="section-3.1">
+        <h3 id="name-why-attributes-are-not-enco">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-why-attributes-are-not-enco" class="section-name selfRef">Why Attributes Are Not Encoded in Identifiers</a>
+        </h3>
+<p id="section-3.1-1">The reasons below are independent: a solution that mitigates one still faces the others.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-3.1-2">
+          <dt id="section-3.1-2.1">Path semantics are not guaranteed.</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.2">
+            <p id="section-3.1-2.2.1"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03#section-4.2" class="relref">Section 4.2</a> of [<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span> states that path contents are "deployment-specific and
+are interpreted according to the scheme, policy of the trust domain, as implemented by the issuer or
+issuers authorized for that trust domain", and <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03#section-4.3" class="relref">Section 4.3</a> of [<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span> requires
+that consumers "<span class="bcp14">MUST</span> compare and authorize Workload Identifiers using the complete URI, rather than
+relying only on individual components such as the path". A relying party parsing path components to
+recover a role is doing something the identifier format does not support.<a href="#section-3.1-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.3">Lifetimes differ.</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.4">
+            <p id="section-3.1-2.4.1">A Workload Identifier is stable; it is the thing audit records and authorization grants refer to over
+time. Attributes are mutable: a workload is reassigned to another team, its role narrows, its
+owner changes. Encoding a mutable attribute in a stable identifier forces a choice between two bad
+outcomes. Re-identifying the workload whenever an attribute changes breaks every grant and every
+historical audit record that named it. Leaving the identifier alone lets it assert something that is
+no longer true.<a href="#section-3.1-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.5">Cardinality multiplies.</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.6">
+            <p id="section-3.1-2.6.1">Encoding <em>n</em> attributes produces an identifier space that is their cross product. Every combination
+of group, role, and owner becomes a distinct identifier requiring its own registration, its own
+grants, and its own policy entries.<a href="#section-3.1-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.7">Authorization becomes string matching.</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.8">
+            <p id="section-3.1-2.8.1">Policy written against path prefixes couples authorization to a naming convention. Renaming a team
+silently changes who is authorized, and the coupling is invisible at both the policy and the naming
+end. <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03#section-7.6" class="relref">Section 7.6</a> of [<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span> advises consumers against exactly this, warning
+that prefix matching "may lead to incorrect authorization".<a href="#section-3.1-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.9">Exposure is maximal.</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.10">
+            <p id="section-3.1-2.10.1">The identifier is the most widely visible field in the system. It appears in audit logs across every
+component on the call path, in certificate subject alternative names transmitted during TLS
+handshakes, and in diagnostic output. Attributes embedded there are disclosed wherever the
+identifier travels, which is everywhere. <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03#section-7.5" class="relref">Section 7.5</a> of [<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span> raises the
+same concern for descriptive paths generally. It is most acute for human identity; see <a href="#privacy" class="auto internal xref">Section 11</a>.<a href="#section-3.1-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.11">Authority differs.</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.12">
+            <p id="section-3.1-2.12.1">The authority competent to assign an identifier is not necessarily the authority competent to assert
+a role or a principal association. Encoding both in one string requires a single issuer to be
+authoritative for all of it.<a href="#section-3.1-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-3.1-3">WIMSE has already applied this reasoning to a narrower case.
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-4" class="relref">Section 4</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span> requires that where a deployment has several labels for
+one runtime, additional correlation "<span class="bcp14">MUST NOT</span> be encoded as a second workload identifier", directing
+deployments to additional claims instead. This document generalizes that reasoning from correlation data
+to workload attributes.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.1-4">PKIX addressed the same tension earlier, separating attributes from identity certificates into attribute
+certificates <span>[<a href="#INET-CERT" class="cite xref">INET-CERT</a>]</span>. The mechanism saw limited deployment, but the analysis holds and the
+separation it describes is the one specified here.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="identifier-role">
+<section id="section-3.2">
+        <h3 id="name-content-of-the-workload-ide">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-content-of-the-workload-ide" class="section-name selfRef">Content of the Workload Identifier</a>
+        </h3>
+<p id="section-3.2-1">A Workload Identifier <span class="bcp14">MUST</span> unambiguously denote the workload or workload instance selected by the
+deployment's identity model. Multiple instances <span class="bcp14">MAY</span> share an identifier when they are intended to be
+treated as the same service for authentication, authorization, and auditing, as specified in
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03#section-4.2" class="relref">Section 4.2</a> of [<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span>. A relying party requiring the subject's group, role, or
+principal association <span class="bcp14">MUST</span> obtain it from Workload Metadata rather than infer it from the identifier.
+Permissions and scopes are addressed in <a href="#permissions" class="auto internal xref">Section 4.3</a>.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">An Issuer <span class="bcp14">MAY</span> use structured paths for administrative convenience, such as delegation of naming
+authority within a trust domain or operator legibility. Where it does, the structure is not a contract: a
+relying party <span class="bcp14">MUST NOT</span> derive authorization-relevant meaning from any component of a Workload
+Identifier.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="document-role">
+<section id="section-3.3">
+        <h3 id="name-content-of-the-workload-iden">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-content-of-the-workload-iden" class="section-name selfRef">Content of the Workload Identity Credential</a>
+        </h3>
+<p id="section-3.3-1">A Workload Identity Credential asserts a Workload Identifier and <span class="bcp14">MAY</span> assert Workload Metadata
+describing the workload or workload instance that identifier denotes. Metadata in a Workload
+Identity Credential is asserted by the credential issuer and inherits the credential's signature,
+its validity period, and its trust path. That is what distinguishes it from an attribute the
+workload asserts about itself at the application layer.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="in-band">
+<section id="section-3.4">
+        <h3 id="name-in-band-metadata-and-api-re">
+<a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-in-band-metadata-and-api-re" class="section-name selfRef">In-Band Metadata and API Retrieval</a>
+        </h3>
+<p id="section-3.4-1">Metadata in a JWT-based Workload Identity Credential reaches a relying party with the credential,
+avoiding a separate API call and a dependency on an available metadata service at decision time.
+However, additional claims increase token size (token bloat), are transmitted whenever that token
+is presented, and reflect the attributes asserted at credential issuance. This document defines no
+encoding for carrying these metadata claims in X.509 credentials (<a href="#x509" class="auto internal xref">Section 6.2</a>).<a href="#section-3.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.4-2">Retrieval through the API in <a href="#metadata-endpoint" class="auto internal xref">Section 7</a> keeps metadata out of the credential, supports
+X.509-based deployments, and lets the service disclose different claims to different authorized
+callers. Attributes can be updated without reissuing credentials. Retrieval adds a network request,
+latency, and an availability dependency, and its freshness depends on the service's data sources
+(<a href="#staleness" class="auto internal xref">Section 10.5</a>). The service can obtain metadata from stored records or derive it from authoritative
+information; this document does not require a separate pre-provisioned record for every workload.<a href="#section-3.4-2" class="pilcrow">¶</a></p>
+<p id="section-3.4-3">A deployment <span class="bcp14">MAY</span> use either method or both, for example carrying frequently used attributes in a
+JWT and retrieving additional attributes when needed. Claim semantics are independent of delivery;
+<a href="#consistency" class="auto internal xref">Section 8</a> addresses differences between the assertions a relying party receives.<a href="#section-3.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="metadata">
+<section id="section-4">
+      <h2 id="name-workload-metadata">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-workload-metadata" class="section-name selfRef">Workload Metadata</a>
+      </h2>
+<div id="reuse">
+<section id="section-4.1">
+        <h3 id="name-reuse-of-existing-claims">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-reuse-of-existing-claims" class="section-name selfRef">Reuse of Existing Claims</a>
+        </h3>
+<p id="section-4.1-1">This document does not define new claims for group, role, or permission where registered claims exist.
+<span><a href="https://rfc-editor.org/rfc/rfc9068#section-7.2.1" class="relref">Section 7.2.1</a> of [<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> registers <code>groups</code>, <code>roles</code>, and <code>entitlements</code> in the JSON Web Token
+Claims registry, referring for their definitions to <span><a href="https://rfc-editor.org/rfc/rfc7643#section-4.1.2" class="relref">Section 4.1.2</a> of [<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span>. A Workload Identity
+Credential or metadata endpoint response expressing a workload's group, role, or entitlements <span class="bcp14">MUST</span>
+use those claims with the same meanings and value encodings.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+          <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Attribute</th>
+              <th class="text-left" rowspan="1" colspan="1">Claim</th>
+              <th class="text-left" rowspan="1" colspan="1">Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Group membership</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>groups</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span>, <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Role</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>roles</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span>, <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Coarse entitlements</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>entitlements</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span>, <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span>
+</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-4.1-3">Two aspects of this reuse need stating explicitly.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-4.1-4">
+          <dt id="section-4.1-4.1">The subject is the workload.</dt>
+          <dd style="margin-left: 1.5em" id="section-4.1-4.2">
+            <p id="section-4.1-4.2.1"><span><a href="https://rfc-editor.org/rfc/rfc9068#section-2.2.3.1" class="relref">Section 2.2.3.1</a> of [<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> motivates these claims in terms of the resource owner, citing
+"resource owner memberships in roles and groups" and "entitlements assigned to the resource owner",
+and <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> defines them as attributes of a SCIM <code>User</code>. This document applies them to the subject of
+the Workload Identity Credential or metadata response, which is a workload or workload instance
+rather than a person.
+The registrations themselves are subject-neutral, so no conflict arises, but a relying party <span class="bcp14">MUST</span>
+interpret these claims as describing the workload or workload instance denoted by <code>sub</code> and
+<span class="bcp14">MUST NOT</span> interpret them as describing any associated principal (<a href="#principal" class="auto internal xref">Section 4.2</a>).<a href="#section-4.1-4.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.1-4.3">Value encoding is not fully determined.</dt>
+          <dd style="margin-left: 1.5em" id="section-4.1-4.4">
+            <p id="section-4.1-4.4.1"><span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> specifies no vocabulary or syntax for <code>roles</code> and <code>entitlements</code>, expecting a role
+value to be "a String or label representing a collection of entitlements". It describes <code>groups</code>
+differently: as a multi-valued complex attribute with <code>value</code> and <code>type</code> sub-attributes and
+canonical types "direct" and "indirect", derived from SCIM <code>Group</code> resources that have no
+counterpart here. Neither <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> nor this document settles whether <code>groups</code> is an array of
+strings or an array of objects. Until this is settled, credential issuers and metadata services
+<span class="bcp14">SHOULD</span> encode all three claims as arrays of strings, and a relying party <span class="bcp14">SHOULD</span>
+accept an array of objects bearing a <code>value</code> sub-attribute as equivalent to the array of those
+<code>value</code> strings. See <a href="#open-issues" class="auto internal xref">Appendix "Open Issues"</a> item 3.<a href="#section-4.1-4.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-4.1-5">Values are otherwise trust-domain specific, and this document defines no vocabulary. A relying party
+<span class="bcp14">MUST</span> treat an unrecognized value as conveying no authority rather than as a wildcard.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="principal">
+<section id="section-4.2">
+        <h3 id="name-associated-principal">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-associated-principal" class="section-name selfRef">Associated Principal</a>
+        </h3>
+<p id="section-4.2-1">A workload can have a durable association with a person, an organization, or another workload, such as
+an owner or operator. It can also act on behalf of a principal for a particular request. These are
+different relationships: an ownership or operational association does not itself confer authority to
+act on that principal's behalf. Some workloads operate autonomously and have no delegated principal
+for a request.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-4" class="relref">Section 4</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span> requires each Workload Identity Credential to carry
+exactly one Workload Identifier, in <code>sub</code> for a WIT. An associated principal does not replace that
+identifier. The credential identifies the workload, even when a separate authorization artifact
+describes a delegation relationship.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.2-3">Applying the distinction of <a href="#permissions" class="auto internal xref">Section 4.3</a>, per-request delegation belongs in the authorization
+context, such as an OAuth access token, rather than in Workload Metadata. <span>[<a href="#OAUTH-TOKEN-EXCHANGE" class="cite xref">OAUTH-TOKEN-EXCHANGE</a>]</span> provides
+mechanisms for expressing delegation in tokens. The particular access-token claims depend on the
+applicable authorization profile; the AI agent profile is discussed in <a href="#agentic" class="auto internal xref">Section 5</a>.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.2-4">Whether a durable principal association is an attribute worth asserting as Workload Metadata,
+and how it should be represented, remains open. This document defines no claim for that
+association; see <a href="#open-issues" class="auto internal xref">Appendix "Open Issues"</a> item 1. Where the associated principal is a person, asserting it is
+subject to <a href="#privacy" class="auto internal xref">Section 11</a>.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="permissions">
+<section id="section-4.3">
+        <h3 id="name-permissions-and-scopes">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-permissions-and-scopes" class="section-name selfRef">Permissions and Scopes</a>
+        </h3>
+<p id="section-4.3-1">Deployments frequently want a workload's permissions in its Workload Identity Credential. This document
+distinguishes two cases and treats them differently, because they are not the same kind of statement.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3-2">Attributes of the subject, such as group, role, and coarse entitlements, describe what the workload
+is. They are relatively stable, they are meaningful independent of any particular relying party, and
+the credential issuer is plausibly authoritative for them. These belong in the Workload Identity
+Credential or a metadata endpoint response per <a href="#reuse" class="auto internal xref">Section 4.1</a>.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.3-3">Grants, such as scopes and fine-grained permissions, describe what the workload may do at a given
+resource at a given moment. They are relationship-specific, they change faster than an identity
+credential's lifetime, and the authority for them is the resource owner or an authorization server,
+not the credential issuer.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.3-4">Accordingly, a Workload Identity Credential <span class="bcp14">MAY</span> carry coarse entitlements per <a href="#reuse" class="auto internal xref">Section 4.1</a>, but <span class="bcp14">SHOULD NOT</span> carry
+resource-specific scopes or fine-grained permissions. Where a deployment carries them anyway, a relying
+party <span class="bcp14">MUST NOT</span> treat them as authoritative for an authorization decision, and <span class="bcp14">MUST</span> obtain authorization
+from its own policy or from an authorization server. <a href="#capability" class="auto internal xref">Section 10.4</a> gives the reasoning.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.3-5">The same distinction applies to API responses. Retrieving metadata does not itself grant the target
+workload permission to access a resource, and the caller's permission to retrieve metadata does not
+confer authority to act as the target workload.<a href="#section-4.3-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="uniqueness">
+<section id="section-4.4">
+        <h3 id="name-identifier-uniqueness">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-identifier-uniqueness" class="section-name selfRef">Identifier Uniqueness</a>
+        </h3>
+<p id="section-4.4-1">The separation principle depends on the identifier unambiguously denoting its subject at the
+granularity selected by the deployment. Where workloads intended to be separately authorized,
+revoked, or attributed share an identifier, metadata cannot restore the distinction: a relying party
+cannot establish whether workload-specific metadata describes the caller or a co-tenant.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4-2"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03#section-4.3" class="relref">Section 4.3</a> of [<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span> requires that issuers
+"<span class="bcp14">MUST</span> ensure uniqueness of all Workload Identifiers they assign"; and
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03#section-4.5" class="relref">Section 4.5</a> of [<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span> and <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03#section-7.4" class="relref">Section 7.4</a> of [<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span> advise
+against reassigning a retired identifier. Sharing is permitted only where the instances "are intended to
+be treated as the same workload for the purpose of authentication, authorization, and auditing"
+(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03#section-4.2" class="relref">Section 4.2</a> of [<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span>). Replicas of a service can satisfy that condition;
+workloads requiring separate authorization or attribution do not satisfy it merely because they share
+an execution environment. If an identifier denotes a logical workload with multiple instances,
+metadata bound only to that identifier <span class="bcp14">MUST</span> describe that workload, rather than properties of one
+particular instance that do not apply to the others.<a href="#section-4.4-2" class="pilcrow">¶</a></p>
+<p id="section-4.4-3">What none of these address is the case that makes the requirement hard to meet in practice:
+platforms commonly issue a credential scoped to the execution environment rather than to the
+workload, such as an execution role assumed by every workload in a deployment, so the only subject
+available to a credential issuer is one shared by several workloads that require distinct
+identities. Therefore:<a href="#section-4.4-3" class="pilcrow">¶</a></p>
+<p id="section-4.4-4">A credential issuer <span class="bcp14">MUST NOT</span> use the subject of a platform-provided execution credential as a
+Workload Identifier where that credential is, or may become, available to workloads or instances
+that require distinct identities under the deployment's identity model.<a href="#section-4.4-4" class="pilcrow">¶</a></p>
+<p id="section-4.4-5">Where the platform offers only such a credential, a credential issuer <span class="bcp14">MUST</span> determine which workload
+or instance is requesting a credential, by a means the workload does not control, and <span class="bcp14">MUST</span> issue a
+Workload Identity Credential asserting the corresponding Workload Identifier rather than passing the
+shared execution credential through. The execution credential <span class="bcp14">MAY</span> be an input to that
+determination as evidence of the execution environment; it <span class="bcp14">MUST NOT</span> be the sole input. These
+requirements do not prohibit a shared credential for instances intentionally treated as the same
+workload.<a href="#section-4.4-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="agentic">
+<section id="section-5">
+      <h2 id="name-agentic-use-cases">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-agentic-use-cases" class="section-name selfRef">Agentic Use Cases</a>
+      </h2>
+<p id="section-5-1">AI agents are workloads to which the metadata model in this document applies. An agent may run as a
+long-lived service, an ephemeral task, or multiple concurrent instances. Its group membership, roles,
+and entitlements describe the agent identified by the credential. Per-request delegation is a
+separate relationship, as discussed in <a href="#principal" class="auto internal xref">Section 4.2</a>.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5-2">
+        <dt id="section-5-2.1">Autonomous operation:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.2">
+          <p id="section-5-2.2.1">An agent performing scheduled reconciliation can operate under its own workload identity and
+authorization. An owner or operator association, if asserted, does not imply that each action is
+performed on that principal's behalf.<a href="#section-5-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-2.3">Delegated operation:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.4">
+          <p id="section-5-2.4.1">An assistant can act on behalf of a human or another workload for a particular request. Its
+Workload Identity Credential still identifies the agent, while a separate authorization context
+expresses the delegation. The agent's <code>groups</code> and <code>roles</code> do not become those of the delegating
+principal. <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-aims-00#section-10.3" class="relref">Section 10.3</a> of [<a href="#WIMSE-AIMS" class="cite xref">WIMSE-AIMS</a>]</span> describes an OAuth profile in which the agent's
+identifier appears in the access token's <code>client_id</code>, and the user or system on whose behalf it
+acts appears in <code>sub</code>. That profile does not change the subject of the agent's Workload Identity
+Credential.<a href="#section-5-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-2.5">Shared execution environments:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.6">
+          <p id="section-5-2.6.1">A platform can host several agents in the same process, container, or execution role. Agents that
+require separate authorization or attribution need distinct identifiers under <a href="#uniqueness" class="auto internal xref">Section 4.4</a>;
+shared infrastructure alone does not establish that they are the same workload. Conversely,
+replicas or sessions intentionally treated as instances of the same agent need not acquire
+distinct identifiers solely because they are separate executions.<a href="#section-5-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="section-5-3"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-aims-00#section-6" class="relref">Section 6</a> of [<a href="#WIMSE-AIMS" class="cite xref">WIMSE-AIMS</a>]</span> requires an agent participating in that framework to be assigned
+exactly one WIMSE identifier. That requirement belongs to the agent framework; this document follows
+the general workload and instance identity model of <span>[<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span>.<a href="#section-5-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="carriage">
+<section id="section-6">
+      <h2 id="name-carrying-metadata-in-worklo">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-carrying-metadata-in-worklo" class="section-name selfRef">Carrying Metadata in Workload Identity Credentials</a>
+      </h2>
+<div id="jwt">
+<section id="section-6.1">
+        <h3 id="name-jwt-based-credentials">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-jwt-based-credentials" class="section-name selfRef">JWT-Based Credentials</a>
+        </h3>
+<p id="section-6.1-1">Metadata is carried as claims in the JWT <span>[<a href="#JWT" class="cite xref">JWT</a>]</span> claims set, using the claims in <a href="#reuse" class="auto internal xref">Section 4.1</a>. No new
+mechanism is required, and the rules for doing so are already established:
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-5.1.2" class="relref">Section 5.1.2</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span> permits additional claims in a WIT, requires that a
+recipient ignore claims it does not understand, discourages private claim names, and requires that
+claims used outside closed environments be registered with IANA. Because the claims in <a href="#reuse" class="auto internal xref">Section 4.1</a> are
+already registered, a Workload Identity Credential expressing workload group, role, or entitlements
+satisfies those rules without further action.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">The following non-normative examples show Workload Identity Credentials for the reconciliation service
+that <a href="#intro" class="auto internal xref">Section 1</a> names with an attribute-bearing identifier. Its replicas share a workload identifier and
+the same workload metadata. In each example, the identifier is opaque and the attributes appear only
+as claims.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+<p id="section-6.1-3">A WIT, whose JOSE header carries <code>"typ": "wit+jwt"</code>:<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-6.1-4">
+<pre>
+{
+  "iss": "https://issuer.example.com",
+  "sub": "wimse://example.com/workload/a7f3c1a24b904d61",
+  "iat": 1757894400,
+  "exp": 1757898000,
+  "jti": "e1f0c7d2a9b34c58",
+  "cnf": {
+    "jwk": {
+      "alg": "ES256", "kty": "EC", "crv": "P-256",
+      "x": "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
+      "y": "x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0"
+    }
+  },
+  "groups": ["team-payments"],
+  "roles": ["reconciler"],
+  "entitlements": ["ledger-read"]
+}
+</pre><a href="#section-6.1-4" class="pilcrow">¶</a>
+</div>
+<p id="section-6.1-5">The <code>cnf</code> claim is mandatory in a WIT and binds the credential to the workload's key; a WIT has no <code>aud</code>
+claim and cannot be used as a bearer token
+(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-5.1" class="relref">Section 5.1</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span>). The same workload's JWT-SVID <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span> is instead
+audience-restricted and carries no confirmation claim:<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-6.1-6">
+<pre>
+{
+  "sub": "spiffe://example.com/workload/a7f3c1a24b904d61",
+  "aud": ["spiffe://example.com/service/ledger"],
+  "iat": 1757894400,
+  "exp": 1757898000,
+  "groups": ["team-payments"],
+  "roles": ["reconciler"],
+  "entitlements": ["ledger-read"]
+}
+</pre><a href="#section-6.1-6" class="pilcrow">¶</a>
+</div>
+<p id="section-6.1-7">The metadata is identical across these two examples. Two properties illustrate what the separation
+buys. Reassigning the workload to another team
+changes <code>groups</code> and leaves <code>sub</code> untouched, so every existing grant and every historical audit record
+that named the workload remains valid and remains accurate. And a relying party that is not authorized to
+learn the workload's role can be issued a credential omitting <code>roles</code>, without changing the workload's
+identifier, because the identifier no longer carries it.<a href="#section-6.1-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="x509">
+<section id="section-6.2">
+        <h3 id="name-x509-based-credentials">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-x509-based-credentials" class="section-name selfRef">X.509-Based Credentials</a>
+        </h3>
+<p id="section-6.2-1">X.509 certificates have no JWT claims set. This document defines no certificate extension or other
+encoding for carrying Workload Metadata in X.509 credentials; defining one is outside its scope.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-6.1" class="relref">Section 6.1</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span> defines the Workload Identity Certificate, which carries the Workload
+Identifier in a single URI SubjectAltName. Attributes cannot be carried in a second URI SAN:
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-4" class="relref">Section 4</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span> requires that additional correlation "<span class="bcp14">MUST NOT</span> be encoded as a second
+workload identifier in the same WIT or WIC". For an X.509-SVID the constraint is stronger still:
+<span>[<a href="#SPIFFE-X509-SVID" class="cite xref">SPIFFE-X509-SVID</a>]</span> requires a validator to reject any certificate bearing more than one URI SAN,
+whatever its contents. Metadata must go somewhere a relying party will not mistake for an identifier.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<p id="section-6.2-3">Absent such a mechanism, a conforming X.509-based Workload Identity Credential carries the identifier alone:<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.2-4">
+<pre>
+X509v3 Basic Constraints: critical
+    CA:FALSE
+X509v3 Key Usage: critical
+    Digital Signature
+X509v3 Extended Key Usage:
+    TLS Web Server Authentication, TLS Web Client Authentication
+X509v3 Subject Alternative Name: critical
+    URI:spiffe://example.com/workload/a7f3c1a24b904d61
+</pre><a href="#section-6.2-4" class="pilcrow">¶</a>
+</div>
+<p id="section-6.2-5">After authenticating the workload using this certificate, a relying party can request metadata for
+the complete URI SAN value from the endpoint in <a href="#metadata-endpoint" class="auto internal xref">Section 7</a>. It authenticates the metadata
+request using its own workload credentials. No certificate extension is needed for this retrieval.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="metadata-endpoint">
+<section id="section-7">
+      <h2 id="name-workload-metadata-endpoint">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-workload-metadata-endpoint" class="section-name selfRef">Workload Metadata Endpoint</a>
+      </h2>
+<p id="section-7-1">The workload metadata endpoint is an HTTPS API that returns claims about a workload or workload
+instance. The caller and the subject of the query are distinct roles: for example, workload B can
+authenticate to the endpoint to retrieve metadata about workload A. The service authenticates B and
+authorizes B's access to A's metadata. A caller <span class="bcp14">MAY</span> also request its own metadata, subject to the
+same authorization checks.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2">The metadata service can be operated by a credential issuer or by a separate authority trusted to
+provide metadata for the relevant workloads and claims. Knowledge of a Workload Identifier, or
+possession of another workload's public credential, does not grant access to its metadata.<a href="#section-7-2" class="pilcrow">¶</a></p>
+<div id="endpoint-location">
+<section id="section-7.1">
+        <h3 id="name-endpoint-location-and-trust">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-endpoint-location-and-trust" class="section-name selfRef">Endpoint Location and Trust</a>
+        </h3>
+<p id="section-7.1-1">A deployment or trust domain <span class="bcp14">MAY</span> configure its workload metadata endpoint URI out of band. This
+configuration <span class="bcp14">MUST</span> be obtained through a trusted mechanism and <span class="bcp14">MUST</span> associate the endpoint with the
+Workload Identifier namespaces and claims for which it is authoritative. The endpoint can use a
+different host from the trust domain, for example <code>https://metadata.example.net/workload-info</code>.
+An explicitly configured URI takes precedence over the default URI described below.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-2">In the absence of an explicitly configured URI, a client <span class="bcp14">MAY</span> use the following default URI when the
+trust domain is a valid fully qualified DNS name and deployment policy trusts that domain's HTTPS
+service to provide the requested workload metadata:<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.1-3">
+<pre>
+https://&lt;trust-domain&gt;/.well-known/workload-metadata
+</pre><a href="#section-7.1-3" class="pilcrow">¶</a>
+</div>
+<p id="section-7.1-4">The well-known URI uses HTTPS on its default port and follows <span>[<a href="#WELL-KNOWN" class="cite xref">WELL-KNOWN</a>]</span>. The client's
+trust configuration <span class="bcp14">MUST</span> authorize this mapping before the client contacts the endpoint or presents
+credentials. DNS resolution or a valid TLS certificate alone does not establish authority to assert workload
+metadata. Where a trust domain is not a valid fully qualified DNS name, or this default mapping is
+not trusted, the client <span class="bcp14">MUST</span> use trusted out-of-band configuration or treat the endpoint as
+unavailable. It <span class="bcp14">MUST NOT</span> derive an endpoint from the workload path or an untrusted claim.<a href="#section-7.1-4" class="pilcrow">¶</a></p>
+<p id="section-7.1-5">Configured endpoint URIs <span class="bcp14">MUST</span> be absolute HTTPS URIs without user information or a fragment. They
+<span class="bcp14">MAY</span> contain fixed query parameters, but <span class="bcp14">MUST NOT</span> contain a <code>sub</code> parameter; the client adds that
+parameter for each request as described in <a href="#metadata-request" class="auto internal xref">Section 7.3</a>. Clients <span class="bcp14">MUST</span> authenticate the
+server using the configured trust anchors and expected server identity for the endpoint. Clients
+<span class="bcp14">MUST NOT</span> automatically follow redirects; an alternative endpoint requires a trusted configuration
+update. Failure of a configured endpoint <span class="bcp14">MUST NOT</span> trigger fallback to an unconfigured default.<a href="#section-7.1-5" class="pilcrow">¶</a></p>
+<p id="section-7.1-6">The association with a namespace includes the Workload Identifier scheme. Identifiers using
+different schemes <span class="bcp14">MUST NOT</span> be treated as interchangeable merely because their trust domains or
+paths match. A service at the default URI can serve multiple authorized namespaces and distinguishes
+them using the complete identifier in the request.<a href="#section-7.1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="metadata-auth">
+<section id="section-7.2">
+        <h3 id="name-authentication-and-authoriz">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-authentication-and-authoriz" class="section-name selfRef">Authentication and Authorization</a>
+        </h3>
+<p id="section-7.2-1">The endpoint <span class="bcp14">MUST</span> authenticate the caller using WIMSE workload authentication before returning
+metadata. This document does not select a mandatory authentication binding. Deployments can use
+mutual TLS <span>[<a href="#WIMSE-MTLS" class="cite xref">WIMSE-MTLS</a>]</span>, HTTP Message Signatures
+<span>[<a href="#WIMSE-HTTPSIG" class="cite xref">WIMSE-HTTPSIG</a>]</span>, or a WIT with a Workload Proof Token
+<span>[<a href="#WIMSE-WPT" class="cite xref">WIMSE-WPT</a>]</span>, according to deployment configuration.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-2">The service <span class="bcp14">MUST</span> authorize disclosure for the authenticated caller, the requested subject, and
+each claim it returns. The same request from different callers <span class="bcp14">MAY</span> return different subsets of claims.
+The authorization policy and any grouping of claims into access levels are deployment-specific.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="metadata-request">
+<section id="section-7.3">
+        <h3 id="name-metadata-request">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-metadata-request" class="section-name selfRef">Metadata Request</a>
+        </h3>
+<p id="section-7.3-1">A client retrieves metadata using HTTP GET as defined in <span><a href="https://rfc-editor.org/rfc/rfc9110#section-9.3.1" class="relref">Section 9.3.1</a> of [<a href="#HTTP" class="cite xref">HTTP</a>]</span>. The
+request <span class="bcp14">MUST</span> contain exactly one query parameter named <code>sub</code>, whose value is the complete Workload
+Identifier of the subject. The client <span class="bcp14">MUST</span> percent-encode the value as a URI query parameter using
+<span>[<a href="#URI" class="cite xref">URI</a>]</span>. Only unreserved characters can remain unencoded in the value; percent signs already
+present in the identifier are encoded as <code>%25</code>. If the endpoint has fixed query parameters, the
+client appends <code>sub</code> to them using <code>&amp;</code>; otherwise it starts the query with <code>?sub=</code>. The service decodes the
+parameter value once to recover the identifier and <span class="bcp14">MUST NOT</span> interpret its path as a set of claims.
+The client <span class="bcp14">MUST NOT</span> send request content with this GET request.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3-2">For example, a request for <code>wimse://example.com/workload/a7f3c1a24b904d61</code> uses the following request
+target. The caller is authenticated using the configured WIMSE binding; authentication-specific
+headers, if any, are omitted from this example.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
+<div class="lang-http-message sourcecode" id="section-7.3-3">
+<pre>
+GET /.well-known/workload-metadata?sub=wimse%3A%2F%2Fexample.com%2Fworkload%2Fa7f3c1a24b904d61 HTTP/1.1
+Host: example.com
+Accept: application/json
+</pre><a href="#section-7.3-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="metadata-response">
+<section id="section-7.4">
+        <h3 id="name-metadata-response">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-metadata-response" class="section-name selfRef">Metadata Response</a>
+        </h3>
+<p id="section-7.4-1">A successful response <span class="bcp14">MUST</span> use status code 200 and media type <code>application/json</code>. The response body
+<span class="bcp14">MUST</span> be a UTF-8 JSON object <span>[<a href="#JSON" class="cite xref">JSON</a>]</span>, with claims directly at the top level and no wrapping
+metadata object. Claim values retain their defined types, including arrays and objects where
+applicable. Member names <span class="bcp14">MUST</span> be unique. The response <span class="bcp14">MUST</span> contain a string-valued <code>sub</code> exactly
+equal to the complete identifier recovered from the request, using case-sensitive string comparison.
+The client <span class="bcp14">MUST</span> verify this equality and <span class="bcp14">MUST NOT</span> use a response with a missing, invalid, or mismatched <code>sub</code>.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+<p id="section-7.4-2">The remaining members are claims the caller is authorized to receive, using <a href="#reuse" class="auto internal xref">Section 4.1</a>. Clients
+<span class="bcp14">MUST</span> ignore claims they do not understand. A claim that is unavailable or withheld <span class="bcp14">MUST</span> be omitted;
+omission <span class="bcp14">MUST NOT</span> be interpreted as a negative assertion, an empty value, or deletion of a
+previously received claim. For example, an omitted <code>groups</code> member does not assert that the workload
+has no groups, whereas <code>"groups": []</code> asserts an empty group membership list. A response containing
+only <code>sub</code> is permitted when the caller is authorized to learn that the subject exists but no other
+claims are available for disclosure. Missing claims required by an authorization policy <span class="bcp14">MUST NOT</span> be
+treated as satisfying that policy.<a href="#section-7.4-2" class="pilcrow">¶</a></p>
+<p id="section-7.4-3">For a caller authorized to receive group membership and roles, a response might be:<a href="#section-7.4-3" class="pilcrow">¶</a></p>
+<div class="lang-http-message sourcecode" id="section-7.4-4">
+<pre>
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
+
+{
+  "sub": "wimse://example.com/workload/a7f3c1a24b904d61",
+  "groups": ["team-payments"],
+  "roles": ["reconciler"]
+}
+</pre><a href="#section-7.4-4" class="pilcrow">¶</a>
+</div>
+<p id="section-7.4-5">A different caller authorized to receive only group membership might receive:<a href="#section-7.4-5" class="pilcrow">¶</a></p>
+<div class="lang-http-message sourcecode" id="section-7.4-6">
+<pre>
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
+
+{
+  "sub": "wimse://example.com/workload/a7f3c1a24b904d61",
+  "groups": ["team-payments"]
+}
+</pre><a href="#section-7.4-6" class="pilcrow">¶</a>
+</div>
+<p id="section-7.4-7">The missing <code>roles</code> member in the second response says nothing about the workload's roles. The
+response is protected by the authenticated HTTPS exchange; it is not a signed assertion for
+forwarding to another party and is not evidence that the subject participated in this exchange.
+The relying party authenticates the subject separately when its application requires that proof.<a href="#section-7.4-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="metadata-errors">
+<section id="section-7.5">
+        <h3 id="name-errors-and-caching">
+<a href="#section-7.5" class="section-number selfRef">7.5. </a><a href="#name-errors-and-caching" class="section-name selfRef">Errors and Caching</a>
+        </h3>
+<p id="section-7.5-1">Authentication failures are handled according to the selected WIMSE authentication binding. For
+authenticated requests, the endpoint uses HTTP status codes as follows:<a href="#section-7.5-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.5-2.1">
+            <p id="section-7.5-2.1.1">400 (Bad Request) for a missing, repeated, or invalid <code>sub</code> parameter;<a href="#section-7.5-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-7.5-2.2">
+            <p id="section-7.5-2.2.1">403 (Forbidden) when the caller is not authorized to use the metadata endpoint at all;<a href="#section-7.5-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-7.5-2.3">
+            <p id="section-7.5-2.3.1">404 (Not Found) when the subject is unknown or the caller is not authorized to learn whether it
+exists. These cases <span class="bcp14">MUST NOT</span> be distinguished in the response status or body;<a href="#section-7.5-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-7.5-2.4">
+            <p id="section-7.5-2.4.1">503 (Service Unavailable) when a temporary failure prevents the service from obtaining the
+metadata needed to process the request.<a href="#section-7.5-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-7.5-3">Errors <span class="bcp14">MUST NOT</span> disclose withheld claims. Implementations <span class="bcp14">SHOULD</span> also avoid revealing subject
+existence through differences in response timing. Other HTTP errors retain their meanings in
+<span>[<a href="#HTTP" class="cite xref">HTTP</a>]</span>.<a href="#section-7.5-3" class="pilcrow">¶</a></p>
+<p id="section-7.5-4">All HTTP responses from this endpoint, including errors, <span class="bcp14">MUST</span> include <code>Cache-Control: no-store</code>
+(<span><a href="https://rfc-editor.org/rfc/rfc9111#section-5.2.2.5" class="relref">Section 5.2.2.5</a> of [<a href="#HTTP-CACHING" class="cite xref">HTTP-CACHING</a>]</span>). In addition to HTTP cache handling, clients <span class="bcp14">MUST NOT</span>
+use retrieved metadata for any authorization decision other than the one for which it was obtained.
+This does not preclude retaining records for audit purposes, subject to <a href="#privacy" class="auto internal xref">Section 11</a>.<a href="#section-7.5-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="consistency">
+<section id="section-8">
+      <h2 id="name-consistency-across-delivery">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-consistency-across-delivery" class="section-name selfRef">Consistency Across Delivery Methods</a>
+      </h2>
+<p id="section-8-1">Claims have the same semantics whether carried in a JWT or returned by the metadata endpoint. The
+same subject can have different disclosed claim subsets in different credentials and API responses.
+That an X.509 credential carries no metadata does not mean JWTs or API responses for the same
+subject must omit it. Different values can also reflect changes since a credential was issued.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">A relying party using more than one source <span class="bcp14">MUST</span> apply an explicit policy identifying the trusted
+authority and freshness requirements for each claim used in authorization. It <span class="bcp14">MUST NOT</span> assume that
+an API response overrides a credential solely because it was received later, or combine claim
+values from different assertions to obtain a more permissive result. Where conflicting assertions
+cannot be resolved by that policy, the relying party <span class="bcp14">MUST NOT</span> use the conflicting claim to grant
+access. Omission does not resolve a conflict or revoke a previously asserted value; nor does it make
+an older value sufficiently fresh for the current decision. If required metadata cannot be obtained
+from an acceptable source, access depending on that metadata <span class="bcp14">MUST NOT</span> be granted.<a href="#section-8-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="relationship">
+<section id="section-9">
+      <h2 id="name-relationship-to-other-work">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-relationship-to-other-work" class="section-name selfRef">Relationship to Other Work</a>
+      </h2>
+<p id="section-9-1">The RFCs this document profiles are described where they are used. What follows locates it among the
+drafts it neighbors.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-9-2">
+        <dt id="section-9-2.1">
+<span>[<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span>:</dt>
+        <dd style="margin-left: 1.5em" id="section-9-2.2">
+          <p id="section-9-2.2.1">Defines the identifier. This document defines what does not go in it and where those attributes go
+instead. It introduces no new identifier syntax.<a href="#section-9-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-9-2.3">
+<span>[<a href="#WIMSE-ARCH" class="cite xref">WIMSE-ARCH</a>]</span>:</dt>
+        <dd style="margin-left: 1.5em" id="section-9-2.4">
+          <p id="section-9-2.4.1">Provides the architectural frame and the definitions of Workload, Workload Instance, and Workload
+Identity Credential used in this document.<a href="#section-9-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-9-2.5">
+<span>[<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span>:</dt>
+        <dd style="margin-left: 1.5em" id="section-9-2.6">
+          <p id="section-9-2.6.1">Normative. Defines the WIT and WIC used to authenticate workloads, fixes <code>sub</code> in a WIT as the
+Workload Identifier, and sets the rules for adding claims to a WIT that <a href="#jwt" class="auto internal xref">Section 6.1</a> profiles. Workloads
+authenticated using either credential format can be subjects of metadata retrieval.<a href="#section-9-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-9-2.7">
+<span>[<a href="#WIMSE-MTLS" class="cite xref">WIMSE-MTLS</a>]</span>, <span>[<a href="#WIMSE-HTTPSIG" class="cite xref">WIMSE-HTTPSIG</a>]</span>, and <span>[<a href="#WIMSE-WPT" class="cite xref">WIMSE-WPT</a>]</span>:</dt>
+        <dd style="margin-left: 1.5em" id="section-9-2.8">
+          <p id="section-9-2.8.1">Describe WIMSE authentication bindings that deployments can use for the metadata endpoint.
+<a href="#metadata-auth" class="auto internal xref">Section 7.2</a> leaves the selection of a binding to deployment configuration.<a href="#section-9-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-9-2.9">
+<span>[<a href="#WIMSE-AIMS" class="cite xref">WIMSE-AIMS</a>]</span>:</dt>
+        <dd style="margin-left: 1.5em" id="section-9-2.10">
+          <p id="section-9-2.10.1">The WIMSE framework for AI agent identity. It establishes identifier and OAuth authorization
+requirements for agents participating in that framework. This document defines metadata for
+workloads generally, including those agents; <a href="#agentic" class="auto internal xref">Section 5</a> describes the relationship without
+imposing the agent framework on other workloads.<a href="#section-9-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="security">
+<section id="section-10">
+      <h2 id="name-security-considerations">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<div id="binding">
+<section id="section-10.1">
+        <h3 id="name-dependence-on-identifier-un">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-dependence-on-identifier-un" class="section-name selfRef">Dependence on Identifier Uniqueness</a>
+        </h3>
+<p id="section-10.1-1">Metadata is bound to its subject through the identifier asserted in the credential or API response,
+so the reasoning here rests on <a href="#uniqueness" class="auto internal xref">Section 4.4</a>. Sharing an identifier among workloads or instances
+that require distinct identities does two kinds of damage. Metadata can describe a different subject from the
+caller, and grants made to the shared identifier can accrue to all its holders. Instances
+intentionally sharing a workload identity are treated as the same subject; metadata bound only to
+that identifier cannot distinguish them for authorization or attribution.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="issuance">
+<section id="section-10.2">
+        <h3 id="name-strength-of-the-issuance-de">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-strength-of-the-issuance-de" class="section-name selfRef">Strength of the Issuance Decision</a>
+        </h3>
+<p id="section-10.2-1">A credential issuer asserting metadata is making a claim it must be competent to make. If it
+distinguishes workloads, or determines their group and role, on properties the workload controls (a
+self-reported name, a command-line argument, a writable filesystem path, an executable name it can
+choose), then any workload able to reach the credential issuer can obtain another workload's
+identifier and metadata. This converts a shared-identifier problem into an impersonation problem,
+which is worse, because the audit record then positively names the wrong workload.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+<p id="section-10.2-2">A credential issuer <span class="bcp14">MUST NOT</span> determine a Workload Identifier or Workload Metadata solely from
+properties the requesting workload self-reports. Beyond that, credential issuers <span class="bcp14">SHOULD</span> determine
+both from properties the workload cannot alter within its own privilege level. This document does
+not define what qualifies, since the available properties depend on the platform and range from
+hardware-rooted attestation through kernel-observed process properties to orchestrator-asserted
+labels not under the deployer's control. Whichever a credential issuer relies on is
+security-relevant configuration and warrants the same review as policy.<a href="#section-10.2-2" class="pilcrow">¶</a></p>
+<p id="section-10.2-3">That requirement constrains the workload, not its deployer. Where a credential issuer maps a
+deployment-time record (such as an orchestrator label or workload annotation) to an
+authorization-relevant attribute, permission to write that record is permission to grant that
+attribute. Deployments <span class="bcp14">SHOULD</span> restrict such write access as tightly as the corresponding
+authorization grant, or determine attributes from properties the deployer cannot write.<a href="#section-10.2-3" class="pilcrow">¶</a></p>
+<p id="section-10.2-4">A deployer can place a workload only in execution environments the platform authorizes them to
+access. The namespace a pod runs in, the project a cloud workload is deployed to, and the identity
+pool from which it obtains a credential are all properties the platform assigns and the workload
+cannot self-report. A credential issuer <span class="bcp14">MAY</span> use such properties as selectors from which to derive
+Workload Metadata. Where a property is shared across workloads, it <span class="bcp14">MUST NOT</span> be the sole input to
+identifier determination (<a href="#uniqueness" class="auto internal xref">Section 4.4</a>); it <span class="bcp14">MAY</span> inform which metadata the credential issuer
+asserts for workloads that share the environment.<a href="#section-10.2-4" class="pilcrow">¶</a></p>
+<p id="section-10.2-5">For finer granularity within a shared environment, platform-assigned execution environment
+credentials (such as IAM execution roles, managed identities, or service accounts) can
+distinguish individual workloads. A credential issuer <span class="bcp14">MAY</span> use such a credential as a selector for
+metadata derivation; any use of its subject as a Workload Identifier <span class="bcp14">MUST</span> satisfy <a href="#uniqueness" class="auto internal xref">Section 4.4</a>.
+Deployments <span class="bcp14">SHOULD</span> confirm that the privilege required to assign such a credential exceeds the
+privilege required to deploy the workload.<a href="#section-10.2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="metadata-security">
+<section id="section-10.3">
+        <h3 id="name-metadata-service-authority-">
+<a href="#section-10.3" class="section-number selfRef">10.3. </a><a href="#name-metadata-service-authority-" class="section-name selfRef">Metadata Service Authority and Request Protection</a>
+        </h3>
+<p id="section-10.3-1">A metadata service <span class="bcp14">MUST</span> obtain authorization-relevant attributes from sources it is trusted to use
+for the subject and claims concerned. It <span class="bcp14">MUST NOT</span> accept claims solely on the basis that a caller
+or the subject workload self-reports them. The considerations about writable deployment records and
+metadata derivation in <a href="#issuance" class="auto internal xref">Section 10.2</a> apply equally to metadata services. An authenticated response
+establishes which service supplied the claims; it does not by itself establish that the service is
+authoritative for them. Clients <span class="bcp14">MUST</span> verify the authority association in <a href="#endpoint-location" class="auto internal xref">Section 7.1</a> and
+the response subject in <a href="#metadata-response" class="auto internal xref">Section 7.4</a> before using returned claims.<a href="#section-10.3-1" class="pilcrow">¶</a></p>
+<p id="section-10.3-2">The target identifier in a request is a lookup key, not a URI to fetch. A service <span class="bcp14">MUST NOT</span>
+dereference that identifier to obtain metadata without a separately trusted configuration for the
+source. Clients and services <span class="bcp14">SHOULD</span> apply network access restrictions appropriate to their
+deployment to prevent metadata lookups from becoming a means of making requests to unintended
+destinations. The configured endpoint precedence and redirect restrictions in <a href="#endpoint-location" class="auto internal xref">Section 7.1</a>
+also prevent disclosure of credentials or query subjects to untrusted endpoints.<a href="#section-10.3-2" class="pilcrow">¶</a></p>
+<p id="section-10.3-3">The WIMSE authentication binding and HTTPS transport <span class="bcp14">MUST</span> together protect the association between
+the authenticated caller and the actual metadata request, including its method and target with the
+<code>sub</code> query parameter. When an intermediary terminates authentication, the service <span class="bcp14">MUST</span> rely only on
+a trusted binding of the original caller to that request. Forwarding an unauthenticated caller-identity
+header is not such a binding. Rate limits and request-size limits <span class="bcp14">SHOULD</span> be applied to reduce enumeration and
+denial-of-service risks.<a href="#section-10.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="capability">
+<section id="section-10.4">
+        <h3 id="name-workload-identity-credentia">
+<a href="#section-10.4" class="section-number selfRef">10.4. </a><a href="#name-workload-identity-credentia" class="section-name selfRef">Workload Identity Credentials as Capabilities</a>
+        </h3>
+<p id="section-10.4-1">Metadata that expresses authority converts an identity credential into a capability. Three consequences
+motivate <a href="#permissions" class="auto internal xref">Section 4.3</a>. They hold whether or not the credential is a bearer token: a WIT is bound
+to the workload's key and cannot be used as one (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-5.1" class="relref">Section 5.1</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span>), while a JWT-SVID
+is presented as one <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span>.<a href="#section-10.4-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-10.4-2">
+          <dt id="section-10.4-2.1">Lifetime mismatch:</dt>
+          <dd style="margin-left: 1.5em" id="section-10.4-2.2">
+            <p id="section-10.4-2.2.1">A permission revoked at the authorization server remains asserted by every unexpired credential
+carrying it. Workload Identity Credential lifetimes are chosen for identity freshness, not for permission
+freshness.<a href="#section-10.4-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-10.4-2.3">Two authorities:</dt>
+          <dd style="margin-left: 1.5em" id="section-10.4-2.4">
+            <p id="section-10.4-2.4.1">If both the Workload Identity Credential and the relying party's policy assert what a workload may do, the
+effective policy is whichever is consulted, and the deployment has two sources of truth for one
+decision.<a href="#section-10.4-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-10.4-2.5">Blast radius:</dt>
+          <dd style="margin-left: 1.5em" id="section-10.4-2.6">
+            <p id="section-10.4-2.6.1">An identity credential is presented to every relying party the workload contacts. A credential enumerating
+permissions discloses the workload's full authority to each of them, including those with no need to
+know it.<a href="#section-10.4-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="staleness">
+<section id="section-10.5">
+        <h3 id="name-attribute-staleness">
+<a href="#section-10.5" class="section-number selfRef">10.5. </a><a href="#name-attribute-staleness" class="section-name selfRef">Attribute Staleness</a>
+        </h3>
+<p id="section-10.5-1">In-band metadata reflects the assertions made at credential issuance. A still-valid credential can
+therefore carry an attribute that has since changed. Deployments requiring fresher attributes can
+use shorter credential lifetimes or require retrieval from the metadata endpoint for the relevant
+claims. Retrieval avoids waiting for credential renewal, but a metadata service can itself depend
+on delayed or replicated data sources; <code>no-store</code> does not guarantee real-time updates at those
+sources.<a href="#section-10.5-1" class="pilcrow">¶</a></p>
+<p id="section-10.5-2">Deployments <span class="bcp14">MUST</span> establish acceptable freshness for claims used in authorization and <span class="bcp14">MUST NOT</span> use
+data known to exceed those limits. If policy requires an API lookup and that lookup fails, the
+relying party <span class="bcp14">MUST NOT</span> silently fall back to older in-band metadata. The source-selection and
+conflict rules in <a href="#consistency" class="auto internal xref">Section 8</a> apply even when both the credential and endpoint response are
+authentic. Retrieval does not renew, revoke, or establish the validity of a Workload Identity
+Credential.<a href="#section-10.5-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="privacy">
+<section id="section-11">
+      <h2 id="name-privacy-considerations">
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
+      </h2>
+<p id="section-11-1">Asserting an associated human principal per <a href="#principal" class="auto internal xref">Section 4.2</a> can disclose a person's identifier to
+relying parties and their audit systems. Credential issuers and metadata services <span class="bcp14">SHOULD</span> disclose
+such associations only to parties that require them and <span class="bcp14">SHOULD</span> prefer opaque pseudonymous
+identifiers to directly identifying values such as email addresses.<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-2">In-band attributes are exposed to each relying party to which the credential is presented. A
+JWT-SVID can be narrowed by audience restriction, and <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span> recommends a single narrowly
+scoped <code>aud</code> value. A WIT has no <code>aud</code> claim, so issuing different WITs does not itself enforce
+recipient-specific disclosure. Deployments <span class="bcp14">SHOULD</span> omit sensitive attributes from credentials shared
+across relying parties and use the metadata endpoint's authorization-dependent disclosure where
+appropriate. This consideration also applies to organizational information such as group membership
+and roles.<a href="#section-11-2" class="pilcrow">¶</a></p>
+<p id="section-11-3">API retrieval reveals the queried workload identifier to the metadata service, allowing it to
+observe which callers are interested in which workloads. With GET, identifiers also appear in
+request URIs and can be retained in access logs by clients, servers, and intermediaries. Deployments
+<span class="bcp14">SHOULD</span> minimize and protect such logs, including audit records of returned claims. HTTPS protects
+the exchange in transit but does not conceal its contents from its endpoints or TLS-terminating
+intermediaries. The subject-existence protections and <code>no-store</code> requirement in <a href="#metadata-errors" class="auto internal xref">Section 7.5</a>
+limit additional disclosure through errors and caches.<a href="#section-11-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-12">
+      <h2 id="name-iana-considerations">
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-12-1">This document requests registration of the following entry in the "Well-Known URIs" registry
+established by <span>[<a href="#WELL-KNOWN" class="cite xref">WELL-KNOWN</a>]</span>:<a href="#section-12-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-12-2">
+        <dt id="section-12-2.1">URI suffix:</dt>
+        <dd style="margin-left: 1.5em" id="section-12-2.2">
+          <p id="section-12-2.2.1"><code>workload-metadata</code><a href="#section-12-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-12-2.3">Reference:</dt>
+        <dd style="margin-left: 1.5em" id="section-12-2.4">
+          <p id="section-12-2.4.1">this document<a href="#section-12-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-12-2.5">Status:</dt>
+        <dd style="margin-left: 1.5em" id="section-12-2.6">
+          <p id="section-12-2.6.1">permanent<a href="#section-12-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-12-2.7">Change controller:</dt>
+        <dd style="margin-left: 1.5em" id="section-12-2.8">
+          <p id="section-12-2.8.1">IETF<a href="#section-12-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-13">
+      <h2 id="name-references">
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-13.1">
+        <h3 id="name-normative-references">
+<a href="#section-13.1" class="section-number selfRef">13.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="HTTP">[HTTP]</dt>
+        <dd>
+<span class="refAuthor">Fielding, R., Ed.</span>, <span class="refAuthor">Nottingham, M., Ed.</span>, and <span class="refAuthor">J. Reschke, Ed.</span>, <span class="refTitle">"HTTP Semantics"</span>, <span class="seriesInfo">STD 97</span>, <span class="seriesInfo">RFC 9110</span>, <span class="seriesInfo">DOI 10.17487/RFC9110</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9110">https://www.rfc-editor.org/rfc/rfc9110</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="JSON">[JSON]</dt>
+        <dd>
+<span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The JavaScript Object Notation (JSON) Data Interchange Format"</span>, <span class="seriesInfo">STD 90</span>, <span class="seriesInfo">RFC 8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time datetime="2017-12" class="refDate">December 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8259">https://www.rfc-editor.org/rfc/rfc8259</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="JWT">[JWT]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Token (JWT)"</span>, <span class="seriesInfo">RFC 7519</span>, <span class="seriesInfo">DOI 10.17487/RFC7519</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7519">https://www.rfc-editor.org/rfc/rfc7519</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="OAUTH-JWT">[OAUTH-JWT]</dt>
+        <dd>
+<span class="refAuthor">Bertocci, V.</span>, <span class="refTitle">"JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens"</span>, <span class="seriesInfo">RFC 9068</span>, <span class="seriesInfo">DOI 10.17487/RFC9068</span>, <time datetime="2021-10" class="refDate">October 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9068">https://www.rfc-editor.org/rfc/rfc9068</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SCIM-CORE">[SCIM-CORE]</dt>
+        <dd>
+<span class="refAuthor">Hunt, P., Ed.</span>, <span class="refAuthor">Grizzle, K.</span>, <span class="refAuthor">Wahlstroem, E.</span>, and <span class="refAuthor">C. Mortimore</span>, <span class="refTitle">"System for Cross-domain Identity Management: Core Schema"</span>, <span class="seriesInfo">RFC 7643</span>, <span class="seriesInfo">DOI 10.17487/RFC7643</span>, <time datetime="2015-09" class="refDate">September 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7643">https://www.rfc-editor.org/rfc/rfc7643</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="URI">[URI]</dt>
+        <dd>
+<span class="refAuthor">Berners-Lee, T.</span>, <span class="refAuthor">Fielding, R.</span>, and <span class="refAuthor">L. Masinter</span>, <span class="refTitle">"Uniform Resource Identifier (URI): Generic Syntax"</span>, <span class="seriesInfo">STD 66</span>, <span class="seriesInfo">RFC 3986</span>, <span class="seriesInfo">DOI 10.17487/RFC3986</span>, <time datetime="2005-01" class="refDate">January 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3986">https://www.rfc-editor.org/rfc/rfc3986</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WELL-KNOWN">[WELL-KNOWN]</dt>
+        <dd>
+<span class="refAuthor">Nottingham, M.</span>, <span class="refTitle">"Well-Known Uniform Resource Identifiers (URIs)"</span>, <span class="seriesInfo">RFC 8615</span>, <span class="seriesInfo">DOI 10.17487/RFC8615</span>, <time datetime="2019-05" class="refDate">May 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8615">https://www.rfc-editor.org/rfc/rfc8615</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WIMSE-ARCH">[WIMSE-ARCH]</dt>
+        <dd>
+<span class="refAuthor">Salowey, J. A.</span>, <span class="refAuthor">Rosomakho, Y.</span>, and <span class="refAuthor">H. Tschofenig</span>, <span class="refTitle">"Workload Identity in a Multi System Environment (WIMSE) Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-wimse-arch-08</span>, <time datetime="2026-07-06" class="refDate">6 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-arch-08">https://datatracker.ietf.org/doc/html/draft-ietf-wimse-arch-08</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WIMSE-CREDS">[WIMSE-CREDS]</dt>
+        <dd>
+<span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Salowey, J. A.</span>, <span class="refAuthor">Schwenkschuster, A.</span>, <span class="refAuthor">Sheffer, Y.</span>, and <span class="refAuthor">Y. Rosomakho</span>, <span class="refTitle">"WIMSE Workload Credentials"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-wimse-workload-creds-02</span>, <time datetime="2026-07-02" class="refDate">2 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02">https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WIMSE-IDENTIFIER">[WIMSE-IDENTIFIER]</dt>
+      <dd>
+<span class="refAuthor">Rosomakho, Y.</span> and <span class="refAuthor">J. A. Salowey</span>, <span class="refTitle">"Workload Identifier"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-wimse-identifier-03</span>, <time datetime="2026-07-06" class="refDate">6 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03">https://datatracker.ietf.org/doc/html/draft-ietf-wimse-identifier-03</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-13.2">
+        <h3 id="name-informative-references">
+<a href="#section-13.2" class="section-number selfRef">13.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="HTTP-CACHING">[HTTP-CACHING]</dt>
+        <dd>
+<span class="refAuthor">Fielding, R., Ed.</span>, <span class="refAuthor">Nottingham, M., Ed.</span>, and <span class="refAuthor">J. Reschke, Ed.</span>, <span class="refTitle">"HTTP Caching"</span>, <span class="seriesInfo">STD 98</span>, <span class="seriesInfo">RFC 9111</span>, <span class="seriesInfo">DOI 10.17487/RFC9111</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9111">https://www.rfc-editor.org/rfc/rfc9111</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="INET-CERT">[INET-CERT]</dt>
+        <dd>
+<span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">S. Turner</span>, <span class="refTitle">"An Internet Attribute Certificate Profile for Authorization"</span>, <span class="seriesInfo">RFC 5755</span>, <span class="seriesInfo">DOI 10.17487/RFC5755</span>, <time datetime="2010-01" class="refDate">January 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5755">https://www.rfc-editor.org/rfc/rfc5755</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="OAUTH-TOKEN-EXCHANGE">[OAUTH-TOKEN-EXCHANGE]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Nadalin, A.</span>, <span class="refAuthor">Campbell, B., Ed.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">C. Mortimore</span>, <span class="refTitle">"OAuth 2.0 Token Exchange"</span>, <span class="seriesInfo">RFC 8693</span>, <span class="seriesInfo">DOI 10.17487/RFC8693</span>, <time datetime="2020-01" class="refDate">January 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8693">https://www.rfc-editor.org/rfc/rfc8693</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SPIFFE-JWT-SVID">[SPIFFE-JWT-SVID]</dt>
+        <dd>
+<span class="refAuthor">SPIFFE Project</span>, <span class="refTitle">"SPIFFE JWT-SVID"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/spiffe/spiffe/blob/main/standards/JWT-SVID.md">https://github.com/spiffe/spiffe/blob/main/standards/JWT-SVID.md</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SPIFFE-X509-SVID">[SPIFFE-X509-SVID]</dt>
+        <dd>
+<span class="refAuthor">SPIFFE Project</span>, <span class="refTitle">"SPIFFE X.509-SVID"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/spiffe/spiffe/blob/main/standards/X509-SVID.md">https://github.com/spiffe/spiffe/blob/main/standards/X509-SVID.md</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WIMSE-AIMS">[WIMSE-AIMS]</dt>
+        <dd>
+<span class="refAuthor">Kasselman, P.</span>, <span class="refAuthor">Lombardo, J.</span>, <span class="refAuthor">Rosomakho, Y.</span>, <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Steele, N.</span>, and <span class="refAuthor">A. Parecki</span>, <span class="refTitle">"AI Identity Management System"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-wimse-aims-00</span>, <time datetime="2026-09-15" class="refDate">15 September 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-aims-00">https://datatracker.ietf.org/doc/html/draft-ietf-wimse-aims-00</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WIMSE-HTTPSIG">[WIMSE-HTTPSIG]</dt>
+        <dd>
+<span class="refAuthor">Salowey, J. A.</span> and <span class="refAuthor">Y. Sheffer</span>, <span class="refTitle">"WIMSE Workload-to-Workload Authentication with HTTP Signatures"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-wimse-http-signature-07</span>, <time datetime="2026-09-20" class="refDate">20 September 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-http-signature-07">https://datatracker.ietf.org/doc/html/draft-ietf-wimse-http-signature-07</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WIMSE-MTLS">[WIMSE-MTLS]</dt>
+        <dd>
+<span class="refAuthor">Salowey, J. A.</span> and <span class="refAuthor">Y. Rosomakho</span>, <span class="refTitle">"Workload Authentication Using Mutual TLS"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-wimse-mutual-tls-02</span>, <time datetime="2026-07-06" class="refDate">6 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-mutual-tls-02">https://datatracker.ietf.org/doc/html/draft-ietf-wimse-mutual-tls-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WIMSE-WPT">[WIMSE-WPT]</dt>
+      <dd>
+<span class="refAuthor">Campbell, B.</span> and <span class="refAuthor">A. Schwenkschuster</span>, <span class="refTitle">"WIMSE Workload Proof Token"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-wimse-wpt-02</span>, <time datetime="2026-08-27" class="refDate">27 August 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-wpt-02">https://datatracker.ietf.org/doc/html/draft-ietf-wimse-wpt-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="open-issues">
+<section id="appendix-A">
+      <h2 id="name-open-issues">
+<a href="#name-open-issues" class="section-name selfRef">Open Issues</a>
+      </h2>
+<p id="appendix-A-1">To be resolved with the working group, and removed before publication.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="appendix-A-2">
+<li id="appendix-A-2.1">
+          <p id="appendix-A-2.1.1"><strong>Whether a durable principal association belongs in Workload Metadata
+(<a href="#principal" class="auto internal xref">Section 4.2</a>).</strong> Per-request delegation is separate from workload metadata. What remains is
+whether ownership or operational associations with a person, organization, or another workload
+are attributes worth asserting, how to distinguish those relationships, and whether
+they justify new registered claims. Associations with people also require the privacy analysis in
+<a href="#privacy" class="auto internal xref">Section 11</a>.<a href="#appendix-A-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-2.2">
+          <p id="appendix-A-2.2.1"><strong>A common authentication binding for the metadata endpoint (<a href="#metadata-auth" class="auto internal xref">Section 7.2</a>).</strong> Whether to
+select a mandatory-to-implement WIMSE binding or specify interoperable profiles for multiple
+bindings. HTTP Message Signatures are one candidate; this version leaves the choice to deployments.<a href="#appendix-A-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-2.3">
+          <p id="appendix-A-2.3.1"><strong>Value encoding for <code>groups</code> (<a href="#reuse" class="auto internal xref">Section 4.1</a>).</strong> <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> defines <code>groups</code> as a complex multi-valued
+attribute derived from SCIM <code>Group</code> resources, while <code>roles</code> and <code>entitlements</code> are effectively
+string labels. <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> does not say how the complex form maps into a JWT claim. The interim rule
+in <a href="#reuse" class="auto internal xref">Section 4.1</a> (emit strings, accept objects with a <code>value</code> sub-attribute) needs either confirming
+or replacing, and the question may be better raised against <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> than answered here.<a href="#appendix-A-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-2.4">
+          <p id="appendix-A-2.4.1"><strong>Whether <code>entitlements</code> is the right line to draw</strong> between attribute and grant in
+<a href="#permissions" class="auto internal xref">Section 4.3</a>, or whether the document should exclude authority-bearing metadata entirely.<a href="#appendix-A-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-2.5">
+          <p id="appendix-A-2.5.1"><strong>Distribution of metadata authority information.</strong> This version relies on deployment trust
+configuration for claim-specific authority and source precedence (<a href="#endpoint-location" class="auto internal xref">Section 7.1</a> and
+<a href="#consistency" class="auto internal xref">Section 8</a>). Whether an interoperable mechanism for distributing that information is needed
+remains open.<a href="#appendix-A-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-2.6">
+          <p id="appendix-A-2.6.1"><strong>Independently signed metadata responses.</strong> The API response is currently protected by the
+authenticated HTTPS exchange. A separately signed object would need rules for issuer trust,
+subject binding, audience, lifetime, replay, and use by parties other than the original caller.<a href="#appendix-A-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-2.7">
+          <p id="appendix-A-2.7.1"><strong>Caching retrieved metadata.</strong> Whether to allow bounded reuse, and how cache lifetimes, caller
+authorization changes, and different disclosed subsets would interact. This version uses
+<code>no-store</code> and does not allow reuse for later authorization decisions (<a href="#metadata-errors" class="auto internal xref">Section 7.5</a>).<a href="#appendix-A-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-2.8">
+          <p id="appendix-A-2.8.1"><strong>Additional retrieval methods.</strong> Whether a future version should support HTTP QUERY for more
+complex requests. This version specifies GET with a single subject and no request body.<a href="#appendix-A-2.8.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-B">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-B-1">This document restates for workload identity an argument the PKIX community made in <span>[<a href="#INET-CERT" class="cite xref">INET-CERT</a>]</span>, and that
+<span>[<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span> already makes for workload identifiers. The authors thank the WIMSE
+working group for the discussion that prompted it.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-C">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Shlomo Heigh</span></div>
+<div dir="auto" class="left"><span class="org">Palo Alto Networks</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:sheigh@paloaltonetworks.com" class="email">sheigh@paloaltonetworks.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Joseph Salowey</span></div>
+<div dir="auto" class="left"><span class="org">Palo Alto Networks</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:joe@salowey.net" class="email">joe@salowey.net</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Yaroslav Rosomakho</span></div>
+<div dir="auto" class="left"><span class="org">Zscaler</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:yrosomakho@zscaler.com" class="email">yrosomakho@zscaler.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
