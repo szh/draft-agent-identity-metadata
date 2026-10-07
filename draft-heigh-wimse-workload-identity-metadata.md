@@ -128,7 +128,8 @@ In scope:
 Out of scope:
 
 * the identifier format itself, which is {{!WIMSE-IDENTIFIER=I-D.ietf-wimse-identifier}};
-* defining new workload authentication mechanisms or selecting a mandatory API authentication binding;
+* defining new workload authentication mechanisms or selecting a mandatory-to-implement
+  authentication binding;
 * defining an in-band metadata encoding for X.509 credentials;
 * independently signed metadata responses and their forwarding to other parties;
 * how a relying party reaches an authorization decision from metadata;
@@ -297,7 +298,7 @@ Value encoding is not fully determined.
   does not say whether an array of strings conforms. Until this is settled, credential issuers and metadata
   services SHOULD encode all three claims as arrays of strings, and a relying party SHOULD accept an
   array of objects bearing a `value` sub-attribute as equivalent to the array of those `value`
-  strings. See {{open-issues}} item 3.
+  strings. See {{open-issues}} item 2.
 
 Values are otherwise trust-domain specific, and this document defines no vocabulary. A relying party
 MUST treat an unrecognized value as conveying no authority rather than as a wildcard.
@@ -868,29 +869,26 @@ To be resolved with the working group, and removed before publication.
    are attributes worth asserting, how to distinguish those relationships, and whether
    they justify new registered claims. Associations with people also require the privacy analysis in
    {{privacy}}.
-2. **A common authentication binding for the metadata endpoint ({{metadata-auth}}).** Whether to
-   select a mandatory-to-implement WIMSE binding or specify interoperable profiles for multiple
-   bindings. HTTP Message Signatures are one candidate; this version leaves the choice to deployments.
-3. **Value encoding for `groups`, `roles`, and `entitlements` ({{reuse}}).** {{SCIM-CORE}} defines
+2. **Value encoding for `groups`, `roles`, and `entitlements` ({{reuse}}).** {{SCIM-CORE}} defines
    all three as multi-valued complex attributes whose elements carry a `value` sub-attribute, and
    {{OAUTH-JWT}} defers to that encoding without saying whether an array of strings conforms. The
    interim rule in {{reuse}} (emit strings, accept objects with a `value` sub-attribute) departs from
    the object form {{OAUTH-JWT}} points to, and is in tension with the requirement in {{reuse}} to
    use the same value encodings as the registered claims. It needs either confirming or replacing,
    and the question may be better raised against {{OAUTH-JWT}} than answered here.
-4. **Whether `entitlements` is the right line to draw** between attribute and grant in
+3. **Whether `entitlements` is the right line to draw** between attribute and grant in
    {{permissions}}, or whether the document should exclude authority-bearing metadata entirely.
-5. **Distribution of metadata authority information.** This version relies on deployment trust
+4. **Distribution of metadata authority information.** This version relies on deployment trust
    configuration for claim-specific authority and source precedence ({{endpoint-location}} and
    {{consistency}}). Whether an interoperable mechanism for distributing that information is needed
    remains open.
-6. **Independently signed metadata responses.** The API response is currently protected by the
+5. **Independently signed metadata responses.** The API response is currently protected by the
    authenticated HTTPS exchange. A separately signed object would need rules for issuer trust,
    subject binding, audience, lifetime, replay, and use by parties other than the original caller.
-7. **Caching retrieved metadata.** Whether to allow bounded reuse, and how cache lifetimes, caller
+6. **Caching retrieved metadata.** Whether to allow bounded reuse, and how cache lifetimes, caller
    authorization changes, and different disclosed subsets would interact. This version uses
    `no-store` and does not allow reuse for later authorization decisions ({{metadata-errors}}).
-8. **Additional retrieval methods.** Whether a future version should support the HTTP QUERY method
+7. **Additional retrieval methods.** Whether a future version should support the HTTP QUERY method
    {{?HTTP-QUERY=RFC10008}} for more complex requests. This version specifies GET with a single
    subject and no request body.
 
