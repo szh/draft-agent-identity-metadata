@@ -140,7 +140,7 @@ Out of scope:
 {::boilerplate bcp14-tagged}
 
 The terms Workload, Workload Instance, and Workload Identity Credential are used as defined in
-{{Section 2 of !WIMSE-ARCH=I-D.ietf-wimse-arch}}. Workload Identifier and Issuer are used as defined in
+{{Section 2 of ?WIMSE-ARCH=I-D.ietf-wimse-arch}}. Workload Identifier and Issuer are used as defined in
 {{Section 3 of WIMSE-IDENTIFIER}}.
 
 A workload can have multiple concurrent instances. A Workload Identifier can identify a logical
@@ -653,7 +653,7 @@ existence through differences in response timing. Other HTTP errors retain their
 {{HTTP}}.
 
 All HTTP responses from this endpoint, including errors, MUST include `Cache-Control: no-store`
-({{Section 5.2.2.5 of ?HTTP-CACHING=RFC9111}}). In addition to HTTP cache handling, clients MUST NOT
+({{Section 5.2.2.5 of !HTTP-CACHING=RFC9111}}). In addition to HTTP cache handling, clients MUST NOT
 use retrieved metadata for any authorization decision other than the one for which it was obtained.
 This does not preclude retaining records for audit purposes, subject to {{privacy}}.
 
@@ -843,14 +843,14 @@ established by {{WELL-KNOWN}}:
 URI suffix:
 : `workload-metadata`
 
-Reference:
-: this document
+Change controller:
+: IETF
+
+Specification document(s):
+: {{metadata-endpoint}} of this document
 
 Status:
 : permanent
-
-Change controller:
-: IETF
 
 --- back
 
@@ -885,8 +885,9 @@ To be resolved with the working group, and removed before publication.
 7. **Caching retrieved metadata.** Whether to allow bounded reuse, and how cache lifetimes, caller
    authorization changes, and different disclosed subsets would interact. This version uses
    `no-store` and does not allow reuse for later authorization decisions ({{metadata-errors}}).
-8. **Additional retrieval methods.** Whether a future version should support HTTP QUERY for more
-   complex requests. This version specifies GET with a single subject and no request body.
+8. **Additional retrieval methods.** Whether a future version should support the HTTP QUERY method
+   {{?HTTP-QUERY=RFC10008}} for more complex requests. This version specifies GET with a single
+   subject and no request body.
 
 # Acknowledgments
 {:numbered="false"}
