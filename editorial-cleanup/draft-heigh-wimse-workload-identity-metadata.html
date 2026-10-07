@@ -1628,15 +1628,18 @@ interpret these claims as describing the workload or workload instance denoted b
           <dd class="break"></dd>
 <dt id="section-4.1-4.3">Value encoding is not fully determined.</dt>
           <dd style="margin-left: 1.5em" id="section-4.1-4.4">
-            <p id="section-4.1-4.4.1"><span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> specifies no vocabulary or syntax for <code>roles</code> and <code>entitlements</code>, expecting a role
-value to be "a String or label representing a collection of entitlements". It describes <code>groups</code>
-differently: as a multi-valued complex attribute with <code>value</code> and <code>type</code> sub-attributes and
-canonical types "direct" and "indirect", derived from SCIM <code>Group</code> resources that have no
-counterpart here. Neither <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> nor this document settles whether <code>groups</code> is an array of
-strings or an array of objects. Until this is settled, credential issuers and metadata services
-<span class="bcp14">SHOULD</span> encode all three claims as arrays of strings, and a relying party <span class="bcp14">SHOULD</span>
-accept an array of objects bearing a <code>value</code> sub-attribute as equivalent to the array of those
-<code>value</code> strings. See <a href="#open-issues" class="auto internal xref">Appendix "Open Issues"</a> item 3.<a href="#section-4.1-4.4.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-4.4.1"><span><a href="https://rfc-editor.org/rfc/rfc7643#section-8.7.1" class="relref">Section 8.7.1</a> of [<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> defines all three as multi-valued complex attributes whose elements
+carry <code>value</code>, <code>display</code>, <code>type</code>, and <code>primary</code> sub-attributes. They differ in content rather than
+structure. <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> specifies no vocabulary or syntax for <code>roles</code> and <code>entitlements</code>, expecting
+a role value to be "a String or label representing a collection of entitlements". For <code>groups</code> it
+defines canonical types "direct" and "indirect" and ties <code>value</code> and <code>$ref</code> to SCIM <code>Group</code>
+resources, which have no counterpart here. <span><a href="https://rfc-editor.org/rfc/rfc9068#section-2.2.3.1" class="relref">Section 2.2.3.1</a> of [<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> states that
+authorization servers "<span class="bcp14">SHOULD</span> encode the corresponding claim values according to the guidance
+defined in" <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> and points to an example in which <code>groups</code> is an array of objects, but
+does not say whether an array of strings conforms. Until this is settled, credential issuers and metadata
+services <span class="bcp14">SHOULD</span> encode all three claims as arrays of strings, and a relying party <span class="bcp14">SHOULD</span> accept an
+array of objects bearing a <code>value</code> sub-attribute as equivalent to the array of those <code>value</code>
+strings. See <a href="#open-issues" class="auto internal xref">Appendix "Open Issues"</a> item 3.<a href="#section-4.1-4.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
@@ -2444,11 +2447,13 @@ select a mandatory-to-implement WIMSE binding or specify interoperable profiles 
 bindings. HTTP Message Signatures are one candidate; this version leaves the choice to deployments.<a href="#appendix-A-2.2.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-2.3">
-          <p id="appendix-A-2.3.1"><strong>Value encoding for <code>groups</code> (<a href="#reuse" class="auto internal xref">Section 4.1</a>).</strong> <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> defines <code>groups</code> as a complex multi-valued
-attribute derived from SCIM <code>Group</code> resources, while <code>roles</code> and <code>entitlements</code> are effectively
-string labels. <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> does not say how the complex form maps into a JWT claim. The interim rule
-in <a href="#reuse" class="auto internal xref">Section 4.1</a> (emit strings, accept objects with a <code>value</code> sub-attribute) needs either confirming
-or replacing, and the question may be better raised against <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> than answered here.<a href="#appendix-A-2.3.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-2.3.1"><strong>Value encoding for <code>groups</code>, <code>roles</code>, and <code>entitlements</code> (<a href="#reuse" class="auto internal xref">Section 4.1</a>).</strong> <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span> defines
+all three as multi-valued complex attributes whose elements carry a <code>value</code> sub-attribute, and
+<span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> defers to that encoding without saying whether an array of strings conforms. The
+interim rule in <a href="#reuse" class="auto internal xref">Section 4.1</a> (emit strings, accept objects with a <code>value</code> sub-attribute) departs from
+the object form <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> points to, and is in tension with the requirement in <a href="#reuse" class="auto internal xref">Section 4.1</a> to
+use the same value encodings as the registered claims. It needs either confirming or replacing,
+and the question may be better raised against <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> than answered here.<a href="#appendix-A-2.3.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-2.4">
           <p id="appendix-A-2.4.1"><strong>Whether <code>entitlements</code> is the right line to draw</strong> between attribute and grant in
