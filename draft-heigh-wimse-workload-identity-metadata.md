@@ -286,15 +286,18 @@ The subject is the workload.
   MUST NOT interpret them as describing any associated principal ({{principal}}).
 
 Value encoding is not fully determined.
-: {{SCIM-CORE}} specifies no vocabulary or syntax for `roles` and `entitlements`, expecting a role
-  value to be "a String or label representing a collection of entitlements". It describes `groups`
-  differently: as a multi-valued complex attribute with `value` and `type` sub-attributes and
-  canonical types "direct" and "indirect", derived from SCIM `Group` resources that have no
-  counterpart here. Neither {{OAUTH-JWT}} nor this document settles whether `groups` is an array of
-  strings or an array of objects. Until this is settled, credential issuers and metadata services
-  SHOULD encode all three claims as arrays of strings, and a relying party SHOULD
-  accept an array of objects bearing a `value` sub-attribute as equivalent to the array of those
-  `value` strings. See {{open-issues}} item 3.
+: {{Section 8.7.1 of SCIM-CORE}} defines all three as multi-valued complex attributes whose elements
+  carry `value`, `display`, `type`, and `primary` sub-attributes. They differ in content rather than
+  structure. {{SCIM-CORE}} specifies no vocabulary or syntax for `roles` and `entitlements`, expecting
+  a role value to be "a String or label representing a collection of entitlements". For `groups` it
+  defines canonical types "direct" and "indirect" and ties `value` and `$ref` to SCIM `Group`
+  resources, which have no counterpart here. {{Section 2.2.3.1 of OAUTH-JWT}} states that
+  authorization servers "SHOULD encode the corresponding claim values according to the guidance
+  defined in" {{SCIM-CORE}} and points to an example in which `groups` is an array of objects, but
+  does not say whether an array of strings conforms. Until this is settled, credential issuers and metadata
+  services SHOULD encode all three claims as arrays of strings, and a relying party SHOULD accept an
+  array of objects bearing a `value` sub-attribute as equivalent to the array of those `value`
+  strings. See {{open-issues}} item 3.
 
 Values are otherwise trust-domain specific, and this document defines no vocabulary. A relying party
 MUST treat an unrecognized value as conveying no authority rather than as a wildcard.
@@ -868,11 +871,13 @@ To be resolved with the working group, and removed before publication.
 2. **A common authentication binding for the metadata endpoint ({{metadata-auth}}).** Whether to
    select a mandatory-to-implement WIMSE binding or specify interoperable profiles for multiple
    bindings. HTTP Message Signatures are one candidate; this version leaves the choice to deployments.
-3. **Value encoding for `groups` ({{reuse}}).** {{SCIM-CORE}} defines `groups` as a complex multi-valued
-   attribute derived from SCIM `Group` resources, while `roles` and `entitlements` are effectively
-   string labels. {{OAUTH-JWT}} does not say how the complex form maps into a JWT claim. The interim rule
-   in {{reuse}} (emit strings, accept objects with a `value` sub-attribute) needs either confirming
-   or replacing, and the question may be better raised against {{OAUTH-JWT}} than answered here.
+3. **Value encoding for `groups`, `roles`, and `entitlements` ({{reuse}}).** {{SCIM-CORE}} defines
+   all three as multi-valued complex attributes whose elements carry a `value` sub-attribute, and
+   {{OAUTH-JWT}} defers to that encoding without saying whether an array of strings conforms. The
+   interim rule in {{reuse}} (emit strings, accept objects with a `value` sub-attribute) departs from
+   the object form {{OAUTH-JWT}} points to, and is in tension with the requirement in {{reuse}} to
+   use the same value encodings as the registered claims. It needs either confirming or replacing,
+   and the question may be better raised against {{OAUTH-JWT}} than answered here.
 4. **Whether `entitlements` is the right line to draw** between attribute and grant in
    {{permissions}}, or whether the document should exclude authority-bearing metadata entirely.
 5. **Distribution of metadata authority information.** This version relies on deployment trust
