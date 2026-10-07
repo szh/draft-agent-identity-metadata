@@ -67,10 +67,9 @@ or through an authenticated workload metadata endpoint. The endpoint supports me
 workloads using JWT-based or X.509-based credentials and disclosure according to the caller's
 authorization.
 
-This document defines the separation between identifier and metadata, and profiles existing claims for
-expressing workload attributes. It distinguishes these attributes and durable principal associations
-from per-request delegation and grants such as scopes, and states the requirements that make the
-separation sound, including identifier uniqueness.
+This document also defines the separation between identifier and metadata. It distinguishes workload
+attributes and durable principal associations from per-request delegation and grants such as scopes,
+and states the requirements that make the separation sound, including identifier uniqueness.
 
 The document applies to workloads generally, including services, batch and continuous integration
 jobs, serverless functions, and AI agents. Agentic use cases are discussed separately.
@@ -82,20 +81,18 @@ jobs, serverless functions, and AI agents. Agentic use cases are discussed separ
 An identifier denotes a workload. Metadata describes it. These are different things with different
 lifetimes, different authorities, and different exposure, and conflating them causes concrete harm.
 
-Encoding them in the identifier is common practice, but it produces identifiers with structured paths
-that relying parties are then expected to parse and authorize on. Deployments that need to authorize
-on a workload's group, role, or owner frequently encode those attributes into the identifier,
-producing identifiers of the form:
+Deployments that need to authorize on a workload's group, role, or owner commonly encode those
+attributes in the identifier, producing identifiers of the form:
 
 ~~~
 spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliation
 ~~~
 
-Relying parties are then expected to parse path components and authorize on them. This appears to
-work, and it is the path of least resistance because the identifier is the one field guaranteed to
-reach the relying party. It is nonetheless unsound, for reasons developed in {{pollution}}: the
-identifier format does not promise parseable semantics, attributes and identifiers have different
-lifetimes, and the identifier is the most widely exposed field in the system.
+Relying parties then parse the path and authorize on its components. This appears to work, and it
+is the path of least resistance because the identifier is the one field guaranteed to reach the
+relying party. It is nonetheless unsound, for reasons developed in {{pollution}}: the identifier
+format does not promise parseable semantics, attributes and identifiers have different lifetimes,
+and the identifier is the most widely exposed field in the system.
 
 This document specifies the alternative. An identifier denotes the workload or workload instance
 selected by the deployment's identity model; a relying party does not derive attributes from its
@@ -144,11 +141,7 @@ Out of scope:
 
 The terms Workload, Workload Instance, and Workload Identity Credential are used as defined in
 {{Section 2 of !WIMSE-ARCH=I-D.ietf-wimse-arch}}. Workload Identifier and Issuer are used as defined in
-{{Section 3 of WIMSE-IDENTIFIER}}. References to credential issuers follow the credential
-issuance roles described in {{WIMSE-CREDS}} and the applicable SPIFFE
-specifications. In particular, {{Section 5.1 of WIMSE-CREDS}} identifies the
-Identity Server as the issuer of a WIT. This document does not require identifier assignment,
-credential issuance, and metadata determination to be performed by the same entity.
+{{Section 3 of WIMSE-IDENTIFIER}}.
 
 A workload can have multiple concurrent instances. A Workload Identifier can identify a logical
 workload or a particular instance, according to deployment policy; this document does not require a
@@ -157,6 +150,11 @@ separate identifier for each process, replica, job, or invocation.
 Workload Metadata:
 : Attributes of the workload or workload instance denoted by a Workload Identifier, distinct from
   that identifier, asserted for authorization, audit, accounting, and similar purposes.
+
+Credential issuer:
+: The entity that issues a Workload Identity Credential, such as the Identity Server that issues a
+  WIT ({{Section 5.1 of WIMSE-CREDS}}). It need not be the Issuer that assigns the Workload
+  Identifier, nor the entity that determines Workload Metadata.
 
 The Workload Identity Credentials discussed here include WIMSE Workload Identity Tokens (WITs) and
 Workload Identity Certificates (WICs), defined in {{WIMSE-CREDS}}, and SPIFFE
@@ -285,7 +283,7 @@ The subject is the workload.
   rather than a person.
   The registrations themselves are subject-neutral, so no conflict arises, but a relying party MUST
   interpret these claims as describing the workload or workload instance denoted by `sub` and
-  MUST NOT interpret them as describing an associated principal ({{principal}}), where one is asserted.
+  MUST NOT interpret them as describing any associated principal ({{principal}}).
 
 Value encoding is not fully determined.
 : {{SCIM-CORE}} specifies no vocabulary or syntax for `roles` and `entitlements`, expecting a role
@@ -293,7 +291,7 @@ Value encoding is not fully determined.
   differently: as a multi-valued complex attribute with `value` and `type` sub-attributes and
   canonical types "direct" and "indirect", derived from SCIM `Group` resources that have no
   counterpart here. Neither {{OAUTH-JWT}} nor this document settles whether `groups` is an array of
-  strings or an array of objects. Until it is settled, credential issuers and metadata services
+  strings or an array of objects. Until this is settled, credential issuers and metadata services
   SHOULD encode all three claims as arrays of strings, and a relying party SHOULD
   accept an array of objects bearing a `value` sub-attribute as equivalent to the array of those
   `value` strings. See {{open-issues}} item 3.
@@ -376,10 +374,10 @@ A credential issuer MUST NOT use the subject of a platform-provided execution cr
 Workload Identifier where that credential is, or may become, available to workloads or instances
 that require distinct identities under the deployment's identity model.
 
-Where the platform offers only such a credential, a credential issuer MUST establish by a means not
-under the control of the workload which workload or instance is requesting a credential, and MUST
-issue a Workload Identity Credential asserting the corresponding Workload Identifier rather than
-passing the shared execution credential through. The execution credential MAY be an input to that
+Where the platform offers only such a credential, a credential issuer MUST determine which workload
+or instance is requesting a credential, by a means the workload does not control, and MUST issue a
+Workload Identity Credential asserting the corresponding Workload Identifier rather than passing the
+shared execution credential through. The execution credential MAY be an input to that
 determination as evidence of the execution environment; it MUST NOT be the sole input. These
 requirements do not prohibit a shared credential for instances intentionally treated as the same
 workload.
@@ -457,8 +455,8 @@ A WIT, whose JOSE header carries `"typ": "wit+jwt"`:
 
 The `cnf` claim is mandatory in a WIT and binds the credential to the workload's key; a WIT has no `aud`
 claim and cannot be used as a bearer token
-({{Section 5.1 of WIMSE-CREDS}}). The same workload as a JWT-SVID {{SPIFFE-JWT-SVID}},
-which is instead audience-restricted and carries no confirmation claim:
+({{Section 5.1 of WIMSE-CREDS}}). The same workload's JWT-SVID {{SPIFFE-JWT-SVID}} is instead
+audience-restricted and carries no confirmation claim:
 
 ~~~ json
 {
@@ -482,15 +480,12 @@ identifier, because the identifier no longer carries it.
 ## X.509-Based Credentials {#x509}
 
 X.509 certificates have no JWT claims set. This document defines no certificate extension or other
-encoding for carrying Workload Metadata in X.509 credentials, so in-band metadata carriage is not
-available for those credentials under this specification. X.509 is extensible, but defining such an
-extension is outside this document's scope.
+encoding for carrying Workload Metadata in X.509 credentials; defining one is outside its scope.
 
-{{Section 6.1 of WIMSE-CREDS}} defines the Workload Identity Certificate, which
-carries the Workload Identifier in a single URI SubjectAltName. The obvious approach is therefore
-already closed: {{Section 4 of WIMSE-CREDS}} requires that additional correlation
-"MUST NOT be encoded as a second workload identifier in the same WIT or WIC", so workload attributes cannot
-be carried in a second URI SAN. For an X.509-SVID the constraint is stronger still:
+{{Section 6.1 of WIMSE-CREDS}} defines the Workload Identity Certificate, which carries the Workload
+Identifier in a single URI SubjectAltName. Attributes cannot be carried in a second URI SAN:
+{{Section 4 of WIMSE-CREDS}} requires that additional correlation "MUST NOT be encoded as a second
+workload identifier in the same WIT or WIC". For an X.509-SVID the constraint is stronger still:
 {{SPIFFE-X509-SVID}} requires a validator to reject any certificate bearing more than one URI SAN,
 whatever its contents. Metadata must go somewhere a relying party will not mistake for an identifier.
 
@@ -659,15 +654,15 @@ existence through differences in response timing. Other HTTP errors retain their
 
 All HTTP responses from this endpoint, including errors, MUST include `Cache-Control: no-store`
 ({{Section 5.2.2.5 of ?HTTP-CACHING=RFC9111}}). In addition to HTTP cache handling, clients MUST NOT
-reuse retrieved metadata for subsequent authorization decisions beyond the request for which it
-was obtained. This does not preclude retaining records for audit purposes, subject to {{privacy}}.
+use retrieved metadata for any authorization decision other than the one for which it was obtained.
+This does not preclude retaining records for audit purposes, subject to {{privacy}}.
 
 # Consistency Across Delivery Methods {#consistency}
 
 Claims have the same semantics whether carried in a JWT or returned by the metadata endpoint. The
 same subject can have different disclosed claim subsets in different credentials and API responses.
-An X.509 credential's lack of metadata does not require omitting those claims from JWTs or API
-responses. Different values can also reflect changes since a credential was issued.
+That an X.509 credential carries no metadata does not mean JWTs or API responses for the same
+subject must omit it. Different values can also reflect changes since a credential was issued.
 
 A relying party using more than one source MUST apply an explicit policy identifying the trusted
 authority and freshness requirements for each claim used in authorization. It MUST NOT assume that
@@ -782,10 +777,9 @@ denial-of-service risks.
 ## Workload Identity Credentials as Capabilities {#capability}
 
 Metadata that expresses authority converts an identity credential into a capability. Three consequences
-motivate {{permissions}}. They do not depend on the credential being a bearer token: a WIT is bound to the
-workload's key and cannot be used as one
-({{Section 5.1 of WIMSE-CREDS}}), whereas a JWT-SVID is presented as one
-{{SPIFFE-JWT-SVID}}, and the consequences below hold in both cases.
+motivate {{permissions}}. They hold whether or not the credential is a bearer token: a WIT is bound
+to the workload's key and cannot be used as one ({{Section 5.1 of WIMSE-CREDS}}), while a JWT-SVID
+is presented as one {{SPIFFE-JWT-SVID}}.
 
 Lifetime mismatch:
 : A permission revoked at the authorization server remains asserted by every unexpired credential
