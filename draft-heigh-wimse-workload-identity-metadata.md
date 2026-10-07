@@ -95,8 +95,8 @@ format does not promise parseable semantics, attributes and identifiers have dif
 and the identifier is the most widely exposed field in the system.
 
 This document specifies the alternative. An identifier denotes the workload or workload instance
-selected by the deployment's identity model; a relying party does not derive attributes from its
-structure. This document profiles metadata carried in a JWT-based Workload Identity Credential,
+selected by the deployment's identity model; attributes are carried as Workload Metadata rather than
+in its structure. This document profiles metadata carried in a JWT-based Workload Identity Credential,
 such as a WIMSE Workload Identity Token {{!WIMSE-CREDS=I-D.ietf-wimse-workload-creds}} or a JWT-SVID,
 or retrieved from an authenticated metadata endpoint. Both delivery methods use the same metadata
 model and bind attributes to the complete Workload Identifier. The endpoint also supports workloads
@@ -175,7 +175,8 @@ Path semantics are not guaranteed.
   issuers authorized for that trust domain", and {{Section 4.3 of WIMSE-IDENTIFIER}} requires
   that consumers "MUST compare and authorize Workload Identifiers using the complete URI, rather than
   relying only on individual components such as the path". A relying party parsing path components to
-  recover a role is doing something the identifier format does not support.
+  recover a role depends on a trust domain's naming policy, not on anything the identifier format
+  guarantees.
 
 Lifetimes differ.
 : A Workload Identifier is stable; it is the thing audit records and authorization grants refer to over
@@ -223,14 +224,18 @@ separation it describes is the one specified here.
 A Workload Identifier MUST unambiguously denote the workload or workload instance selected by the
 deployment's identity model. Multiple instances MAY share an identifier when they are intended to be
 treated as the same service for authentication, authorization, and auditing, as specified in
-{{Section 4.2 of WIMSE-IDENTIFIER}}. A relying party requiring the subject's group, role, or
-principal association MUST obtain it from Workload Metadata rather than infer it from the identifier.
-Permissions and scopes are addressed in {{permissions}}.
+{{Section 4.2 of WIMSE-IDENTIFIER}}.
 
-An Issuer MAY use structured paths for administrative convenience, such as delegation of naming
-authority within a trust domain or operator legibility. Where it does, the structure is not a contract: a
-relying party MUST NOT derive authorization-relevant meaning from any component of a Workload
-Identifier.
+A relying party SHOULD obtain the subject's group, role, or principal association from Workload
+Metadata rather than infer it from the identifier. If it is configured to obtain any of them from
+Workload Metadata, it MUST NOT infer that attribute from the identifier, even when the metadata is
+unavailable. Permissions and scopes are addressed in {{permissions}}.
+
+An Issuer MAY use structured paths for administrative convenience, such as delegating naming
+authority within a trust domain or making identifiers readable to operators. Any such structure is
+defined by the trust domain's policy, not by the identifier format. A relying party SHOULD NOT base
+an authorization decision on part of a Workload Identifier unless that policy explicitly defines what
+the part means, consistent with {{Section 7.6 of WIMSE-IDENTIFIER}}.
 
 ## Content of the Workload Identity Credential {#document-role}
 
