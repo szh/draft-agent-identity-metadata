@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-06T04:13:17.741723+00:00",
+  "timestamp": "2026-10-08T03:54:17.122801+00:00",
   "repo": "szh/draft-agent-identity-metadata",
   "labels": [
     {
@@ -145,21 +145,21 @@
       "id": "PR_kwDOUcQW4c8AAAABD9Iiww",
       "title": "some comments around a separate metadata document",
       "url": "https://github.com/szh/draft-agent-identity-metadata/pull/3",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "jsalowey",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2026-09-17T15:49:43Z",
-      "updatedAt": "2026-09-29T15:49:01Z",
+      "updatedAt": "2026-10-06T13:26:54Z",
       "baseRepository": "szh/draft-agent-identity-metadata",
       "baseRefName": "main",
       "baseRefOid": "1db15d210d5f12cf1e23ad61f559e44c303a476e",
       "headRepository": "szh/draft-agent-identity-metadata",
       "headRefName": "comment-3",
       "headRefOid": "b81cd7581aafc902b9a1cd55b7972ea197879616",
-      "closedAt": null,
+      "closedAt": "2026-10-06T13:26:54Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -317,7 +317,7 @@
       "id": "PR_kwDOUcQW4c8AAAABFYQaDg",
       "title": "Metadata api",
       "url": "https://github.com/szh/draft-agent-identity-metadata/pull/7",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "yaroslavros",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -326,17 +326,19 @@
       "labels": [],
       "body": "Initial text on metadata API",
       "createdAt": "2026-09-27T18:44:09Z",
-      "updatedAt": "2026-09-30T13:44:11Z",
+      "updatedAt": "2026-10-06T13:26:12Z",
       "baseRepository": "szh/draft-agent-identity-metadata",
       "baseRefName": "main",
       "baseRefOid": "094a8eb0c1c92dcaed534be8f8adaa682aee4498",
       "headRepository": "yaroslavros/draft-agent-identity-metadata",
       "headRefName": "metadata-api",
       "headRefOid": "18645825a2d6824fb8faf223a641c65f89549c76",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-10-06T13:26:12Z",
+      "mergedAt": "2026-10-06T13:26:12Z",
+      "mergedBy": "szh",
+      "mergeCommit": {
+        "oid": "60a0e7c8a97647c29a2f43df440f1b0e0674e7a3"
+      },
       "comments": [],
       "reviews": [
         {
@@ -424,6 +426,19 @@
               "updatedAt": "2026-09-30T13:44:11Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABQ5ipjg",
+          "commit": {
+            "abbreviatedOid": "1864582"
+          },
+          "author": "szh",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-10-06T13:26:05Z",
+          "updatedAt": "2026-10-06T13:26:05Z",
+          "comments": []
         }
       ]
     },
@@ -512,6 +527,34 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 10,
+      "id": "PR_kwDOUcQW4c8AAAABHMOhNw",
+      "title": "Editorial pass, reference fixes, and alignment with WIMSE-IDENTIFIER",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/10",
+      "state": "OPEN",
+      "author": "szh",
+      "authorAssociation": "OWNER",
+      "assignees": [
+        "szh"
+      ],
+      "labels": [],
+      "body": "Prepares the draft for -00. Each commit is self-contained and can be reviewed in order.\r\n\r\n**No change to requirements**\r\n- **Editorial pass.** Simplifies wording throughout and defines \"credential issuer\" as a term.\r\n  No BCP 14 keyword is added, removed, strengthened, or weakened.\r\n- **Reference types and IANA template.** Makes draft-ietf-wimse-arch informative, avoiding a\r\n  downref (the other WIMSE Standards Track drafts cite it that way) and RFC 9111 normative (the\r\n  `no-store` MUST depends on it). Cites RFC 10008 for HTTP QUERY, and uses the RFC 8615 field\r\n  names in the well-known URI request.\r\n- **SCIM encoding description.** RFC 7643 Section 8.7.1 defines `groups`, `roles`, and\r\n  `entitlements` all as complex attributes; the draft described only `groups` that way. The\r\n  interim encoding rule is unchanged, and the open issue on it now covers all three claims.\r\n\r\n**Substantive**\r\n- **Authentication binding selection out of scope.** Removes the open issue on a\r\n  mandatory-to-implement binding; deployment configuration selects the binding.\r\n- **Metadata across credential exchange (new Section 9).** An exchanging credential issuer may\r\n  filter, add to, or modify metadata from another trust domain. Whatever it asserts carries its\r\n  own authority, not the other trust domain's.\r\n- **Identifier interpretation aligned with WIMSE-IDENTIFIER.** The blanket MUST NOT on deriving\r\n  authorization meaning from identifier components conflicted with WIMSE-IDENTIFIER Sections 4.2,\r\n  7.5, and 7.6. It is now a SHOULD NOT, with an exception for meaning defined by trust domain\r\n  policy, and the rule on obtaining group, role, or principal association from metadata is a\r\n  SHOULD. A new MUST forbids inferring such an attribute from the identifier when the relying\r\n  party is configured to obtain it from Workload Metadata, even if the metadata is unavailable.\r\n  This commit is the one most likely to need discussion.\r\n\r\n**Not included**\r\n- Section 7.2 still says \"WIMSE workload authentication\". Open question for @yaroslavros: is it\r\n  meant to cover bearer JWT-SVIDs restricted to the metadata service as their audience, and callers\r\n  that are not WIMSE workloads, such as a gateway or a relying party outside the trust domain?",
+      "createdAt": "2026-10-07T19:37:53Z",
+      "updatedAt": "2026-10-07T19:37:55Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "60a0e7c8a97647c29a2f43df440f1b0e0674e7a3",
+      "headRepository": "szh/draft-agent-identity-metadata",
+      "headRefName": "editorial-cleanup",
+      "headRefOid": "156b8e33488c7817726c35245809ff682118c877",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
