@@ -65,7 +65,8 @@ auditing, authorization, accounting, and other purposes. It profiles existing cl
 membership, roles, and entitlements, with delivery either in JWT-based Workload Identity Credentials
 or through an authenticated workload metadata endpoint. The endpoint supports metadata retrieval for
 workloads using JWT-based or X.509-based credentials and disclosure according to the caller's
-authorization.
+authorization. An optional JWT claim or X.509 certificate extension identifies the metadata
+endpoint for the credential's subject.
 
 This document also defines the separation between identifier and metadata. It distinguishes workload
 attributes and durable principal associations from per-request delegation and grants such as scopes,
@@ -101,6 +102,7 @@ such as a WIMSE Workload Identity Token {{!WIMSE-CREDS=I-D.ietf-wimse-workload-c
 or retrieved from an authenticated metadata endpoint. Both delivery methods use the same metadata
 model and bind attributes to the complete Workload Identifier. The endpoint also supports workloads
 authenticated using X.509 credentials, for which this document defines no in-band metadata encoding.
+Either credential format can carry a reference to the metadata endpoint.
 
 Where suitable claims already exist, this document profiles them rather than defining new ones. Group,
 role, and entitlement claims are already registered {{!OAUTH-JWT=RFC9068}} with semantics drawn from SCIM
@@ -123,6 +125,7 @@ In scope:
   associations;
 * how metadata is carried in JWT-based identity credentials or retrieved through an authenticated API;
 * endpoint location, request and response formats, and authorization-dependent disclosure;
+* a JWT claim and an X.509 certificate extension for identifying the metadata endpoint;
 * metadata asserted by a credential issuer that exchanges credentials across trust domains;
 * the identifier uniqueness requirements that the separation depends on.
 
@@ -131,7 +134,7 @@ Out of scope:
 * the identifier format itself, which is {{!WIMSE-IDENTIFIER=I-D.ietf-wimse-identifier}};
 * defining new workload authentication mechanisms or selecting a mandatory-to-implement
   authentication binding;
-* defining an in-band metadata encoding for X.509 credentials;
+* carrying metadata attributes themselves in X.509 credentials;
 * independently signed metadata responses and their forwarding to other parties;
 * how a relying party reaches an authorization decision from metadata;
 * verification of the identity credentials, for which see
@@ -244,6 +247,10 @@ describing the workload or workload instance that identifier denotes. Metadata i
 Identity Credential is asserted by the credential issuer and inherits the credential's signature,
 its validity period, and its trust path. That is what distinguishes it from an attribute the
 workload asserts about itself at the application layer.
+
+A Workload Identity Credential MAY also identify a metadata endpoint for its subject, using the
+JWT claim in {{metadata-uri-claim}} or the X.509 extension in {{sanuri-metadata}}. This reference
+locates an API; it does not itself carry the metadata returned by that API.
 
 ## In-Band Metadata and API Retrieval {#in-band}
 
@@ -424,7 +431,7 @@ Shared execution environments:
 exactly one WIMSE identifier. That requirement belongs to the agent framework; this document follows
 the general workload and instance identity model of {{WIMSE-IDENTIFIER}}.
 
-# Carrying Metadata in Workload Identity Credentials {#carriage}
+# Metadata and Endpoint References in Workload Identity Credentials {#carriage}
 
 ## JWT-Based Credentials {#jwt}
 
@@ -435,6 +442,22 @@ recipient ignore claims it does not understand, discourages private claim names,
 claims used outside closed environments be registered with IANA. Because the claims in {{reuse}} are
 already registered, a Workload Identity Credential expressing workload group, role, or entitlements
 satisfies those rules without further action.
+
+### Metadata URI Claim {#metadata-uri-claim}
+
+This document defines the optional `metadata_uri` claim for JWT-based Workload Identity Credentials,
+including WITs. Its value MUST be a single JSON string containing the URI of a workload metadata
+API endpoint for the subject identified by the credential's `sub` claim. The URI MUST satisfy
+{{endpoint-uri}}. It identifies an API endpoint, not a complete request URI: the client adds the
+subject identifier as the `sub` query parameter according to {{metadata-request}}.
+
+The claim is carried in the signed JWT claims set. A client MUST validate the credential according
+to its applicable profile before using this claim for endpoint selection ({{endpoint-location}}).
+The claim MAY appear whether or not the credential also carries metadata attributes. Its absence
+does not imply that metadata is unavailable; the other location mechanisms in {{endpoint-location}}
+remain applicable. This document requests registration of the claim in {{iana-jwt}}.
+
+### Examples
 
 The following non-normative examples show Workload Identity Credentials for the reconciliation service
 that {{intro}} names with an attribute-bearing identifier. Its replicas share a workload identifier and
@@ -447,6 +470,7 @@ A WIT, whose JOSE header carries `"typ": "wit+jwt"`:
 {
   "iss": "https://issuer.example.com",
   "sub": "wimse://example.com/workload/a7f3c1a24b904d61",
+  "metadata_uri": "https://metadata.example.net/workload-info",
   "iat": 1757894400,
   "exp": 1757898000,
   "jti": "e1f0c7d2a9b34c58",
@@ -472,6 +496,7 @@ audience-restricted and carries no confirmation claim:
 {
   "sub": "spiffe://example.com/workload/a7f3c1a24b904d61",
   "aud": ["spiffe://example.com/service/ledger"],
+  "metadata_uri": "https://metadata.example.net/workload-info",
   "iat": 1757894400,
   "exp": 1757898000,
   "groups": ["team-payments"],
@@ -487,10 +512,15 @@ that named the workload remains valid and remains accurate. And a relying party 
 learn the workload's role can be issued a credential omitting `roles`, without changing the workload's
 identifier, because the identifier no longer carries it.
 
+Both examples also identify the same metadata endpoint. A client selecting that endpoint appends
+the respective credential's complete `sub` value; it does not treat the two identifier schemes as
+interchangeable.
+
 ## X.509-Based Credentials {#x509}
 
-X.509 certificates have no JWT claims set. This document defines no certificate extension or other
-encoding for carrying Workload Metadata in X.509 credentials; defining one is outside its scope.
+X.509 certificates have no JWT claims set. This document defines an extension for locating a
+metadata endpoint, but no encoding for carrying the metadata attributes themselves in X.509
+credentials.
 
 {{Section 6.1 of WIMSE-CREDS}} defines the Workload Identity Certificate, which carries the Workload
 Identifier in a single URI SubjectAltName. Attributes cannot be carried in a second URI SAN:
@@ -499,7 +529,50 @@ workload identifier in the same WIT or WIC". For an X.509-SVID the constraint is
 {{SPIFFE-X509-SVID}} requires a validator to reject any certificate bearing more than one URI SAN,
 whatever its contents. Metadata must go somewhere a relying party will not mistake for an identifier.
 
-Absent such a mechanism, a conforming X.509-based Workload Identity Credential carries the identifier alone:
+### SubjectAltName URI Metadata Extension {#sanuri-metadata}
+
+An X.509-based Workload Identity Credential MAY contain the SubjectAltName URI Metadata extension
+defined below. The extension identifies a workload metadata API endpoint for the workload denoted
+by the certificate's single URI SubjectAltName. It is a separate certificate extension, not an
+additional SubjectAltName entry, and does not change the Workload Identifier.
+
+The extension MUST be non-critical, so clients that do not support metadata retrieval can ignore it
+under the processing rules in {{Section 4.2 of !PKIX=RFC5280}}. The following ASN.1 uses the
+`EXTENSION` information object class defined in {{!PKIX-ASN1=RFC5912}}:
+
+~~~ asn.1
+-- Metadata for the SubjectAltName URI Certificate Extension
+
+ext-SANURImetadata EXTENSION ::= {
+  SYNTAX MetadataURI
+  IDENTIFIED BY id-pe-sanuri-metadata }
+
+-- Metadata for the SubjectAltName URI Certificate Extension OID
+
+id-pe-sanuri-metadata OBJECT IDENTIFIER ::=
+  { iso(1) identified-organization(3) dod(6) internet(1)
+    security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
+
+-- Metadata for the SubjectAltName URI Extension Syntax
+
+MetadataURI ::= IA5String
+-- Contains the URL of the workload metadata API endpoint
+~~~
+
+The `extnValue` OCTET STRING contains the DER encoding of `MetadataURI`, as required by {{PKIX}}.
+The value MUST contain a single URI satisfying {{endpoint-uri}}. The URI is represented using
+ASCII characters, as required by `IA5String`. The OID allocation is requested in {{iana-x509}};
+`TBD` is a placeholder for that allocation.
+
+A client MUST validate the credential according to its applicable profile before using this
+extension for endpoint selection. The client uses the complete workload URI SAN value as the `sub`
+query parameter according to {{metadata-request}}. The extension applies only to the subject of
+the certificate containing it; it is not inherited from a CA certificate. This document defines no
+mapping for certificates containing multiple URI SAN values.
+
+### Example
+
+The following illustrative certificate includes the optional endpoint reference:
 
 ~~~
 X509v3 Basic Constraints: critical
@@ -510,11 +583,14 @@ X509v3 Extended Key Usage:
     TLS Web Server Authentication, TLS Web Client Authentication
 X509v3 Subject Alternative Name: critical
     URI:spiffe://example.com/workload/a7f3c1a24b904d61
+SubjectAltName URI Metadata:
+    https://metadata.example.net/workload-info
 ~~~
 
 After authenticating the workload using this certificate, a relying party can request metadata for
 the complete URI SAN value from the endpoint in {{metadata-endpoint}}. It authenticates the metadata
-request using its own workload credentials. No certificate extension is needed for this retrieval.
+request using its own workload credentials. A certificate without this extension can still be used
+with an endpoint located through trusted configuration or the default URI in {{endpoint-location}}.
 
 # Workload Metadata Endpoint {#metadata-endpoint}
 
@@ -530,15 +606,30 @@ possession of another workload's public credential, does not grant access to its
 
 ## Endpoint Location and Trust {#endpoint-location}
 
+A client MUST select a metadata endpoint for the requested subject in the following order:
+
+1. An endpoint URI explicitly configured out of band for that subject or its namespace.
+2. The endpoint URI carried in a validated Workload Identity Credential for that subject, using
+   `metadata_uri` ({{metadata-uri-claim}}) or the SubjectAltName URI Metadata extension
+   ({{sanuri-metadata}}).
+3. The default URI described below, when the conditions for its use are satisfied.
+
+Credential validation precedes use of a credential-carried URI. When using such a URI, the subject
+used in the request MUST be the complete Workload Identifier from that credential. Considerations
+about the credential issuer's authority to nominate a metadata service are discussed in
+{{credential-uri-security}}.
+
 A deployment or trust domain MAY configure its workload metadata endpoint URI out of band. This
 configuration MUST be obtained through a trusted mechanism and MUST associate the endpoint with the
 Workload Identifier namespaces and claims for which it is authoritative. The endpoint can use a
 different host from the trust domain, for example `https://metadata.example.net/workload-info`.
-An explicitly configured URI takes precedence over the default URI described below.
+An explicitly configured URI takes precedence over both a credential-carried URI and the default URI.
+A credential-carried URI can likewise identify an endpoint on a different host from the trust domain.
 
-In the absence of an explicitly configured URI, a client MAY use the following default URI when the
-trust domain is a valid fully qualified DNS name and deployment policy trusts that domain's HTTPS
-service to provide the requested workload metadata:
+In the absence of both an explicitly configured URI and a URI in the validated credential being
+used, a client MAY use the following default URI when the trust domain is a valid fully qualified
+DNS name and deployment policy trusts that domain's HTTPS service to provide the requested workload
+metadata:
 
 ~~~
 https://<trust-domain>/.well-known/workload-metadata
@@ -548,20 +639,31 @@ The well-known URI uses HTTPS on its default port and follows {{!WELL-KNOWN=RFC8
 trust configuration MUST authorize this mapping before the client contacts the endpoint or presents
 credentials. DNS resolution or a valid TLS certificate alone does not establish authority to assert workload
 metadata. Where a trust domain is not a valid fully qualified DNS name, or this default mapping is
-not trusted, the client MUST use trusted out-of-band configuration or treat the endpoint as
-unavailable. It MUST NOT derive an endpoint from the workload path or an untrusted claim.
+not trusted, a client without an explicitly configured or credential-carried URI MUST treat the
+endpoint as unavailable. It MUST NOT derive an endpoint from the workload path or an unvalidated
+credential.
 
-Configured endpoint URIs MUST be absolute HTTPS URIs without user information or a fragment. They
-MAY contain fixed query parameters, but MUST NOT contain a `sub` parameter; the client adds that
-parameter for each request as described in {{metadata-request}}. Clients MUST authenticate the
-server using the configured trust anchors and expected server identity for the endpoint. Clients
-MUST NOT automatically follow redirects; an alternative endpoint requires a trusted configuration
-update. Failure of a configured endpoint MUST NOT trigger fallback to an unconfigured default.
+A selected endpoint that is invalid, disallowed by local policy, or unavailable MUST NOT cause
+automatic fallback to a lower-precedence location mechanism. If multiple validated credentials for
+the same subject carry different endpoint URIs, the client MUST resolve the choice through explicit
+local policy or treat the endpoint as unavailable.
 
 The association with a namespace includes the Workload Identifier scheme. Identifiers using
 different schemes MUST NOT be treated as interchangeable merely because their trust domains or
 paths match. A service at the default URI can serve multiple authorized namespaces and distinguishes
 them using the complete identifier in the request.
+
+### Endpoint URI Requirements {#endpoint-uri}
+
+Endpoint URIs, whether configured out of band or carried in a credential, MUST be absolute HTTPS
+URIs without user information or a fragment. They MAY contain fixed query parameters, but MUST NOT
+contain a `sub` parameter; the client adds that parameter for each request as described in
+{{metadata-request}}. An endpoint URI MUST NOT contain credentials or other secrets.
+
+Clients MUST authenticate the server using the configured trust anchors and expected server
+identity for the endpoint. Clients MUST NOT automatically follow redirects. An alternative
+endpoint requires updated trusted configuration or a newly validated credential, subject to the
+precedence rules in {{endpoint-location}}.
 
 ## Authentication and Authorization {#metadata-auth}
 
@@ -593,6 +695,15 @@ headers, if any, are omitted from this example.
 ~~~ http-message
 GET /.well-known/workload-metadata?sub=wimse%3A%2F%2Fexample.com%2Fworkload%2Fa7f3c1a24b904d61 HTTP/1.1
 Host: example.com
+Accept: application/json
+~~~
+
+If the client instead selects `https://metadata.example.net/workload-info` from the WIT example in
+{{jwt}}, its request uses the same subject parameter at that endpoint:
+
+~~~ http-message
+GET /workload-info?sub=wimse%3A%2F%2Fexample.com%2Fworkload%2Fa7f3c1a24b904d61 HTTP/1.1
+Host: metadata.example.net
 Accept: application/json
 ~~~
 
@@ -787,8 +898,8 @@ for the subject and claims concerned. It MUST NOT accept claims solely on the ba
 or the subject workload self-reports them. The considerations about writable deployment records and
 metadata derivation in {{issuance}} apply equally to metadata services. An authenticated response
 establishes which service supplied the claims; it does not by itself establish that the service is
-authoritative for them. Clients MUST verify the authority association in {{endpoint-location}} and
-the response subject in {{metadata-response}} before using returned claims.
+authoritative for them. Clients MUST apply the authority and source-selection policy in
+{{consistency}} and verify the response subject in {{metadata-response}} before using returned claims.
 
 The target identifier in a request is a lookup key, not a URI to fetch. A service MUST NOT
 dereference that identifier to obtain metadata without a separately trusted configuration for the
@@ -803,6 +914,33 @@ the authenticated caller and the actual metadata request, including its method a
 a trusted binding of the original caller to that request. Forwarding an unauthenticated caller-identity
 header is not such a binding. Rate limits and request-size limits SHOULD be applied to reduce enumeration and
 denial-of-service risks.
+
+## Credential-Carried Endpoint References {#credential-uri-security}
+
+A validated credential authenticates the issuer's statement about the metadata endpoint for its
+subject. Trust in an issuer for workload authentication does not by itself establish that the issuer
+is competent to nominate a metadata service. Deployment policy can distinguish these roles and
+determine which issuers can nominate sources for particular subjects and claims. An endpoint
+reference in one credential does not establish the service's authority for an entire trust domain.
+
+The credential's signature protects the endpoint reference, not the metadata subsequently returned
+by the service. The latter is protected by the authenticated HTTPS exchange and evaluated under the
+authority and freshness policy in {{consistency}}. The credential issuer and metadata service can
+be different entities; a reference does not make the API response an assertion signed by the
+credential issuer.
+
+Even a signed URI can direct a client to an unintended destination if a credential issuer accepts
+an arbitrary URI from a workload or its deployer. Issuance controls and client network access
+policies help prevent server-side request forgery and disclosure of query subjects or caller
+credentials. Validation of the subject's credential is not, on its own, a reason for the client to
+present its own authentication material to any host named in that credential. The URI and redirect
+restrictions in {{endpoint-uri}} complement these controls.
+
+An endpoint reference remains visible to recipients of the credential and can expose deployment
+structure, even when the metadata service restricts access to the attributes. Changing a reference
+requires credential reissuance, whereas the metadata at that endpoint can change independently.
+Deployments can keep an old endpoint available while credentials referring to it remain valid or
+use an out-of-band override to direct clients to a replacement.
 
 ## Workload Identity Credentials as Capabilities {#capability}
 
@@ -867,6 +1005,36 @@ limit additional disclosure through errors and caches.
 
 # IANA Considerations
 
+## JSON Web Token Claim Registration {#iana-jwt}
+
+This document requests registration of the following entry in the "JSON Web Token Claims" registry
+established by {{JWT}}:
+
+Claim Name:
+: `metadata_uri`
+
+Claim Description:
+: Workload metadata API endpoint URI for the subject identified by the token.
+
+Change Controller:
+: IETF
+
+Reference:
+: {{metadata-uri-claim}} of this document
+
+## X.509 Certificate Extension Registration {#iana-x509}
+
+This document requests an object identifier allocation in the "SMI Security for PKIX Certificate
+Extension" registry, under the `id-pe` arc (`1.3.6.1.5.5.7.1`):
+
+| Decimal | Description | Reference |
+|---|---|---|
+| TBD | id-pe-sanuri-metadata | {{sanuri-metadata}} of this document |
+
+The allocated value replaces `TBD` in the ASN.1 definition in {{sanuri-metadata}}.
+
+## Well-Known URI Registration
+
 This document requests registration of the following entry in the "Well-Known URIs" registry
 established by {{WELL-KNOWN}}:
 
@@ -924,3 +1092,6 @@ To be resolved with the working group, and removed before publication.
 This document restates for workload identity an argument the PKIX community made in {{INET-CERT}}, and that
 {{WIMSE-IDENTIFIER}} already makes for workload identifiers. The authors thank the WIMSE
 working group for the discussion that prompted it.
+
+The authors thank Russ Housley for his guidance on the SubjectAltName URI Metadata certificate
+extension and its ASN.1 definition.
