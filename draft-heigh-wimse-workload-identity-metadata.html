@@ -14,7 +14,8 @@ auditing, authorization, accounting, and other purposes. It profiles existing cl
 membership, roles, and entitlements, with delivery either in JWT-based Workload Identity Credentials
 or through an authenticated workload metadata endpoint. The endpoint supports metadata retrieval for
 workloads using JWT-based or X.509-based credentials and disclosure according to the caller's
-authorization. 
+authorization. An optional JWT claim or X.509 certificate extension identifies the metadata
+endpoint for the credential's subject. 
        This document also defines the separation between identifier and metadata. It distinguishes workload
 attributes and durable principal associations from per-request delegation and grants such as scopes,
 and states the requirements that make the separation sound, including identifier uniqueness. 
@@ -1105,7 +1106,8 @@ auditing, authorization, accounting, and other purposes. It profiles existing cl
 membership, roles, and entitlements, with delivery either in JWT-based Workload Identity Credentials
 or through an authenticated workload metadata endpoint. The endpoint supports metadata retrieval for
 workloads using JWT-based or X.509-based credentials and disclosure according to the caller's
-authorization.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+authorization. An optional JWT claim or X.509 certificate extension identifies the metadata
+endpoint for the credential's subject.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-abstract-2">This document also defines the separation between identifier and metadata. It distinguishes workload
 attributes and durable principal associations from per-request delegation and grants such as scopes,
 and states the requirements that make the separation sound, including identifier uniqueness.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
@@ -1225,13 +1227,29 @@ jobs, serverless functions, and AI agents. Agentic use cases are discussed separ
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-agentic-use-cases" class="internal xref">Agentic Use Cases</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
-            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-carrying-metadata-in-worklo" class="internal xref">Carrying Metadata in Workload Identity Credentials</a></p>
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-metadata-and-endpoint-refer" class="internal xref">Metadata and Endpoint References in Workload Identity Credentials</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
                 <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-jwt-based-credentials" class="internal xref">JWT-Based Credentials</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1.2.1">
+                    <p id="section-toc.1-1.6.2.1.2.1.1"><a href="#section-6.1.1" class="auto internal xref">6.1.1</a>.  <a href="#name-metadata-uri-claim" class="internal xref">Metadata URI Claim</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1.2.2">
+                    <p id="section-toc.1-1.6.2.1.2.2.1"><a href="#section-6.1.2" class="auto internal xref">6.1.2</a>.  <a href="#name-examples" class="internal xref">Examples</a></p>
+</li>
+                </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
                 <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-x509-based-credentials" class="internal xref">X.509-Based Credentials</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2.2.1">
+                    <p id="section-toc.1-1.6.2.2.2.1.1"><a href="#section-6.2.1" class="auto internal xref">6.2.1</a>.  <a href="#name-subjectaltname-uri-metadata" class="internal xref">SubjectAltName URI Metadata Extension</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2.2.2">
+                    <p id="section-toc.1-1.6.2.2.2.2.1"><a href="#section-6.2.2" class="auto internal xref">6.2.2</a>.  <a href="#name-example" class="internal xref">Example</a></p>
+</li>
+                </ul>
 </li>
             </ul>
 </li>
@@ -1240,6 +1258,11 @@ jobs, serverless functions, and AI agents. Agentic use cases are discussed separ
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
                 <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-endpoint-location-and-trust" class="internal xref">Endpoint Location and Trust</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1.2.1">
+                    <p id="section-toc.1-1.7.2.1.2.1.1"><a href="#section-7.1.1" class="auto internal xref">7.1.1</a>.  <a href="#name-endpoint-uri-requirements" class="internal xref">Endpoint URI Requirements</a></p>
+</li>
+                </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
                 <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-authentication-and-authoriz" class="internal xref">Authentication and Authorization</a></p>
@@ -1277,10 +1300,13 @@ jobs, serverless functions, and AI agents. Agentic use cases are discussed separ
                 <p id="section-toc.1-1.11.2.3.1"><a href="#section-11.3" class="auto internal xref">11.3</a>.  <a href="#name-metadata-service-authority-" class="internal xref">Metadata Service Authority and Request Protection</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.4">
-                <p id="section-toc.1-1.11.2.4.1"><a href="#section-11.4" class="auto internal xref">11.4</a>.  <a href="#name-workload-identity-credentia" class="internal xref">Workload Identity Credentials as Capabilities</a></p>
+                <p id="section-toc.1-1.11.2.4.1"><a href="#section-11.4" class="auto internal xref">11.4</a>.  <a href="#name-credential-carried-endpoint" class="internal xref">Credential-Carried Endpoint References</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.5">
-                <p id="section-toc.1-1.11.2.5.1"><a href="#section-11.5" class="auto internal xref">11.5</a>.  <a href="#name-attribute-staleness" class="internal xref">Attribute Staleness</a></p>
+                <p id="section-toc.1-1.11.2.5.1"><a href="#section-11.5" class="auto internal xref">11.5</a>.  <a href="#name-workload-identity-credentia" class="internal xref">Workload Identity Credentials as Capabilities</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.6">
+                <p id="section-toc.1-1.11.2.6.1"><a href="#section-11.6" class="auto internal xref">11.6</a>.  <a href="#name-attribute-staleness" class="internal xref">Attribute Staleness</a></p>
 </li>
             </ul>
 </li>
@@ -1289,6 +1315,17 @@ jobs, serverless functions, and AI agents. Agentic use cases are discussed separ
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
             <p id="section-toc.1-1.13.1"><a href="#section-13" class="auto internal xref">13</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
+                <p id="section-toc.1-1.13.2.1.1"><a href="#section-13.1" class="auto internal xref">13.1</a>.  <a href="#name-json-web-token-claim-regist" class="internal xref">JSON Web Token Claim Registration</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
+                <p id="section-toc.1-1.13.2.2.1"><a href="#section-13.2" class="auto internal xref">13.2</a>.  <a href="#name-x509-certificate-extension-" class="internal xref">X.509 Certificate Extension Registration</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.3">
+                <p id="section-toc.1-1.13.2.3.1"><a href="#section-13.3" class="auto internal xref">13.3</a>.  <a href="#name-well-known-uri-registration" class="internal xref">Well-Known URI Registration</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
             <p id="section-toc.1-1.14.1"><a href="#section-14" class="auto internal xref">14</a>. <a href="#name-references" class="internal xref">References</a></p>
@@ -1339,7 +1376,8 @@ in its structure. This document profiles metadata carried in a JWT-based Workloa
 such as a WIMSE Workload Identity Token <span>[<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span> or a JWT-SVID,
 or retrieved from an authenticated metadata endpoint. Both delivery methods use the same metadata
 model and bind attributes to the complete Workload Identifier. The endpoint also supports workloads
-authenticated using X.509 credentials, for which this document defines no in-band metadata encoding.<a href="#section-1-5" class="pilcrow">¶</a></p>
+authenticated using X.509 credentials, for which this document defines no in-band metadata encoding.
+Either credential format can carry a reference to the metadata endpoint.<a href="#section-1-5" class="pilcrow">¶</a></p>
 <p id="section-1-6">Where suitable claims already exist, this document profiles them rather than defining new ones. Group,
 role, and entitlement claims are already registered <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> with semantics drawn from SCIM
 <span>[<a href="#SCIM-CORE" class="cite xref">SCIM-CORE</a>]</span>, and delegation is already expressible <span>[<a href="#OAUTH-TOKEN-EXCHANGE" class="cite xref">OAUTH-TOKEN-EXCHANGE</a>]</span>.<a href="#section-1-6" class="pilcrow">¶</a></p>
@@ -1370,10 +1408,13 @@ associations;<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
             <p id="section-1.1-2.4.1">endpoint location, request and response formats, and authorization-dependent disclosure;<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-2.5">
-            <p id="section-1.1-2.5.1">metadata asserted by a credential issuer that exchanges credentials across trust domains;<a href="#section-1.1-2.5.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.5.1">a JWT claim and an X.509 certificate extension for identifying the metadata endpoint;<a href="#section-1.1-2.5.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-2.6">
-            <p id="section-1.1-2.6.1">the identifier uniqueness requirements that the separation depends on.<a href="#section-1.1-2.6.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.6.1">metadata asserted by a credential issuer that exchanges credentials across trust domains;<a href="#section-1.1-2.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.7">
+            <p id="section-1.1-2.7.1">the identifier uniqueness requirements that the separation depends on.<a href="#section-1.1-2.7.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-1.1-3">Out of scope:<a href="#section-1.1-3" class="pilcrow">¶</a></p>
@@ -1386,7 +1427,7 @@ associations;<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
 authentication binding;<a href="#section-1.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.3">
-            <p id="section-1.1-4.3.1">defining an in-band metadata encoding for X.509 credentials;<a href="#section-1.1-4.3.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-4.3.1">carrying metadata attributes themselves in X.509 credentials;<a href="#section-1.1-4.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.4">
             <p id="section-1.1-4.4.1">independently signed metadata responses and their forwarding to other parties;<a href="#section-1.1-4.4.1" class="pilcrow">¶</a></p>
@@ -1544,6 +1585,9 @@ describing the workload or workload instance that identifier denotes. Metadata i
 Identity Credential is asserted by the credential issuer and inherits the credential's signature,
 its validity period, and its trust path. That is what distinguishes it from an attribute the
 workload asserts about itself at the application layer.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3-2">A Workload Identity Credential <span class="bcp14">MAY</span> also identify a metadata endpoint for its subject, using the
+JWT claim in <a href="#metadata-uri-claim" class="auto internal xref">Section 6.1.1</a> or the X.509 extension in <a href="#sanuri-metadata" class="auto internal xref">Section 6.2.1</a>. This reference
+locates an API; it does not itself carry the metadata returned by that API.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="in-band">
@@ -1560,7 +1604,7 @@ encoding for carrying these metadata claims in X.509 credentials (<a href="#x509
 X.509-based deployments, and lets the service disclose different claims to different authorized
 callers. Attributes can be updated without reissuing credentials. Retrieval adds a network request,
 latency, and an availability dependency, and its freshness depends on the service's data sources
-(<a href="#staleness" class="auto internal xref">Section 11.5</a>). The service can obtain metadata from stored records or derive it from authoritative
+(<a href="#staleness" class="auto internal xref">Section 11.6</a>). The service can obtain metadata from stored records or derive it from authoritative
 information; this document does not require a separate pre-provisioned record for every workload.<a href="#section-3.4-2" class="pilcrow">¶</a></p>
 <p id="section-3.4-3">A deployment <span class="bcp14">MAY</span> use either method or both, for example carrying frequently used attributes in a
 JWT and retrieving additional attributes when needed. Claim semantics are independent of delivery;
@@ -1700,7 +1744,7 @@ not the credential issuer.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
 <p id="section-4.3-4">Accordingly, a Workload Identity Credential <span class="bcp14">MAY</span> carry coarse entitlements per <a href="#reuse" class="auto internal xref">Section 4.1</a>, but <span class="bcp14">SHOULD NOT</span> carry
 resource-specific scopes or fine-grained permissions. Where a deployment carries them anyway, a relying
 party <span class="bcp14">MUST NOT</span> treat them as authoritative for an authorization decision, and <span class="bcp14">MUST</span> obtain authorization
-from its own policy or from an authorization server. <a href="#capability" class="auto internal xref">Section 11.4</a> gives the reasoning.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
+from its own policy or from an authorization server. <a href="#capability" class="auto internal xref">Section 11.5</a> gives the reasoning.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
 <p id="section-4.3-5">The same distinction applies to API responses. Retrieving metadata does not itself grant the target
 workload permission to access a resource, and the caller's permission to retrieve metadata does not
 confer authority to act as the target workload.<a href="#section-4.3-5" class="pilcrow">¶</a></p>
@@ -1789,8 +1833,8 @@ the general workload and instance identity model of <span>[<a href="#WIMSE-IDENT
 </div>
 <div id="carriage">
 <section id="section-6">
-      <h2 id="name-carrying-metadata-in-worklo">
-<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-carrying-metadata-in-worklo" class="section-name selfRef">Carrying Metadata in Workload Identity Credentials</a>
+      <h2 id="name-metadata-and-endpoint-refer">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-metadata-and-endpoint-refer" class="section-name selfRef">Metadata and Endpoint References in Workload Identity Credentials</a>
       </h2>
 <div id="jwt">
 <section id="section-6.1">
@@ -1804,16 +1848,39 @@ recipient ignore claims it does not understand, discourages private claim names,
 claims used outside closed environments be registered with IANA. Because the claims in <a href="#reuse" class="auto internal xref">Section 4.1</a> are
 already registered, a Workload Identity Credential expressing workload group, role, or entitlements
 satisfies those rules without further action.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
-<p id="section-6.1-2">The following non-normative examples show Workload Identity Credentials for the reconciliation service
+<div id="metadata-uri-claim">
+<section id="section-6.1.1">
+          <h4 id="name-metadata-uri-claim">
+<a href="#section-6.1.1" class="section-number selfRef">6.1.1. </a><a href="#name-metadata-uri-claim" class="section-name selfRef">Metadata URI Claim</a>
+          </h4>
+<p id="section-6.1.1-1">This document defines the optional <code>metadata_uri</code> claim for JWT-based Workload Identity Credentials,
+including WITs. Its value <span class="bcp14">MUST</span> be a single JSON string containing the URI of a workload metadata
+API endpoint for the subject identified by the credential's <code>sub</code> claim. The URI <span class="bcp14">MUST</span> satisfy
+<a href="#endpoint-uri" class="auto internal xref">Section 7.1.1</a>. It identifies an API endpoint, not a complete request URI: the client adds the
+subject identifier as the <code>sub</code> query parameter according to <a href="#metadata-request" class="auto internal xref">Section 7.3</a>.<a href="#section-6.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1.1-2">The claim is carried in the signed JWT claims set. A client <span class="bcp14">MUST</span> validate the credential according
+to its applicable profile before using this claim for endpoint selection (<a href="#endpoint-location" class="auto internal xref">Section 7.1</a>).
+The claim <span class="bcp14">MAY</span> appear whether or not the credential also carries metadata attributes. Its absence
+does not imply that metadata is unavailable; the other location mechanisms in <a href="#endpoint-location" class="auto internal xref">Section 7.1</a>
+remain applicable. This document requests registration of the claim in <a href="#iana-jwt" class="auto internal xref">Section 13.1</a>.<a href="#section-6.1.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="examples">
+<section id="section-6.1.2">
+          <h4 id="name-examples">
+<a href="#section-6.1.2" class="section-number selfRef">6.1.2. </a><a href="#name-examples" class="section-name selfRef">Examples</a>
+          </h4>
+<p id="section-6.1.2-1">The following non-normative examples show Workload Identity Credentials for the reconciliation service
 that <a href="#intro" class="auto internal xref">Section 1</a> names with an attribute-bearing identifier. Its replicas share a workload identifier and
 the same workload metadata. In each example, the identifier is opaque and the attributes appear only
-as claims.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
-<p id="section-6.1-3">A WIT, whose JOSE header carries <code>"typ": "wit+jwt"</code>:<a href="#section-6.1-3" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-6.1-4">
+as claims.<a href="#section-6.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.1.2-2">A WIT, whose JOSE header carries <code>"typ": "wit+jwt"</code>:<a href="#section-6.1.2-2" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-6.1.2-3">
 <pre>
 {
   "iss": "https://issuer.example.com",
   "sub": "wimse://example.com/workload/a7f3c1a24b904d61",
+  "metadata_uri": "https://metadata.example.net/workload-info",
   "iat": 1757894400,
   "exp": 1757898000,
   "jti": "e1f0c7d2a9b34c58",
@@ -1828,31 +1895,37 @@ as claims.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
   "roles": ["reconciler"],
   "entitlements": ["ledger-read"]
 }
-</pre><a href="#section-6.1-4" class="pilcrow">¶</a>
+</pre><a href="#section-6.1.2-3" class="pilcrow">¶</a>
 </div>
-<p id="section-6.1-5">The <code>cnf</code> claim is mandatory in a WIT and binds the credential to the workload's key; a WIT has no <code>aud</code>
+<p id="section-6.1.2-4">The <code>cnf</code> claim is mandatory in a WIT and binds the credential to the workload's key; a WIT has no <code>aud</code>
 claim and cannot be used as a bearer token
 (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-5.1" class="relref">Section 5.1</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span>). The same workload's JWT-SVID <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span> is instead
-audience-restricted and carries no confirmation claim:<a href="#section-6.1-5" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-6.1-6">
+audience-restricted and carries no confirmation claim:<a href="#section-6.1.2-4" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-6.1.2-5">
 <pre>
 {
   "sub": "spiffe://example.com/workload/a7f3c1a24b904d61",
   "aud": ["spiffe://example.com/service/ledger"],
+  "metadata_uri": "https://metadata.example.net/workload-info",
   "iat": 1757894400,
   "exp": 1757898000,
   "groups": ["team-payments"],
   "roles": ["reconciler"],
   "entitlements": ["ledger-read"]
 }
-</pre><a href="#section-6.1-6" class="pilcrow">¶</a>
+</pre><a href="#section-6.1.2-5" class="pilcrow">¶</a>
 </div>
-<p id="section-6.1-7">The metadata is identical across these two examples. Two properties illustrate what the separation
+<p id="section-6.1.2-6">The metadata is identical across these two examples. Two properties illustrate what the separation
 buys. Reassigning the workload to another team
 changes <code>groups</code> and leaves <code>sub</code> untouched, so every existing grant and every historical audit record
 that named the workload remains valid and remains accurate. And a relying party that is not authorized to
 learn the workload's role can be issued a credential omitting <code>roles</code>, without changing the workload's
-identifier, because the identifier no longer carries it.<a href="#section-6.1-7" class="pilcrow">¶</a></p>
+identifier, because the identifier no longer carries it.<a href="#section-6.1.2-6" class="pilcrow">¶</a></p>
+<p id="section-6.1.2-7">Both examples also identify the same metadata endpoint. A client selecting that endpoint appends
+the respective credential's complete <code>sub</code> value; it does not treat the two identifier schemes as
+interchangeable.<a href="#section-6.1.2-7" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="x509">
@@ -1860,16 +1933,65 @@ identifier, because the identifier no longer carries it.<a href="#section-6.1-7"
         <h3 id="name-x509-based-credentials">
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-x509-based-credentials" class="section-name selfRef">X.509-Based Credentials</a>
         </h3>
-<p id="section-6.2-1">X.509 certificates have no JWT claims set. This document defines no certificate extension or other
-encoding for carrying Workload Metadata in X.509 credentials; defining one is outside its scope.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-1">X.509 certificates have no JWT claims set. This document defines an extension for locating a
+metadata endpoint, but no encoding for carrying the metadata attributes themselves in X.509
+credentials.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <p id="section-6.2-2"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-6.1" class="relref">Section 6.1</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span> defines the Workload Identity Certificate, which carries the Workload
 Identifier in a single URI SubjectAltName. Attributes cannot be carried in a second URI SAN:
 <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-4" class="relref">Section 4</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span> requires that additional correlation "<span class="bcp14">MUST NOT</span> be encoded as a second
 workload identifier in the same WIT or WIC". For an X.509-SVID the constraint is stronger still:
 <span>[<a href="#SPIFFE-X509-SVID" class="cite xref">SPIFFE-X509-SVID</a>]</span> requires a validator to reject any certificate bearing more than one URI SAN,
 whatever its contents. Metadata must go somewhere a relying party will not mistake for an identifier.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
-<p id="section-6.2-3">Absent such a mechanism, a conforming X.509-based Workload Identity Credential carries the identifier alone:<a href="#section-6.2-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-6.2-4">
+<div id="sanuri-metadata">
+<section id="section-6.2.1">
+          <h4 id="name-subjectaltname-uri-metadata">
+<a href="#section-6.2.1" class="section-number selfRef">6.2.1. </a><a href="#name-subjectaltname-uri-metadata" class="section-name selfRef">SubjectAltName URI Metadata Extension</a>
+          </h4>
+<p id="section-6.2.1-1">An X.509-based Workload Identity Credential <span class="bcp14">MAY</span> contain the SubjectAltName URI Metadata extension
+defined below. The extension identifies a workload metadata API endpoint for the workload denoted
+by the certificate's single URI SubjectAltName. It is a separate certificate extension, not an
+additional SubjectAltName entry, and does not change the Workload Identifier.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.2.1-2">The extension <span class="bcp14">MUST</span> be non-critical, so clients that do not support metadata retrieval can ignore it
+under the processing rules in <span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2" class="relref">Section 4.2</a> of [<a href="#PKIX" class="cite xref">PKIX</a>]</span>. The following ASN.1 uses the
+<code>EXTENSION</code> information object class defined in <span>[<a href="#PKIX-ASN1" class="cite xref">PKIX-ASN1</a>]</span>:<a href="#section-6.2.1-2" class="pilcrow">¶</a></p>
+<div class="lang-asn.1 sourcecode" id="section-6.2.1-3">
+<pre>
+-- Metadata for the SubjectAltName URI Certificate Extension
+
+ext-SANURImetadata EXTENSION ::= {
+  SYNTAX MetadataURI
+  IDENTIFIED BY id-pe-sanuri-metadata }
+
+-- Metadata for the SubjectAltName URI Certificate Extension OID
+
+id-pe-sanuri-metadata OBJECT IDENTIFIER ::=
+  { iso(1) identified-organization(3) dod(6) internet(1)
+    security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
+
+-- Metadata for the SubjectAltName URI Extension Syntax
+
+MetadataURI ::= IA5String
+-- Contains the URL of the workload metadata API endpoint
+</pre><a href="#section-6.2.1-3" class="pilcrow">¶</a>
+</div>
+<p id="section-6.2.1-4">The <code>extnValue</code> OCTET STRING contains the DER encoding of <code>MetadataURI</code>, as required by <span>[<a href="#PKIX" class="cite xref">PKIX</a>]</span>.
+The value <span class="bcp14">MUST</span> contain a single URI satisfying <a href="#endpoint-uri" class="auto internal xref">Section 7.1.1</a>. The URI is represented using
+ASCII characters, as required by <code>IA5String</code>. The OID allocation is requested in <a href="#iana-x509" class="auto internal xref">Section 13.2</a>;
+<code>TBD</code> is a placeholder for that allocation.<a href="#section-6.2.1-4" class="pilcrow">¶</a></p>
+<p id="section-6.2.1-5">A client <span class="bcp14">MUST</span> validate the credential according to its applicable profile before using this
+extension for endpoint selection. The client uses the complete workload URI SAN value as the <code>sub</code>
+query parameter according to <a href="#metadata-request" class="auto internal xref">Section 7.3</a>. The extension applies only to the subject of
+the certificate containing it; it is not inherited from a CA certificate. This document defines no
+mapping for certificates containing multiple URI SAN values.<a href="#section-6.2.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="example">
+<section id="section-6.2.2">
+          <h4 id="name-example">
+<a href="#section-6.2.2" class="section-number selfRef">6.2.2. </a><a href="#name-example" class="section-name selfRef">Example</a>
+          </h4>
+<p id="section-6.2.2-1">The following illustrative certificate includes the optional endpoint reference:<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.2.2-2">
 <pre>
 X509v3 Basic Constraints: critical
     CA:FALSE
@@ -1879,11 +2001,16 @@ X509v3 Extended Key Usage:
     TLS Web Server Authentication, TLS Web Client Authentication
 X509v3 Subject Alternative Name: critical
     URI:spiffe://example.com/workload/a7f3c1a24b904d61
-</pre><a href="#section-6.2-4" class="pilcrow">¶</a>
+SubjectAltName URI Metadata:
+    https://metadata.example.net/workload-info
+</pre><a href="#section-6.2.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-6.2-5">After authenticating the workload using this certificate, a relying party can request metadata for
+<p id="section-6.2.2-3">After authenticating the workload using this certificate, a relying party can request metadata for
 the complete URI SAN value from the endpoint in <a href="#metadata-endpoint" class="auto internal xref">Section 7</a>. It authenticates the metadata
-request using its own workload credentials. No certificate extension is needed for this retrieval.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
+request using its own workload credentials. A certificate without this extension can still be used
+with an endpoint located through trusted configuration or the default URI in <a href="#endpoint-location" class="auto internal xref">Section 7.1</a>.<a href="#section-6.2.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 </section>
@@ -1906,35 +2033,69 @@ possession of another workload's public credential, does not grant access to its
         <h3 id="name-endpoint-location-and-trust">
 <a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-endpoint-location-and-trust" class="section-name selfRef">Endpoint Location and Trust</a>
         </h3>
-<p id="section-7.1-1">A deployment or trust domain <span class="bcp14">MAY</span> configure its workload metadata endpoint URI out of band. This
+<p id="section-7.1-1">A client <span class="bcp14">MUST</span> select a metadata endpoint for the requested subject in the following order:<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-7.1-2">
+<li id="section-7.1-2.1">
+            <p id="section-7.1-2.1.1">An endpoint URI explicitly configured out of band for that subject or its namespace.<a href="#section-7.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-7.1-2.2">
+            <p id="section-7.1-2.2.1">The endpoint URI carried in a validated Workload Identity Credential for that subject, using
+<code>metadata_uri</code> (<a href="#metadata-uri-claim" class="auto internal xref">Section 6.1.1</a>) or the SubjectAltName URI Metadata extension
+(<a href="#sanuri-metadata" class="auto internal xref">Section 6.2.1</a>).<a href="#section-7.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-7.1-2.3">
+            <p id="section-7.1-2.3.1">The default URI described below, when the conditions for its use are satisfied.<a href="#section-7.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-7.1-3">Credential validation precedes use of a credential-carried URI. When using such a URI, the subject
+used in the request <span class="bcp14">MUST</span> be the complete Workload Identifier from that credential. Considerations
+about the credential issuer's authority to nominate a metadata service are discussed in
+<a href="#credential-uri-security" class="auto internal xref">Section 11.4</a>.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
+<p id="section-7.1-4">A deployment or trust domain <span class="bcp14">MAY</span> configure its workload metadata endpoint URI out of band. This
 configuration <span class="bcp14">MUST</span> be obtained through a trusted mechanism and <span class="bcp14">MUST</span> associate the endpoint with the
 Workload Identifier namespaces and claims for which it is authoritative. The endpoint can use a
 different host from the trust domain, for example <code>https://metadata.example.net/workload-info</code>.
-An explicitly configured URI takes precedence over the default URI described below.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
-<p id="section-7.1-2">In the absence of an explicitly configured URI, a client <span class="bcp14">MAY</span> use the following default URI when the
-trust domain is a valid fully qualified DNS name and deployment policy trusts that domain's HTTPS
-service to provide the requested workload metadata:<a href="#section-7.1-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.1-3">
+An explicitly configured URI takes precedence over both a credential-carried URI and the default URI.
+A credential-carried URI can likewise identify an endpoint on a different host from the trust domain.<a href="#section-7.1-4" class="pilcrow">¶</a></p>
+<p id="section-7.1-5">In the absence of both an explicitly configured URI and a URI in the validated credential being
+used, a client <span class="bcp14">MAY</span> use the following default URI when the trust domain is a valid fully qualified
+DNS name and deployment policy trusts that domain's HTTPS service to provide the requested workload
+metadata:<a href="#section-7.1-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.1-6">
 <pre>
 https://&lt;trust-domain&gt;/.well-known/workload-metadata
-</pre><a href="#section-7.1-3" class="pilcrow">¶</a>
+</pre><a href="#section-7.1-6" class="pilcrow">¶</a>
 </div>
-<p id="section-7.1-4">The well-known URI uses HTTPS on its default port and follows <span>[<a href="#WELL-KNOWN" class="cite xref">WELL-KNOWN</a>]</span>. The client's
+<p id="section-7.1-7">The well-known URI uses HTTPS on its default port and follows <span>[<a href="#WELL-KNOWN" class="cite xref">WELL-KNOWN</a>]</span>. The client's
 trust configuration <span class="bcp14">MUST</span> authorize this mapping before the client contacts the endpoint or presents
 credentials. DNS resolution or a valid TLS certificate alone does not establish authority to assert workload
 metadata. Where a trust domain is not a valid fully qualified DNS name, or this default mapping is
-not trusted, the client <span class="bcp14">MUST</span> use trusted out-of-band configuration or treat the endpoint as
-unavailable. It <span class="bcp14">MUST NOT</span> derive an endpoint from the workload path or an untrusted claim.<a href="#section-7.1-4" class="pilcrow">¶</a></p>
-<p id="section-7.1-5">Configured endpoint URIs <span class="bcp14">MUST</span> be absolute HTTPS URIs without user information or a fragment. They
-<span class="bcp14">MAY</span> contain fixed query parameters, but <span class="bcp14">MUST NOT</span> contain a <code>sub</code> parameter; the client adds that
-parameter for each request as described in <a href="#metadata-request" class="auto internal xref">Section 7.3</a>. Clients <span class="bcp14">MUST</span> authenticate the
-server using the configured trust anchors and expected server identity for the endpoint. Clients
-<span class="bcp14">MUST NOT</span> automatically follow redirects; an alternative endpoint requires a trusted configuration
-update. Failure of a configured endpoint <span class="bcp14">MUST NOT</span> trigger fallback to an unconfigured default.<a href="#section-7.1-5" class="pilcrow">¶</a></p>
-<p id="section-7.1-6">The association with a namespace includes the Workload Identifier scheme. Identifiers using
+not trusted, a client without an explicitly configured or credential-carried URI <span class="bcp14">MUST</span> treat the
+endpoint as unavailable. It <span class="bcp14">MUST NOT</span> derive an endpoint from the workload path or an unvalidated
+credential.<a href="#section-7.1-7" class="pilcrow">¶</a></p>
+<p id="section-7.1-8">A selected endpoint that is invalid, disallowed by local policy, or unavailable <span class="bcp14">MUST NOT</span> cause
+automatic fallback to a lower-precedence location mechanism. If multiple validated credentials for
+the same subject carry different endpoint URIs, the client <span class="bcp14">MUST</span> resolve the choice through explicit
+local policy or treat the endpoint as unavailable.<a href="#section-7.1-8" class="pilcrow">¶</a></p>
+<p id="section-7.1-9">The association with a namespace includes the Workload Identifier scheme. Identifiers using
 different schemes <span class="bcp14">MUST NOT</span> be treated as interchangeable merely because their trust domains or
 paths match. A service at the default URI can serve multiple authorized namespaces and distinguishes
-them using the complete identifier in the request.<a href="#section-7.1-6" class="pilcrow">¶</a></p>
+them using the complete identifier in the request.<a href="#section-7.1-9" class="pilcrow">¶</a></p>
+<div id="endpoint-uri">
+<section id="section-7.1.1">
+          <h4 id="name-endpoint-uri-requirements">
+<a href="#section-7.1.1" class="section-number selfRef">7.1.1. </a><a href="#name-endpoint-uri-requirements" class="section-name selfRef">Endpoint URI Requirements</a>
+          </h4>
+<p id="section-7.1.1-1">Endpoint URIs, whether configured out of band or carried in a credential, <span class="bcp14">MUST</span> be absolute HTTPS
+URIs without user information or a fragment. They <span class="bcp14">MAY</span> contain fixed query parameters, but <span class="bcp14">MUST NOT</span>
+contain a <code>sub</code> parameter; the client adds that parameter for each request as described in
+<a href="#metadata-request" class="auto internal xref">Section 7.3</a>. An endpoint URI <span class="bcp14">MUST NOT</span> contain credentials or other secrets.<a href="#section-7.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1.1-2">Clients <span class="bcp14">MUST</span> authenticate the server using the configured trust anchors and expected server
+identity for the endpoint. Clients <span class="bcp14">MUST NOT</span> automatically follow redirects. An alternative
+endpoint requires updated trusted configuration or a newly validated credential, subject to the
+precedence rules in <a href="#endpoint-location" class="auto internal xref">Section 7.1</a>.<a href="#section-7.1.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="metadata-auth">
@@ -1974,6 +2135,15 @@ GET /.well-known/workload-metadata?sub=wimse%3A%2F%2Fexample.com%2Fworkload%2Fa7
 Host: example.com
 Accept: application/json
 </pre><a href="#section-7.3-3" class="pilcrow">¶</a>
+</div>
+<p id="section-7.3-4">If the client instead selects <code>https://metadata.example.net/workload-info</code> from the WIT example in
+<a href="#jwt" class="auto internal xref">Section 6.1</a>, its request uses the same subject parameter at that endpoint:<a href="#section-7.3-4" class="pilcrow">¶</a></p>
+<div class="lang-http-message sourcecode" id="section-7.3-5">
+<pre>
+GET /workload-info?sub=wimse%3A%2F%2Fexample.com%2Fworkload%2Fa7f3c1a24b904d61 HTTP/1.1
+Host: metadata.example.net
+Accept: application/json
+</pre><a href="#section-7.3-5" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -2219,8 +2389,8 @@ for the subject and claims concerned. It <span class="bcp14">MUST NOT</span> acc
 or the subject workload self-reports them. The considerations about writable deployment records and
 metadata derivation in <a href="#issuance" class="auto internal xref">Section 11.2</a> apply equally to metadata services. An authenticated response
 establishes which service supplied the claims; it does not by itself establish that the service is
-authoritative for them. Clients <span class="bcp14">MUST</span> verify the authority association in <a href="#endpoint-location" class="auto internal xref">Section 7.1</a> and
-the response subject in <a href="#metadata-response" class="auto internal xref">Section 7.4</a> before using returned claims.<a href="#section-11.3-1" class="pilcrow">¶</a></p>
+authoritative for them. Clients <span class="bcp14">MUST</span> apply the authority and source-selection policy in
+<a href="#consistency" class="auto internal xref">Section 8</a> and verify the response subject in <a href="#metadata-response" class="auto internal xref">Section 7.4</a> before using returned claims.<a href="#section-11.3-1" class="pilcrow">¶</a></p>
 <p id="section-11.3-2">The target identifier in a request is a lookup key, not a URI to fetch. A service <span class="bcp14">MUST NOT</span>
 dereference that identifier to obtain metadata without a separately trusted configuration for the
 source. Clients and services <span class="bcp14">SHOULD</span> apply network access restrictions appropriate to their
@@ -2235,57 +2405,85 @@ header is not such a binding. Rate limits and request-size limits <span class="b
 denial-of-service risks.<a href="#section-11.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="capability">
+<div id="credential-uri-security">
 <section id="section-11.4">
-        <h3 id="name-workload-identity-credentia">
-<a href="#section-11.4" class="section-number selfRef">11.4. </a><a href="#name-workload-identity-credentia" class="section-name selfRef">Workload Identity Credentials as Capabilities</a>
+        <h3 id="name-credential-carried-endpoint">
+<a href="#section-11.4" class="section-number selfRef">11.4. </a><a href="#name-credential-carried-endpoint" class="section-name selfRef">Credential-Carried Endpoint References</a>
         </h3>
-<p id="section-11.4-1">Metadata that expresses authority converts an identity credential into a capability. Three consequences
+<p id="section-11.4-1">A validated credential authenticates the issuer's statement about the metadata endpoint for its
+subject. Trust in an issuer for workload authentication does not by itself establish that the issuer
+is competent to nominate a metadata service. Deployment policy can distinguish these roles and
+determine which issuers can nominate sources for particular subjects and claims. An endpoint
+reference in one credential does not establish the service's authority for an entire trust domain.<a href="#section-11.4-1" class="pilcrow">¶</a></p>
+<p id="section-11.4-2">The credential's signature protects the endpoint reference, not the metadata subsequently returned
+by the service. The latter is protected by the authenticated HTTPS exchange and evaluated under the
+authority and freshness policy in <a href="#consistency" class="auto internal xref">Section 8</a>. The credential issuer and metadata service can
+be different entities; a reference does not make the API response an assertion signed by the
+credential issuer.<a href="#section-11.4-2" class="pilcrow">¶</a></p>
+<p id="section-11.4-3">Even a signed URI can direct a client to an unintended destination if a credential issuer accepts
+an arbitrary URI from a workload or its deployer. Issuance controls and client network access
+policies help prevent server-side request forgery and disclosure of query subjects or caller
+credentials. Validation of the subject's credential is not, on its own, a reason for the client to
+present its own authentication material to any host named in that credential. The URI and redirect
+restrictions in <a href="#endpoint-uri" class="auto internal xref">Section 7.1.1</a> complement these controls.<a href="#section-11.4-3" class="pilcrow">¶</a></p>
+<p id="section-11.4-4">An endpoint reference remains visible to recipients of the credential and can expose deployment
+structure, even when the metadata service restricts access to the attributes. Changing a reference
+requires credential reissuance, whereas the metadata at that endpoint can change independently.
+Deployments can keep an old endpoint available while credentials referring to it remain valid or
+use an out-of-band override to direct clients to a replacement.<a href="#section-11.4-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="capability">
+<section id="section-11.5">
+        <h3 id="name-workload-identity-credentia">
+<a href="#section-11.5" class="section-number selfRef">11.5. </a><a href="#name-workload-identity-credentia" class="section-name selfRef">Workload Identity Credentials as Capabilities</a>
+        </h3>
+<p id="section-11.5-1">Metadata that expresses authority converts an identity credential into a capability. Three consequences
 motivate <a href="#permissions" class="auto internal xref">Section 4.3</a>. They hold whether or not the credential is a bearer token: a WIT is bound
 to the workload's key and cannot be used as one (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02#section-5.1" class="relref">Section 5.1</a> of [<a href="#WIMSE-CREDS" class="cite xref">WIMSE-CREDS</a>]</span>), while a JWT-SVID
-is presented as one <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span>.<a href="#section-11.4-1" class="pilcrow">¶</a></p>
-<span class="break"></span><dl class="dlParallel" id="section-11.4-2">
-          <dt id="section-11.4-2.1">Lifetime mismatch:</dt>
-          <dd style="margin-left: 1.5em" id="section-11.4-2.2">
-            <p id="section-11.4-2.2.1">A permission revoked at the authorization server remains asserted by every unexpired credential
+is presented as one <span>[<a href="#SPIFFE-JWT-SVID" class="cite xref">SPIFFE-JWT-SVID</a>]</span>.<a href="#section-11.5-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-11.5-2">
+          <dt id="section-11.5-2.1">Lifetime mismatch:</dt>
+          <dd style="margin-left: 1.5em" id="section-11.5-2.2">
+            <p id="section-11.5-2.2.1">A permission revoked at the authorization server remains asserted by every unexpired credential
 carrying it. Workload Identity Credential lifetimes are chosen for identity freshness, not for permission
-freshness.<a href="#section-11.4-2.2.1" class="pilcrow">¶</a></p>
+freshness.<a href="#section-11.5-2.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-11.4-2.3">Two authorities:</dt>
-          <dd style="margin-left: 1.5em" id="section-11.4-2.4">
-            <p id="section-11.4-2.4.1">If both the Workload Identity Credential and the relying party's policy assert what a workload may do, the
+<dt id="section-11.5-2.3">Two authorities:</dt>
+          <dd style="margin-left: 1.5em" id="section-11.5-2.4">
+            <p id="section-11.5-2.4.1">If both the Workload Identity Credential and the relying party's policy assert what a workload may do, the
 effective policy is whichever is consulted, and the deployment has two sources of truth for one
-decision.<a href="#section-11.4-2.4.1" class="pilcrow">¶</a></p>
+decision.<a href="#section-11.5-2.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-11.4-2.5">Blast radius:</dt>
-          <dd style="margin-left: 1.5em" id="section-11.4-2.6">
-            <p id="section-11.4-2.6.1">An identity credential is presented to every relying party the workload contacts. A credential enumerating
+<dt id="section-11.5-2.5">Blast radius:</dt>
+          <dd style="margin-left: 1.5em" id="section-11.5-2.6">
+            <p id="section-11.5-2.6.1">An identity credential is presented to every relying party the workload contacts. A credential enumerating
 permissions discloses the workload's full authority to each of them, including those with no need to
-know it.<a href="#section-11.4-2.6.1" class="pilcrow">¶</a></p>
+know it.<a href="#section-11.5-2.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
 </section>
 </div>
 <div id="staleness">
-<section id="section-11.5">
+<section id="section-11.6">
         <h3 id="name-attribute-staleness">
-<a href="#section-11.5" class="section-number selfRef">11.5. </a><a href="#name-attribute-staleness" class="section-name selfRef">Attribute Staleness</a>
+<a href="#section-11.6" class="section-number selfRef">11.6. </a><a href="#name-attribute-staleness" class="section-name selfRef">Attribute Staleness</a>
         </h3>
-<p id="section-11.5-1">In-band metadata reflects the assertions made at credential issuance. A still-valid credential can
+<p id="section-11.6-1">In-band metadata reflects the assertions made at credential issuance. A still-valid credential can
 therefore carry an attribute that has since changed. Deployments requiring fresher attributes can
 use shorter credential lifetimes or require retrieval from the metadata endpoint for the relevant
 claims. Retrieval avoids waiting for credential renewal, but a metadata service can itself depend
 on delayed or replicated data sources; <code>no-store</code> does not guarantee real-time updates at those
-sources.<a href="#section-11.5-1" class="pilcrow">¶</a></p>
-<p id="section-11.5-2">Deployments <span class="bcp14">MUST</span> establish acceptable freshness for claims used in authorization and <span class="bcp14">MUST NOT</span> use
+sources.<a href="#section-11.6-1" class="pilcrow">¶</a></p>
+<p id="section-11.6-2">Deployments <span class="bcp14">MUST</span> establish acceptable freshness for claims used in authorization and <span class="bcp14">MUST NOT</span> use
 data known to exceed those limits. If policy requires an API lookup and that lookup fails, the
 relying party <span class="bcp14">MUST NOT</span> silently fall back to older in-band metadata. The source-selection and
 conflict rules in <a href="#consistency" class="auto internal xref">Section 8</a> apply even when both the credential and endpoint response are
 authentic. Retrieval does not renew, revoke, or establish the validity of a Workload Identity
-Credential.<a href="#section-11.5-2" class="pilcrow">¶</a></p>
+Credential.<a href="#section-11.6-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2320,30 +2518,96 @@ limit additional disclosure through errors and caches.<a href="#section-12-3" cl
       <h2 id="name-iana-considerations">
 <a href="#section-13" class="section-number selfRef">13. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-13-1">This document requests registration of the following entry in the "Well-Known URIs" registry
-established by <span>[<a href="#WELL-KNOWN" class="cite xref">WELL-KNOWN</a>]</span>:<a href="#section-13-1" class="pilcrow">¶</a></p>
-<span class="break"></span><dl class="dlParallel" id="section-13-2">
-        <dt id="section-13-2.1">URI suffix:</dt>
-        <dd style="margin-left: 1.5em" id="section-13-2.2">
-          <p id="section-13-2.2.1"><code>workload-metadata</code><a href="#section-13-2.2.1" class="pilcrow">¶</a></p>
+<div id="iana-jwt">
+<section id="section-13.1">
+        <h3 id="name-json-web-token-claim-regist">
+<a href="#section-13.1" class="section-number selfRef">13.1. </a><a href="#name-json-web-token-claim-regist" class="section-name selfRef">JSON Web Token Claim Registration</a>
+        </h3>
+<p id="section-13.1-1">This document requests registration of the following entry in the "JSON Web Token Claims" registry
+established by <span>[<a href="#JWT" class="cite xref">JWT</a>]</span>:<a href="#section-13.1-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-13.1-2">
+          <dt id="section-13.1-2.1">Claim Name:</dt>
+          <dd style="margin-left: 1.5em" id="section-13.1-2.2">
+            <p id="section-13.1-2.2.1"><code>metadata_uri</code><a href="#section-13.1-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-13.1-2.3">Claim Description:</dt>
+          <dd style="margin-left: 1.5em" id="section-13.1-2.4">
+            <p id="section-13.1-2.4.1">Workload metadata API endpoint URI for the subject identified by the token.<a href="#section-13.1-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-13.1-2.5">Change Controller:</dt>
+          <dd style="margin-left: 1.5em" id="section-13.1-2.6">
+            <p id="section-13.1-2.6.1">IETF<a href="#section-13.1-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-13.1-2.7">Reference:</dt>
+          <dd style="margin-left: 1.5em" id="section-13.1-2.8">
+            <p id="section-13.1-2.8.1"><a href="#metadata-uri-claim" class="auto internal xref">Section 6.1.1</a> of this document<a href="#section-13.1-2.8.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-13-2.3">Change controller:</dt>
-        <dd style="margin-left: 1.5em" id="section-13-2.4">
-          <p id="section-13-2.4.1">IETF<a href="#section-13-2.4.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="section-13-2.5">Specification document(s):</dt>
-        <dd style="margin-left: 1.5em" id="section-13-2.6">
-          <p id="section-13-2.6.1"><a href="#metadata-endpoint" class="auto internal xref">Section 7</a> of this document<a href="#section-13-2.6.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="section-13-2.7">Status:</dt>
-        <dd style="margin-left: 1.5em" id="section-13-2.8">
-          <p id="section-13-2.8.1">permanent<a href="#section-13-2.8.1" class="pilcrow">¶</a></p>
-</dd>
-      <dd class="break"></dd>
 </dl>
+</section>
+</div>
+<div id="iana-x509">
+<section id="section-13.2">
+        <h3 id="name-x509-certificate-extension-">
+<a href="#section-13.2" class="section-number selfRef">13.2. </a><a href="#name-x509-certificate-extension-" class="section-name selfRef">X.509 Certificate Extension Registration</a>
+        </h3>
+<p id="section-13.2-1">This document requests an object identifier allocation in the "SMI Security for PKIX Certificate
+Extension" registry, under the <code>id-pe</code> arc (<code>1.3.6.1.5.5.7.1</code>):<a href="#section-13.2-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-2">
+          <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Decimal</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+              <th class="text-left" rowspan="1" colspan="1">Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">TBD</td>
+              <td class="text-left" rowspan="1" colspan="1">id-pe-sanuri-metadata</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <a href="#sanuri-metadata" class="auto internal xref">Section 6.2.1</a> of this document</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-13.2-3">The allocated value replaces <code>TBD</code> in the ASN.1 definition in <a href="#sanuri-metadata" class="auto internal xref">Section 6.2.1</a>.<a href="#section-13.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="well-known-uri-registration">
+<section id="section-13.3">
+        <h3 id="name-well-known-uri-registration">
+<a href="#section-13.3" class="section-number selfRef">13.3. </a><a href="#name-well-known-uri-registration" class="section-name selfRef">Well-Known URI Registration</a>
+        </h3>
+<p id="section-13.3-1">This document requests registration of the following entry in the "Well-Known URIs" registry
+established by <span>[<a href="#WELL-KNOWN" class="cite xref">WELL-KNOWN</a>]</span>:<a href="#section-13.3-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-13.3-2">
+          <dt id="section-13.3-2.1">URI suffix:</dt>
+          <dd style="margin-left: 1.5em" id="section-13.3-2.2">
+            <p id="section-13.3-2.2.1"><code>workload-metadata</code><a href="#section-13.3-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-13.3-2.3">Change controller:</dt>
+          <dd style="margin-left: 1.5em" id="section-13.3-2.4">
+            <p id="section-13.3-2.4.1">IETF<a href="#section-13.3-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-13.3-2.5">Specification document(s):</dt>
+          <dd style="margin-left: 1.5em" id="section-13.3-2.6">
+            <p id="section-13.3-2.6.1"><a href="#metadata-endpoint" class="auto internal xref">Section 7</a> of this document<a href="#section-13.3-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-13.3-2.7">Status:</dt>
+          <dd style="margin-left: 1.5em" id="section-13.3-2.8">
+            <p id="section-13.3-2.8.1">permanent<a href="#section-13.3-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
 </section>
 </div>
 <div id="sec-combined-references">
@@ -2376,6 +2640,14 @@ established by <span>[<a href="#WELL-KNOWN" class="cite xref">WELL-KNOWN</a>]</s
 <dt id="OAUTH-JWT">[OAUTH-JWT]</dt>
         <dd>
 <span class="refAuthor">Bertocci, V.</span>, <span class="refTitle">"JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens"</span>, <span class="seriesInfo">RFC 9068</span>, <span class="seriesInfo">DOI 10.17487/RFC9068</span>, <time datetime="2021-10" class="refDate">October 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9068">https://www.rfc-editor.org/rfc/rfc9068</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="PKIX">[PKIX]</dt>
+        <dd>
+<span class="refAuthor">Cooper, D.</span>, <span class="refAuthor">Santesson, S.</span>, <span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Boeyen, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">W. Polk</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile"</span>, <span class="seriesInfo">RFC 5280</span>, <span class="seriesInfo">DOI 10.17487/RFC5280</span>, <time datetime="2008-05" class="refDate">May 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5280">https://www.rfc-editor.org/rfc/rfc5280</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="PKIX-ASN1">[PKIX-ASN1]</dt>
+        <dd>
+<span class="refAuthor">Hoffman, P.</span> and <span class="refAuthor">J. Schaad</span>, <span class="refTitle">"New ASN.1 Modules for the Public Key Infrastructure Using X.509 (PKIX)"</span>, <span class="seriesInfo">RFC 5912</span>, <span class="seriesInfo">DOI 10.17487/RFC5912</span>, <time datetime="2010-06" class="refDate">June 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5912">https://www.rfc-editor.org/rfc/rfc5912</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
@@ -2519,6 +2791,8 @@ subject and no request body.<a href="#appendix-A-2.7.1" class="pilcrow">¶</a></
 <p id="appendix-B-1">This document restates for workload identity an argument the PKIX community made in <span>[<a href="#INET-CERT" class="cite xref">INET-CERT</a>]</span>, and that
 <span>[<a href="#WIMSE-IDENTIFIER" class="cite xref">WIMSE-IDENTIFIER</a>]</span> already makes for workload identifiers. The authors thank the WIMSE
 working group for the discussion that prompted it.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2">The authors thank Russ Housley for his guidance on the SubjectAltName URI Metadata certificate
+extension and its ASN.1 definition.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
