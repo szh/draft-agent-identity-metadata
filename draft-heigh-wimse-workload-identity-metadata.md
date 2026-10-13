@@ -457,7 +457,7 @@ The claim MAY appear whether or not the credential also carries metadata attribu
 does not imply that metadata is unavailable; the other location mechanisms in {{endpoint-location}}
 remain applicable. This document requests registration of the claim in {{iana-jwt}}.
 
-### Examples
+### Examples {#metadata-uri-examples}
 
 The following non-normative examples show Workload Identity Credentials for the reconciliation service
 that {{intro}} names with an attribute-bearing identifier. Its replicas share a workload identifier and
@@ -556,7 +556,7 @@ id-pe-sanuri-metadata OBJECT IDENTIFIER ::=
 -- Metadata for the SubjectAltName URI Extension Syntax
 
 MetadataURI ::= IA5String
--- Contains the URL of the workload metadata API endpoint
+-- Contains the URI of the workload metadata API endpoint
 ~~~
 
 The `extnValue` OCTET STRING contains the DER encoding of `MetadataURI`, as required by {{PKIX}}.
@@ -1070,21 +1070,12 @@ To be resolved with the working group, and removed before publication.
    the object form {{OAUTH-JWT}} points to, and is in tension with the requirement in {{reuse}} to
    use the same value encodings as the registered claims. It needs either confirming or replacing,
    and the question may be better raised against {{OAUTH-JWT}} than answered here.
-3. **Whether `entitlements` is the right line to draw** between attribute and grant in
-   {{permissions}}, or whether the document should exclude authority-bearing metadata entirely.
-4. **Distribution of metadata authority information.** This version relies on deployment trust
-   configuration for claim-specific authority and source precedence ({{endpoint-location}} and
-   {{consistency}}). Whether an interoperable mechanism for distributing that information is needed
-   remains open.
-5. **Independently signed metadata responses.** The API response is currently protected by the
+3. **Independently signed metadata responses.** The API response is currently protected by the
    authenticated HTTPS exchange. A separately signed object would need rules for issuer trust,
    subject binding, audience, lifetime, replay, and use by parties other than the original caller.
-6. **Caching retrieved metadata.** Whether to allow bounded reuse, and how cache lifetimes, caller
+4. **Caching retrieved metadata.** Whether to allow bounded reuse, and how cache lifetimes, caller
    authorization changes, and different disclosed subsets would interact. This version uses
    `no-store` and does not allow reuse for later authorization decisions ({{metadata-errors}}).
-7. **Additional retrieval methods.** Whether a future version should support the HTTP QUERY method
-   {{?HTTP-QUERY=RFC10008}} for more complex requests. This version specifies GET with a single
-   subject and no request body.
 
 # Acknowledgments
 {:numbered="false"}
