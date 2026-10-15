@@ -1062,7 +1062,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Heigh, et al.</td>
-<td class="center">Expires 16 April 2027</td>
+<td class="center">Expires 18 April 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1075,12 +1075,12 @@ svg {
 <dd class="internet-draft">draft-heigh-wimse-workload-identity-metadata-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-10-13" class="published">13 October 2026</time>
+<time datetime="2026-10-15" class="published">15 October 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-04-16">16 April 2027</time></dd>
+<dd class="expires"><time datetime="2027-04-18">18 April 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1149,7 +1149,7 @@ jobs, serverless functions, and AI agents. Agentic use cases are discussed separ
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 16 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 18 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1865,7 +1865,7 @@ does not imply that metadata is unavailable; the other location mechanisms in <a
 remain applicable. This document requests registration of the claim in <a href="#iana-jwt" class="auto internal xref">Section 13.1</a>.<a href="#section-6.1.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="examples">
+<div id="metadata-uri-examples">
 <section id="section-6.1.2">
           <h4 id="name-examples">
 <a href="#section-6.1.2" class="section-number selfRef">6.1.2. </a><a href="#name-examples" class="section-name selfRef">Examples</a>
@@ -1971,7 +1971,7 @@ id-pe-sanuri-metadata OBJECT IDENTIFIER ::=
 -- Metadata for the SubjectAltName URI Extension Syntax
 
 MetadataURI ::= IA5String
--- Contains the URL of the workload metadata API endpoint
+-- Contains the URI of the workload metadata API endpoint
 </pre><a href="#section-6.2.1-3" class="pilcrow">¶</a>
 </div>
 <p id="section-6.2.1-4">The <code>extnValue</code> OCTET STRING contains the DER encoding of <code>MetadataURI</code>, as required by <span>[<a href="#PKIX" class="cite xref">PKIX</a>]</span>.
@@ -2686,10 +2686,6 @@ established by <span>[<a href="#WELL-KNOWN" class="cite xref">WELL-KNOWN</a>]</s
 <a href="#section-14.2" class="section-number selfRef">14.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
-<dt id="HTTP-QUERY">[HTTP-QUERY]</dt>
-        <dd>
-<span class="refAuthor">Reschke, J.</span>, <span class="refAuthor">Snell, J.M.</span>, and <span class="refAuthor">M. Bishop</span>, <span class="refTitle">"The HTTP QUERY Method"</span>, <span class="seriesInfo">RFC 10008</span>, <span class="seriesInfo">DOI 10.17487/RFC10008</span>, <time datetime="2026-06" class="refDate">June 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc10008">https://www.rfc-editor.org/rfc/rfc10008</a>&gt;</span>. </dd>
-<dd class="break"></dd>
 <dt id="INET-CERT">[INET-CERT]</dt>
         <dd>
 <span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">S. Turner</span>, <span class="refTitle">"An Internet Attribute Certificate Profile for Authorization"</span>, <span class="seriesInfo">RFC 5755</span>, <span class="seriesInfo">DOI 10.17487/RFC5755</span>, <time datetime="2010-01" class="refDate">January 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5755">https://www.rfc-editor.org/rfc/rfc5755</a>&gt;</span>. </dd>
@@ -2756,29 +2752,14 @@ use the same value encodings as the registered claims. It needs either confirmin
 and the question may be better raised against <span>[<a href="#OAUTH-JWT" class="cite xref">OAUTH-JWT</a>]</span> than answered here.<a href="#appendix-A-2.2.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-2.3">
-          <p id="appendix-A-2.3.1"><strong>Whether <code>entitlements</code> is the right line to draw</strong> between attribute and grant in
-<a href="#permissions" class="auto internal xref">Section 4.3</a>, or whether the document should exclude authority-bearing metadata entirely.<a href="#appendix-A-2.3.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-2.3.1"><strong>Independently signed metadata responses.</strong> The API response is currently protected by the
+authenticated HTTPS exchange. A separately signed object would need rules for issuer trust,
+subject binding, audience, lifetime, replay, and use by parties other than the original caller.<a href="#appendix-A-2.3.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-2.4">
-          <p id="appendix-A-2.4.1"><strong>Distribution of metadata authority information.</strong> This version relies on deployment trust
-configuration for claim-specific authority and source precedence (<a href="#endpoint-location" class="auto internal xref">Section 7.1</a> and
-<a href="#consistency" class="auto internal xref">Section 8</a>). Whether an interoperable mechanism for distributing that information is needed
-remains open.<a href="#appendix-A-2.4.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="appendix-A-2.5">
-          <p id="appendix-A-2.5.1"><strong>Independently signed metadata responses.</strong> The API response is currently protected by the
-authenticated HTTPS exchange. A separately signed object would need rules for issuer trust,
-subject binding, audience, lifetime, replay, and use by parties other than the original caller.<a href="#appendix-A-2.5.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="appendix-A-2.6">
-          <p id="appendix-A-2.6.1"><strong>Caching retrieved metadata.</strong> Whether to allow bounded reuse, and how cache lifetimes, caller
+          <p id="appendix-A-2.4.1"><strong>Caching retrieved metadata.</strong> Whether to allow bounded reuse, and how cache lifetimes, caller
 authorization changes, and different disclosed subsets would interact. This version uses
-<code>no-store</code> and does not allow reuse for later authorization decisions (<a href="#metadata-errors" class="auto internal xref">Section 7.5</a>).<a href="#appendix-A-2.6.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="appendix-A-2.7">
-          <p id="appendix-A-2.7.1"><strong>Additional retrieval methods.</strong> Whether a future version should support the HTTP QUERY method
-<span>[<a href="#HTTP-QUERY" class="cite xref">HTTP-QUERY</a>]</span> for more complex requests. This version specifies GET with a single
-subject and no request body.<a href="#appendix-A-2.7.1" class="pilcrow">¶</a></p>
+<code>no-store</code> and does not allow reuse for later authorization decisions (<a href="#metadata-errors" class="auto internal xref">Section 7.5</a>).<a href="#appendix-A-2.4.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
 </section>

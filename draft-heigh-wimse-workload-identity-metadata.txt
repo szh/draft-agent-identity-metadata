@@ -5,9 +5,9 @@
 Workload Identity in Multi System Environments                  S. Heigh
 Internet-Draft                                                J. Salowey
 Intended status: Standards Track                      Palo Alto Networks
-Expires: 16 April 2027                                      Y. Rosomakho
+Expires: 18 April 2027                                      Y. Rosomakho
                                                                  Zscaler
-                                                         13 October 2026
+                                                         15 October 2026
 
 
                        Workload Identity Metadata
@@ -70,7 +70,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 April 2027.
+   This Internet-Draft will expire on 18 April 2027.
 
 Copyright Notice
 
@@ -745,7 +745,7 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
    -- Metadata for the SubjectAltName URI Extension Syntax
 
    MetadataURI ::= IA5String
-   -- Contains the URL of the workload metadata API endpoint
+   -- Contains the URI of the workload metadata API endpoint
 
    The extnValue OCTET STRING contains the DER encoding of MetadataURI,
    as required by [PKIX].  The value MUST contain a single URI
@@ -1429,11 +1429,6 @@ spiffe://example.com/ns/prod/team/payments/role/reconciler/service/reconciliatio
 
 14.2.  Informative References
 
-   [HTTP-QUERY]
-              Reschke, J., Snell, J.M., and M. Bishop, "The HTTP QUERY
-              Method", RFC 10008, DOI 10.17487/RFC10008, June 2026,
-              <https://www.rfc-editor.org/rfc/rfc10008>.
-
    [INET-CERT]
               Farrell, S., Housley, R., and S. Turner, "An Internet
               Attribute Certificate Profile for Authorization",
@@ -1519,32 +1514,17 @@ Open Issues
        the question may be better raised against [OAUTH-JWT] than
        answered here.
 
-   3.  *Whether entitlements is the right line to draw* between
-       attribute and grant in Section 4.3, or whether the document
-       should exclude authority-bearing metadata entirely.
-
-   4.  *Distribution of metadata authority information.* This version
-       relies on deployment trust configuration for claim-specific
-       authority and source precedence (Section 7.1 and Section 8).
-       Whether an interoperable mechanism for distributing that
-       information is needed remains open.
-
-   5.  *Independently signed metadata responses.* The API response is
+   3.  *Independently signed metadata responses.* The API response is
        currently protected by the authenticated HTTPS exchange.  A
        separately signed object would need rules for issuer trust,
        subject binding, audience, lifetime, replay, and use by parties
        other than the original caller.
 
-   6.  *Caching retrieved metadata.* Whether to allow bounded reuse, and
+   4.  *Caching retrieved metadata.* Whether to allow bounded reuse, and
        how cache lifetimes, caller authorization changes, and different
        disclosed subsets would interact.  This version uses no-store and
        does not allow reuse for later authorization decisions
        (Section 7.5).
-
-   7.  *Additional retrieval methods.* Whether a future version should
-       support the HTTP QUERY method [HTTP-QUERY] for more complex
-       requests.  This version specifies GET with a single subject and
-       no request body.
 
 Acknowledgments
 
