@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-13T04:53:39.712141+00:00",
+  "timestamp": "2026-10-15T02:40:32.837156+00:00",
   "repo": "szh/draft-agent-identity-metadata",
   "labels": [
     {
@@ -533,7 +533,7 @@
       "id": "PR_kwDOUcQW4c8AAAABHMOhNw",
       "title": "Editorial pass, reference fixes, and alignment with WIMSE-IDENTIFIER",
       "url": "https://github.com/szh/draft-agent-identity-metadata/pull/10",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "szh",
       "authorAssociation": "OWNER",
       "assignees": [
@@ -542,13 +542,97 @@
       "labels": [],
       "body": "Prepares the draft for -00. Each commit is self-contained and can be reviewed in order.\r\n\r\n**No change to requirements**\r\n- **Editorial pass.** Simplifies wording throughout and defines \"credential issuer\" as a term.\r\n  No BCP 14 keyword is added, removed, strengthened, or weakened.\r\n- **Reference types and IANA template.** Makes draft-ietf-wimse-arch informative, avoiding a\r\n  downref (the other WIMSE Standards Track drafts cite it that way) and RFC 9111 normative (the\r\n  `no-store` MUST depends on it). Cites RFC 10008 for HTTP QUERY, and uses the RFC 8615 field\r\n  names in the well-known URI request.\r\n- **SCIM encoding description.** RFC 7643 Section 8.7.1 defines `groups`, `roles`, and\r\n  `entitlements` all as complex attributes; the draft described only `groups` that way. The\r\n  interim encoding rule is unchanged, and the open issue on it now covers all three claims.\r\n\r\n**Substantive**\r\n- **Authentication binding selection out of scope.** Removes the open issue on a\r\n  mandatory-to-implement binding; deployment configuration selects the binding.\r\n- **Metadata across credential exchange (new Section 9).** An exchanging credential issuer may\r\n  filter, add to, or modify metadata from another trust domain. Whatever it asserts carries its\r\n  own authority, not the other trust domain's.\r\n- **Identifier interpretation aligned with WIMSE-IDENTIFIER.** The blanket MUST NOT on deriving\r\n  authorization meaning from identifier components conflicted with WIMSE-IDENTIFIER Sections 4.2,\r\n  7.5, and 7.6. It is now a SHOULD NOT, with an exception for meaning defined by trust domain\r\n  policy, and the rule on obtaining group, role, or principal association from metadata is a\r\n  SHOULD. A new MUST forbids inferring such an attribute from the identifier when the relying\r\n  party is configured to obtain it from Workload Metadata, even if the metadata is unavailable.\r\n  This commit is the one most likely to need discussion.\r\n\r\n**Not included**\r\n- Section 7.2 still says \"WIMSE workload authentication\". Open question for @yaroslavros: is it\r\n  meant to cover bearer JWT-SVIDs restricted to the metadata service as their audience, and callers\r\n  that are not WIMSE workloads, such as a gateway or a relying party outside the trust domain?",
       "createdAt": "2026-10-07T19:37:53Z",
-      "updatedAt": "2026-10-07T19:37:55Z",
+      "updatedAt": "2026-10-13T13:48:52Z",
       "baseRepository": "szh/draft-agent-identity-metadata",
       "baseRefName": "main",
       "baseRefOid": "60a0e7c8a97647c29a2f43df440f1b0e0674e7a3",
       "headRepository": "szh/draft-agent-identity-metadata",
       "headRefName": "editorial-cleanup",
       "headRefOid": "156b8e33488c7817726c35245809ff682118c877",
+      "closedAt": "2026-10-13T05:31:26Z",
+      "mergedAt": "2026-10-13T05:31:25Z",
+      "mergedBy": "yaroslavros",
+      "mergeCommit": {
+        "oid": "3a644bb44bfe8d3b19485512cac61da01996e04c"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABR8cURg",
+          "commit": {
+            "abbreviatedOid": "156b8e3"
+          },
+          "author": "yaroslavros",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-10-13T05:31:15Z",
+          "updatedAt": "2026-10-13T05:31:15Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "id": "PR_kwDOUcQW4c8AAAABIG3Ijw",
+      "title": "Added metadata_uri JWT claim and appropriate X.509 extension",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/11",
+      "state": "MERGED",
+      "author": "yaroslavros",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-10-13T05:56:47Z",
+      "updatedAt": "2026-10-13T14:07:33Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "3a644bb44bfe8d3b19485512cac61da01996e04c",
+      "headRepository": "yaroslavros/draft-agent-identity-metadata",
+      "headRefName": "main",
+      "headRefOid": "926905cbd9ec9fb19ed6d90bc6e5e1a4c51ccb41",
+      "closedAt": "2026-10-13T14:07:33Z",
+      "mergedAt": "2026-10-13T14:07:33Z",
+      "mergedBy": "szh",
+      "mergeCommit": {
+        "oid": "8fdeaed7790c73121919db16b84b9f55e2991598"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABSBymBA",
+          "commit": {
+            "abbreviatedOid": "926905c"
+          },
+          "author": "szh",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-10-13T14:07:18Z",
+          "updatedAt": "2026-10-13T14:07:18Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "id": "PR_kwDOUcQW4c8AAAABIMTv-A",
+      "title": "Close some open issues",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/pull/12",
+      "state": "OPEN",
+      "author": "szh",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Follow up to #11 \n\nResolve three open issues in {#open-issues}:\n- Former item 3 (entitlements scope): the normative text in {#permissions} and {#capability} already settles this. Coarse entitlements are workload attributes, not capability grants, and the draft prohibits relying parties from treating them as authoritative for authorization decisions. Removing the issue does not change the normative text.\n- Former item 4 (distribution of metadata authority): resolved by PR #11. The metadata_uri JWT claim and the SubjectAltName URI Metadata extension provide the in-credential pointer that was the missing piece.\n- Former item 7 (HTTP QUERY): a future-version consideration, not a current-version decision. The GET-only design is stated in the retrieval section; no open question remains for this version. Remaining items renumbered 1-4.\nAlso: add missing {#metadata-uri-examples} anchor to the Examples subsection under {#jwt}, and correct \"URL\" to \"URI\" in the MetadataURI ASN.1 comment (the type is an IA5String URI, not a URL).",
+      "createdAt": "2026-10-13T14:27:12Z",
+      "updatedAt": "2026-10-13T14:27:13Z",
+      "baseRepository": "szh/draft-agent-identity-metadata",
+      "baseRefName": "main",
+      "baseRefOid": "8fdeaed7790c73121919db16b84b9f55e2991598",
+      "headRepository": "szh/draft-agent-identity-metadata",
+      "headRefName": "resolve-issues",
+      "headRefOid": "e553685bf66d052734fc05efa357f3f8d7fd96ac",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
