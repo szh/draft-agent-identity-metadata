@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-15T02:40:32.837156+00:00",
+  "timestamp": "2026-10-18T02:29:09.270444+00:00",
   "repo": "szh/draft-agent-identity-metadata",
   "labels": [
     {
@@ -619,26 +619,42 @@
       "id": "PR_kwDOUcQW4c8AAAABIMTv-A",
       "title": "Close some open issues",
       "url": "https://github.com/szh/draft-agent-identity-metadata/pull/12",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "szh",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "Follow up to #11 \n\nResolve three open issues in {#open-issues}:\n- Former item 3 (entitlements scope): the normative text in {#permissions} and {#capability} already settles this. Coarse entitlements are workload attributes, not capability grants, and the draft prohibits relying parties from treating them as authoritative for authorization decisions. Removing the issue does not change the normative text.\n- Former item 4 (distribution of metadata authority): resolved by PR #11. The metadata_uri JWT claim and the SubjectAltName URI Metadata extension provide the in-credential pointer that was the missing piece.\n- Former item 7 (HTTP QUERY): a future-version consideration, not a current-version decision. The GET-only design is stated in the retrieval section; no open question remains for this version. Remaining items renumbered 1-4.\nAlso: add missing {#metadata-uri-examples} anchor to the Examples subsection under {#jwt}, and correct \"URL\" to \"URI\" in the MetadataURI ASN.1 comment (the type is an IA5String URI, not a URL).",
       "createdAt": "2026-10-13T14:27:12Z",
-      "updatedAt": "2026-10-13T14:27:13Z",
+      "updatedAt": "2026-10-15T18:28:08Z",
       "baseRepository": "szh/draft-agent-identity-metadata",
       "baseRefName": "main",
       "baseRefOid": "8fdeaed7790c73121919db16b84b9f55e2991598",
       "headRepository": "szh/draft-agent-identity-metadata",
       "headRefName": "resolve-issues",
       "headRefOid": "e553685bf66d052734fc05efa357f3f8d7fd96ac",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-10-15T18:27:05Z",
+      "mergedAt": "2026-10-15T18:27:05Z",
+      "mergedBy": "szh",
+      "mergeCommit": {
+        "oid": "323161656194338a9b5e6a3e65d7718a2c3b650a"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOUcQW4c8AAAABShXrqw",
+          "commit": {
+            "abbreviatedOid": "e553685"
+          },
+          "author": "jsalowey",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-10-15T18:19:20Z",
+          "updatedAt": "2026-10-15T18:19:20Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
