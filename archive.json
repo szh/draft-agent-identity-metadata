@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-17T05:57:54.252312+00:00",
+  "timestamp": "2026-11-19T05:24:54.343690+00:00",
   "repo": "szh/draft-agent-identity-metadata",
   "labels": [
     {
@@ -54,7 +54,24 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
+  "issues": [
+    {
+      "number": 13,
+      "id": "I_kwDOUcQW4c8AAAABgi2aBg",
+      "title": "Value encoding for groups, roles, entitlements (Open Issue 2)",
+      "url": "https://github.com/szh/draft-agent-identity-metadata/issues/13",
+      "state": "OPEN",
+      "author": "ogazitt",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "We hit the same question in the AuthZEN Profile for Authorization Claims in JWT Access Tokens, which populates the RFC 9068 `groups`, `roles` and `entitlements` claims from an AuthZEN search, and landed in the same place: an array of strings, each member being the SCIM `value`.\n\nWe treated it as a stated deviation from RFC 9068's SHOULD rather than as conforming, which avoids the tension with \"same value encodings\" in Section 4.1. Text is here: https://openid.github.io/authzen/authzen-oauth-authorization-claims-1_0.html#name-rendering-the-claim\n\nAgree this is better settled against RFC 9068 than in each draft. Happy to work on that with you if you take it to OAuth.\n",
+      "createdAt": "2026-11-18T23:39:36Z",
+      "updatedAt": "2026-11-18T23:39:36Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
   "pulls": [
     {
       "number": 1,
